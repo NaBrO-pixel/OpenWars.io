@@ -74,6 +74,17 @@ export function taggedGameVersion(rawVersion: string): string {
   return trimmed.startsWith("v") ? trimmed : `v${trimmed}`;
 }
 
+/**
+ * The OpenWars release players see in the nav bar, next to Play. Separate from
+ * version.txt, which tracks the upstream engine build that the footer names.
+ */
+export const OPENWARS_VERSION = "1.3";
+
+/** The nav bar label: "OpenWars v1.3". */
+export function navVersionLabel(): string {
+  return `OpenWars v${OPENWARS_VERSION}`;
+}
+
 /** The nav bar's version elements, in both the mobile and desktop nav bars. */
 const NAV_VERSION_SELECTOR = "#game-version, .game-version-display";
 
@@ -84,15 +95,15 @@ const NAV_VERSION_SELECTOR = "#game-version, .game-version-display";
  * Lives here rather than inline in Main.ts so it can be tested without
  * importing Main.ts, which is a module of side effects.
  *
- * Uses taggedGameVersion, not currentGameVersion: the nav bar and the footer
- * answer different questions on an untagged build, by decision rather than by
- * drift (OPE-387).
+ * Shows the OpenWars release (navVersionLabel), not currentGameVersion: the
+ * nav bar and the footer answer different questions (OPE-387).
  */
 export function renderNavVersion(root: ParentNode = document): number {
   const elements = root.querySelectorAll(NAV_VERSION_SELECTOR);
-  const label = taggedGameVersion(version);
+  const label = navVersionLabel();
   elements.forEach((el) => {
-    (el as HTMLElement).style.fontFamily = '"OpenWars Display", Inter, sans-serif';
+    (el as HTMLElement).style.fontFamily =
+      '"OpenWars Display", Inter, sans-serif';
     el.textContent = label;
   });
   return elements.length;
