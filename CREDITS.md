@@ -5,6 +5,13 @@
 OpenFront is licensed under AGPL-3.0.  
 See [Contributors](https://github.com/openfrontio/OpenFrontIO/graphs/contributors) for code contributors.
 
+## Fonts
+
+### Bungee
+
+Display font. Copyright 2023 The Bungee Project Authors ([github.com/djrrb/Bungee](https://github.com/djrrb/Bungee)).  
+Licensed under the [SIL Open Font License 1.1](resources/fonts/Bungee-OFL.txt).
+
 ## Map Data
 
 ### OpenStreetMap
