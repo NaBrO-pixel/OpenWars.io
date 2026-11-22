@@ -25,7 +25,7 @@ function renderTemplate(): string {
   );
   const manifest = {
     "manifest.json": "/_assets/manifest.111.json",
-    "images/Favicon.svg": "/_assets/images/Favicon.222.svg",
+    "images/OpenWarsFavicon.svg": "/_assets/images/OpenWarsFavicon.222.svg",
     "icons/OpenWarsIcon512_maskable.png": "/_assets/icons/icon512.333.png",
     "images/KeyArt.jpg": "/_assets/images/KeyArt.444.jpg",
     "images/background.webp": "/_assets/images/background.555.webp",
@@ -42,7 +42,7 @@ function renderTemplate(): string {
     turnstileSiteKey: JSON.stringify("1x00000000000000000000AA"),
     jwtAudience: JSON.stringify("localhost"),
     manifestHref: asset("manifest.json"),
-    faviconHref: asset("images/Favicon.svg"),
+    faviconHref: asset("images/OpenWarsFavicon.svg"),
     appleTouchIconHref: asset("icons/OpenWarsIcon512_maskable.png"),
     gameplayScreenshotUrl: asset("images/KeyArt.jpg"),
     backgroundImageUrl: asset("images/background.webp"),
@@ -74,7 +74,7 @@ describe("Poki web build index.html", () => {
 
     expect(html).not.toContain(BASE_PLACEHOLDER);
     expect(html).toContain('src="./assets/index-abc123.js"');
-    expect(html).toContain('href="./_assets/images/Favicon.222.svg"');
+    expect(html).toContain('href="./_assets/images/OpenWarsFavicon.222.svg"');
     const config = bootstrapAt(
       html,
       "https://abc.poki-gdn.com/3f9c2b1e-version/index.html?site_id=1",

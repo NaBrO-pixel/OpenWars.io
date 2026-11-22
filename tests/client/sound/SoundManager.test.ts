@@ -205,7 +205,7 @@ describe("background music", () => {
     expect(last.unload).toHaveBeenCalled();
     const first = currentMusic();
     expect(first).not.toBe(last);
-    expect(first.src).toContain("gameplay.mp3");
+    expect(first.src).toContain("openwars-gameplay-1.mp3");
     expect(first.load).toHaveBeenCalled();
     expect(first.play).toHaveBeenCalledTimes(1);
 

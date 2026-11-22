@@ -9,14 +9,14 @@ const FLASH_INTERVAL_MS = 250;
 // stop flashing rather than blinking in a background tab forever.
 const MAX_FLASH_MS = 2 * 60 * 1000;
 
-// The game's own warship favicon on a white tile. Same pixels and the same
-// padded -2 -2 15 15 framing as Favicon.svg (which has a black tile), so the
-// ship stays the same size and only the background flips between black and
-// white. Inline so it needs no asset pipeline entry.
+// The OpenWars favicon (OpenWarsFavicon.svg, a pixel "W") on a white tile.
+// Same pixels and the same padded -2 -2 15 15 framing as the favicon (which
+// has a black tile), so the letter stays the same size and only the background
+// flips between black and white. Inline so it needs no asset pipeline entry.
 const ALERT_ICON_SVG =
   `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="-2 -2 15 15" shape-rendering="crispEdges">` +
   `<rect x="-2" y="-2" width="15" height="15" fill="#fff"/>` +
-  `<path fill="#0084d1" d="M2 0h4v1h-4zM2 1h4v1h-4zM4 2h4v1h-4zM4 3h4v1h-4zM6 4h4v1h-4zM6 5h4v1h-4zM6 6h4v1h-4zM4 7h4v1h-4zM4 8h4v1h-4zM2 9h4v1h-4zM2 10h4v1h-4z"/>` +
+  `<path fill="#0084d1" d="M0 1h2v1h-2zM9 1h2v1h-2zM0 2h2v1h-2zM9 2h2v1h-2zM0 3h2v1h-2zM9 3h2v1h-2zM0 4h2v1h-2zM5 4h1v1h-1zM9 4h2v1h-2zM0 5h2v1h-2zM4 5h3v1h-3zM9 5h2v1h-2zM0 6h2v1h-2zM3 6h2v1h-2zM6 6h2v1h-2zM9 6h2v1h-2zM0 7h5v1h-5zM6 7h5v1h-5zM1 8h3v1h-3zM7 8h3v1h-3zM2 9h1v1h-1zM8 9h1v1h-1z"/>` +
   `</svg>`;
 const ALERT_ICON_SVG_HREF =
   "data:image/svg+xml," + encodeURIComponent(ALERT_ICON_SVG);

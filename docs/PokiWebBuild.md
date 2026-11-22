@@ -187,12 +187,22 @@ Observed in the smoke test, single-player build: only `game-cdn.poki.com` and
 `localhost:8787` were requested. Multiplayer build: those two, plus
 `challenges.cloudflare.com` and the game server. Nothing else.
 
+## OpenFront's proprietary assets
+
+`proprietary/` is © OpenFront Inc. and may only be used as part of OpenFront.
+OpenWars has its own font, logos, icons, favicon, music and game-start sound
+in `resources/`, and builds publish only the proprietary files listed in
+`PROPRIETARY_ASSETS_IN_USE` (`src/server/PublicAssetManifest.ts`).
+`tests/NoProprietaryAssets.test.ts` enforces both. One is still listed:
+**`images/KeyArt.jpg`**, the social-preview image (`og:image`). It needs an
+OpenWars replacement before release.
+
 ## Known review risks (Poki requirements)
 
 From Poki's [quality requirements](https://developers.poki.com/guide/requirements-quality),
 the points to check before submitting:
 
-- **Size**: 843 MiB uncompressed, 193 MiB zipped. Maps account for 764 MiB
+- **Size**: 840 MiB uncompressed, 191 MiB zipped. Maps account for 764 MiB
   (148 maps). Players download only the map they play, but the upload is
   large; confirm the limit with Poki.
 - **Accounts and purchases**: Poki forbids email or Google sign-in and in-game

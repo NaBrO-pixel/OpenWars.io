@@ -17,9 +17,9 @@ const AMBIENCE_FADE_MS = 500;
  * in order, round and round, so short games do not always hear the same one.
  */
 const GAMEPLAY_TRACKS = [
-  "sounds/music/gameplay.mp3",
-  "sounds/music/gameplay-2.mp3",
-  "sounds/music/gameplay-3.mp3",
+  "sounds/music/openwars-gameplay-1.mp3",
+  "sounds/music/openwars-gameplay-2.mp3",
+  "sounds/music/openwars-gameplay-3.mp3",
 ];
 
 /**

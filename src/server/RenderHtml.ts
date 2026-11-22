@@ -102,7 +102,11 @@ export async function renderHtmlContent(
         ? undefined
         : JSON.stringify(ServerEnv.faroCollectorUrl()),
     manifestHref: buildAssetUrl("manifest.json", assetManifest, cdnBase),
-    faviconHref: buildAssetUrl("images/Favicon.svg", assetManifest, cdnBase),
+    faviconHref: buildAssetUrl(
+      "images/OpenWarsFavicon.svg",
+      assetManifest,
+      cdnBase,
+    ),
     appleTouchIconHref: buildAssetUrl(
       "icons/OpenWarsIcon512_maskable.png",
       assetManifest,
