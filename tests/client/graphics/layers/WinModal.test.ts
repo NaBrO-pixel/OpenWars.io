@@ -9,12 +9,6 @@ import { GAME_ID_REGEX, type Winner } from "@openfront/engine-api/Schemas";
 import { EventBus } from "@openfront/shared/EventBus";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FfaRatingPanel } from "../../../../src/client/components/ffaRating/FfaRatingPanel";
-import type { PurchaseButton } from "../../../../src/client/components/PurchaseButton";
-import {
-  fetchCosmetics,
-  resolveCosmetics,
-  type ResolvedCosmetic,
-} from "../../../../src/client/Cosmetics";
 import "../../../../src/client/hud/layers/WinModal";
 import type { WinModal } from "../../../../src/client/hud/layers/WinModal";
 import { rememberLobbyPublicGameType } from "../../../../src/client/LobbyPublicGameType";
@@ -209,7 +203,7 @@ describe("WinModal Play Again", () => {
   });
 });
 
-describe("WinModal pattern promotion", () => {
+describe("WinModal promotions", () => {
   let modal: WinModal | undefined;
 
   afterEach(() => {
@@ -217,81 +211,21 @@ describe("WinModal pattern promotion", () => {
     modal = undefined;
   });
 
-  it("renders three card-and-purchase promotions from four purchasable patterns", async () => {
-    const purchasablePatterns: ResolvedCosmetic[] = [
-      "aurora",
-      "blaze",
-      "circuit",
-      "dawn",
-    ].map((name) => ({
-      type: "pattern",
-      cosmetic: {
-        name,
-        pattern: "AAAAAA",
-        product: null,
-        priceHard: 120,
-        rarity: "rare",
-      } as never,
-      colorPalette: null,
-      relationship: "purchasable",
-      key: `pattern:${name}`,
-    }));
-    vi.mocked(fetchCosmetics).mockResolvedValue(null);
-    vi.mocked(resolveCosmetics).mockReturnValue(purchasablePatterns);
-
-    modal = document.createElement("win-modal") as WinModal;
-    Object.assign(modal as unknown as { rand: number; isWin: boolean }, {
-      rand: 0.75,
-      isWin: true,
-    });
-    document.body.appendChild(modal);
-    await modal.updateComplete;
-
-    await modal.loadPatternContent();
-    modal.requestUpdate();
-    await modal.updateComplete;
-
-    const promotions = modal.querySelectorAll("[data-win-cosmetic-promo]");
-    expect(promotions).toHaveLength(3);
-    expect(modal.querySelectorAll("cosmetic-card")).toHaveLength(3);
-    expect(modal.querySelectorAll("purchase-button")).toHaveLength(3);
-    for (const button of modal.querySelectorAll<PurchaseButton>(
-      "purchase-button",
-    )) {
-      expect(button.rarity).toBe("rare");
-    }
-    for (const card of modal.querySelectorAll("cosmetic-card")) {
-      expect(card.querySelector("[data-cosmetic-main]")?.tagName).toBe("DIV");
-      expect(card.querySelectorAll("button")).toHaveLength(0);
-    }
-    const legacyButtonTag = ["cosmetic", "button"].join("-");
-    const legacyContainerTag = ["cosmetic", "container"].join("-");
-    expect(modal.querySelectorAll(legacyButtonTag)).toHaveLength(0);
-    expect(modal.querySelectorAll(legacyContainerTag)).toHaveLength(0);
-  });
-
-  it("drops the ad-free pitch in the desktop shell, which has no ads", async () => {
-    const render = async () => {
+  it("shows none of OpenFront's promotions (Steam, Discord, tutorial, store)", async () => {
+    for (const isWin of [true, false]) {
       modal = document.createElement("win-modal") as WinModal;
-      Object.assign(modal as unknown as { rand: number; isWin: boolean }, {
-        rand: 0.75,
-        isWin: true,
-      });
+      Object.assign(modal as unknown as { isWin: boolean }, { isWin });
       document.body.appendChild(modal);
       await modal.updateComplete;
-      return modal.textContent ?? "";
-    };
-
-    expect(await render()).toContain("win_modal.territory_pattern");
-    modal?.remove();
-
-    window.openfrontDesktop = {};
-    try {
-      const text = await render();
-      expect(text).toContain("win_modal.support_openfront");
-      expect(text).not.toContain("win_modal.territory_pattern");
-    } finally {
-      delete window.openfrontDesktop;
+      expect(modal.querySelector("steam-wishlist")).toBeNull();
+      expect(modal.querySelector("purchase-button")).toBeNull();
+      expect(modal.querySelector("iframe")).toBeNull();
+      expect(modal.innerHTML).not.toContain("discord");
+      const text = modal.textContent ?? "";
+      expect(text).not.toContain("steam_wishlist.buy_on_steam");
+      expect(text).not.toContain("win_modal.support_openfront");
+      expect(text).not.toContain("win_modal.youtube_tutorial");
+      modal.remove();
     }
   });
 

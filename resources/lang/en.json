@@ -1913,8 +1913,7 @@
     "title": "OpenWars",
     "troubleshooting": "Troubleshooting",
     "tutorial": "Tutorial",
-    "user_avatar_alt": "{username}'s avatar",
-    "wiki": "Wiki"
+    "user_avatar_alt": "{username}'s avatar"
   },
   "map": {
     "achiran": "Achiran",
@@ -3018,10 +3017,6 @@
     "avatar_alt": "Steam avatar",
     "default_name": "Steam player"
   },
-  "steam_wishlist": {
-    "buy_cta": "Buy on Steam",
-    "buy_on_steam": "Buy OpenWars on Steam"
-  },
   "store": {
     "already_owned": "You already own this item. Nothing was charged.",
     "already_subscribed": "Already subscribed.",
@@ -3562,10 +3557,7 @@
   },
   "win_modal": {
     "died": "You died",
-    "discord_description": "Connect with players, discover new features, and win prizes!",
     "exit": "Exit Game",
-    "join_discord": "Join Our Discord Community!",
-    "join_server": "Join Server",
     "keep": "Keep Playing",
     "match_cancelled": "Match cancelled — not all players spawned",
     "nation_won": "Nation {nation} has won!",
@@ -3575,10 +3567,7 @@
     "requeue": "Play Again",
     "share": "Share",
     "spectate": "Spectate",
-    "support_openfront": "Support OpenWars!",
-    "territory_pattern": "Purchase a territory skin to go ad-free!",
     "you_won": "You Won!",
-    "your_team": "Your team won!",
-    "youtube_tutorial": "Need some help?"
+    "your_team": "Your team won!"
   }
 }

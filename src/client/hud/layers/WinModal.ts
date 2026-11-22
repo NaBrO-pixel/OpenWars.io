@@ -2,22 +2,15 @@ import { GameType } from "@openfront/engine-api/game/GameTypes";
 import { GameUpdateType } from "@openfront/engine-api/game/GameUpdates";
 import type { AllPlayersStats, Winner } from "@openfront/engine-api/Schemas";
 import type { GameXpEligible, Progress } from "@openfront/shared/ApiSchemas";
-import { Pattern } from "@openfront/shared/CosmeticSchemas";
 import { EventBus } from "@openfront/shared/EventBus";
 import { html, LitElement, nothing, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import {
-  DESKTOP_TUTORIAL_VIDEO_URL,
   exitGame,
-  getGamesPlayed,
   getTranslatedPlayerTeamLabel,
-  isInIframe,
   translateText,
-  TUTORIAL_VIDEO_URL,
 } from "../../../client/Utils";
-import { fetchUserMeUncached, getUserMe, invalidateUserMe } from "../../Api";
-import "../../components/CosmeticCard";
-import { cosmeticSelectionLabel } from "../../components/CosmeticPresentation";
+import { fetchUserMeUncached, invalidateUserMe } from "../../Api";
 import {
   ffaRatingGameOf,
   type FfaRatingGame,
@@ -26,15 +19,7 @@ import {
 import type { GameXpPanelState } from "../../components/GameXpPanel";
 import type { LegendCeremony } from "../../components/LegendCeremony";
 import "../../components/ProfileShare";
-import "../../components/PurchaseButton";
-import "../../components/SteamWishlist";
 import { Controller } from "../../Controller";
-import {
-  fetchCosmetics,
-  purchaseCosmetic,
-  resolveCosmetics,
-} from "../../Cosmetics";
-import { isDesktopShell } from "../../DesktopShell";
 import { gamePortal } from "../../GamePortal";
 import { lobbyPublicGameType } from "../../LobbyPublicGameType";
 import type { MatchmakingMode } from "../../Matchmaking";
@@ -44,7 +29,6 @@ import {
   momentShareText,
   momentShareUrl,
 } from "../../MomentShare";
-import { Platform } from "../../Platform";
 import { MAX_PRESTIGE, reachedLegendThisGame } from "../../Progression";
 import { resolveXpAccount } from "../../ProgressionAccount";
 import { fetchProgressionConfig, pollGameXp } from "../../ProgressionApi";
@@ -141,9 +125,6 @@ export class WinModal extends LitElement implements Controller {
   @state()
   private requeueMode: MatchmakingMode | null = null;
 
-  @state()
-  private patternContent: TemplateResult | null = null;
-
   // The XP this game earned. Stays hidden unless there is something to say:
   // no progression, a spectator or a replay never see the section at all.
   @state()
@@ -191,8 +172,6 @@ export class WinModal extends LitElement implements Controller {
 
   private _title: string;
 
-  private rand = Math.random();
-
   // Override to prevent shadow DOM creation
   createRenderRoot() {
     return this;
@@ -232,7 +211,6 @@ export class WinModal extends LitElement implements Controller {
                   .lobbyHumans=${this.ffaRating.lobbyHumans}
                 ></ffa-rating-panel>`
           }
-          ${this.innerHtml()}
         </div>
         <!-- Leaving is the quieter action, on the left; staying in the game
              is the main one, on the right. Sharing a milestone sits between
@@ -528,162 +506,6 @@ export class WinModal extends LitElement implements Controller {
     </style>`;
   }
 
-  innerHtml() {
-    // The Steam desktop build has nothing to wishlist, and the Android app
-    // must not send the player to another store — fall through to the other
-    // promos so the box is never empty.
-    const canWishlist = !isDesktopShell();
-
-    if (isInIframe()) {
-      return canWishlist ? this.steamWishlist() : this.discordDisplay();
-    }
-
-    if (!this.isWin && getGamesPlayed() < 3) {
-      return this.renderYoutubeTutorial();
-    }
-    if (this.rand < 0.25 && canWishlist) {
-      return this.steamWishlist();
-    } else if (this.rand < 0.5) {
-      return this.discordDisplay();
-    } else {
-      return this.renderPatternButton();
-    }
-  }
-
-  renderYoutubeTutorial() {
-    return html`
-      <div class="text-center mb-6 bg-black/30 p-2.5 rounded-sm">
-        <h3 class="text-xl font-semibold text-white mb-3">
-          ${translateText("win_modal.youtube_tutorial")}
-        </h3>
-        <!-- 56.25% = 9:16 -->
-        <div class="relative w-full pb-[56.25%]">
-          ${
-            Platform.isElectron
-              ? html`<video
-                  class="absolute top-0 left-0 w-full h-full rounded-sm"
-                  src="${this.isVisible ? DESKTOP_TUTORIAL_VIDEO_URL : ""}"
-                  controls
-                  preload="metadata"
-                ></video>`
-              : html`<iframe
-                  class="absolute top-0 left-0 w-full h-full rounded-sm"
-                  src="${this.isVisible ? TUTORIAL_VIDEO_URL : ""}"
-                  title="YouTube video player"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowfullscreen
-                ></iframe>`
-          }
-        </div>
-      </div>
-    `;
-  }
-
-  renderPatternButton() {
-    return html`
-      <div class="text-center mb-6 bg-black/30 p-2.5 rounded-sm">
-        <h3 class="text-xl font-semibold text-white mb-3">
-          ${translateText("win_modal.support_openfront")}
-        </h3>
-        ${
-          isDesktopShell()
-            ? null
-            : html`<p class="text-white mb-3">
-                ${translateText("win_modal.territory_pattern")}
-              </p>`
-        }
-        <div
-          class="mx-auto w-full overflow-x-auto overflow-y-visible rounded-sm"
-        >
-          <div
-            class="flex min-w-max items-start justify-center gap-4 px-1 py-1"
-          >
-            ${this.patternContent}
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  async loadPatternContent() {
-    const me = await getUserMe();
-    const cosmetics = await fetchCosmetics();
-
-    const purchasable = resolveCosmetics(cosmetics, me, null).filter(
-      (r) => r.type === "pattern" && r.relationship === "purchasable",
-    );
-
-    if (purchasable.length === 0) {
-      this.patternContent = html``;
-      return;
-    }
-
-    // Shuffle the array and take patterns. Will always be 3 wide to allow scrolling
-    const shuffled = [...purchasable].sort(() => Math.random() - 0.5);
-    const selected = shuffled.slice(0, Math.min(3, shuffled.length));
-
-    this.patternContent = html`
-      <div class="flex gap-4 flex-nowrap justify-start items-start">
-        ${selected.map((resolved) => {
-          // Only patterns were selected above.
-          const pattern = resolved.cosmetic as Pattern | null;
-          return html`
-            <div data-win-cosmetic-promo class="flex w-40 flex-col gap-2">
-              <cosmetic-card
-                .resolved=${resolved}
-                .interactive=${false}
-              ></cosmetic-card>
-              <purchase-button
-                .priceHard=${pattern?.priceHard ?? null}
-                .priceSoft=${pattern?.priceSoft ?? null}
-                .rarity=${pattern?.rarity ?? "common"}
-                .itemName=${cosmeticSelectionLabel(resolved)}
-                .onPurchaseHard=${() => purchaseCosmetic(resolved, "hard", { kind: "post_game" })}
-                .onPurchaseSoft=${() => purchaseCosmetic(resolved, "soft", { kind: "post_game" })}
-              ></purchase-button>
-            </div>
-          `;
-        })}
-      </div>
-    `;
-  }
-
-  steamWishlist(): TemplateResult {
-    return html`
-      <div class="text-center mb-6 bg-black/30 p-2.5 rounded-sm">
-        <h3 class="text-xl font-semibold text-white mb-3">
-          ${translateText("steam_wishlist.buy_on_steam")}
-        </h3>
-        <steam-wishlist
-          campaign="win_modal"
-          .active=${this.isVisible}
-        ></steam-wishlist>
-      </div>
-    `;
-  }
-
-  discordDisplay(): TemplateResult {
-    return html`
-      <div class="text-center mb-6 bg-black/30 p-2.5 rounded-sm">
-        <h3 class="text-xl font-semibold text-white mb-3">
-          ${translateText("win_modal.join_discord")}
-        </h3>
-        <p class="text-white mb-3">
-          ${translateText("win_modal.discord_description")}
-        </p>
-        <a
-          href="https://discord.com/invite/openfront"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-block px-6 py-3 bg-indigo-600 text-white rounded-sm font-semibold transition-all duration-200 hover:bg-indigo-700 hover:-translate-y-px no-underline"
-        >
-          ${translateText("win_modal.join_server")}
-        </a>
-      </div>
-    `;
-  }
-
   async show() {
     void gamePortal.gameplayStop();
     // The onboarding tutorial ends on its own card (OnboardingOverlay).
@@ -692,13 +514,6 @@ export class WinModal extends LitElement implements Controller {
       this.game.config().gameConfig().rankedType,
     );
     this.isVisible = true;
-    this.requestUpdate();
-    try {
-      await this.loadPatternContent();
-    } catch (error) {
-      console.warn("Failed to load win modal cosmetics", error);
-      return;
-    }
     this.requestUpdate();
   }
 
