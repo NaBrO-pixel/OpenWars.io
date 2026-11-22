@@ -26,11 +26,11 @@ function renderTemplate(): string {
   const manifest = {
     "manifest.json": "/_assets/manifest.111.json",
     "images/Favicon.svg": "/_assets/images/Favicon.222.svg",
-    "icons/icon512_maskable.png": "/_assets/icons/icon512.333.png",
+    "icons/OpenWarsIcon512_maskable.png": "/_assets/icons/icon512.333.png",
     "images/KeyArt.jpg": "/_assets/images/KeyArt.444.jpg",
     "images/background.webp": "/_assets/images/background.555.webp",
-    "images/OpenFront.png": "/_assets/images/OpenFront.666.png",
-    "images/OF.png": "/_assets/images/OF.777.png",
+    "images/OpenWars.png": "/_assets/images/OpenFront.666.png",
+    "images/OW.png": "/_assets/images/OF.777.png",
   };
   const asset = (p: string) => buildAssetUrl(p, manifest, BASE_PLACEHOLDER);
   return ejs.render(template, {
@@ -43,11 +43,11 @@ function renderTemplate(): string {
     jwtAudience: JSON.stringify("localhost"),
     manifestHref: asset("manifest.json"),
     faviconHref: asset("images/Favicon.svg"),
-    appleTouchIconHref: asset("icons/icon512_maskable.png"),
+    appleTouchIconHref: asset("icons/OpenWarsIcon512_maskable.png"),
     gameplayScreenshotUrl: asset("images/KeyArt.jpg"),
     backgroundImageUrl: asset("images/background.webp"),
-    desktopLogoImageUrl: asset("images/OpenFront.png"),
-    mobileLogoImageUrl: asset("images/OF.png"),
+    desktopLogoImageUrl: asset("images/OpenWars.png"),
+    mobileLogoImageUrl: asset("images/OW.png"),
   });
 }
 
