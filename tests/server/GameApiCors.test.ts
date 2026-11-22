@@ -500,3 +500,68 @@ describe("applyGameApiCorsHeaders and the replay shell host", () => {
     expect(headers.has("Access-Control-Allow-Origin")).toBe(false);
   });
 });
+
+describe("applyGameApiCorsHeaders with EXTRA_PAGE_ORIGINS", () => {
+  // A web build uploaded to a game portal (docs/PokiWebBuild.md) is served by
+  // the portal, so its /api calls reach this server cross-origin.
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  const granted = (origin: string): string | undefined => {
+    const { headers, setHeader } = collect();
+    applyGameApiCorsHeaders(origin, setHeader);
+    return headers.get("Access-Control-Allow-Origin");
+  };
+
+  test("grants nothing extra when unset", () => {
+    vi.stubEnv("EXTRA_PAGE_ORIGINS", "");
+    expect(granted("https://abc.poki-gdn.com")).toBeUndefined();
+  });
+
+  test("grants an exact origin", () => {
+    vi.stubEnv("EXTRA_PAGE_ORIGINS", "https://games.example.com");
+    expect(granted("https://games.example.com")).toBe(
+      "https://games.example.com",
+    );
+    expect(granted("https://other.example.com")).toBeUndefined();
+  });
+
+  test("grants any https subdomain for a wildcard, not the bare domain", () => {
+    vi.stubEnv(
+      "EXTRA_PAGE_ORIGINS",
+      "https://games.example.com, https://*.poki-gdn.com",
+    );
+    expect(granted("https://abc.poki-gdn.com")).toBe(
+      "https://abc.poki-gdn.com",
+    );
+    expect(granted("https://a.b.poki-gdn.com")).toBe(
+      "https://a.b.poki-gdn.com",
+    );
+    expect(granted("https://poki-gdn.com")).toBeUndefined();
+  });
+
+  test("refuses lookalikes, plain http and non-matching ports", () => {
+    vi.stubEnv("EXTRA_PAGE_ORIGINS", "https://*.poki-gdn.com");
+    expect(granted("https://evilpoki-gdn.com")).toBeUndefined();
+    expect(granted("https://poki-gdn.com.evil.com")).toBeUndefined();
+    expect(granted("http://abc.poki-gdn.com")).toBeUndefined();
+    expect(granted("https://abc.poki-gdn.com:8443")).toBeUndefined();
+  });
+
+  test("ignores malformed entries", () => {
+    vi.stubEnv(
+      "EXTRA_PAGE_ORIGINS",
+      "*, http://insecure.example.com, https://*, https://ok.example.com/path",
+    );
+    expect(granted("https://anything.example.com")).toBeUndefined();
+    expect(granted("http://insecure.example.com")).toBeUndefined();
+  });
+
+  test("still never allows credentials", () => {
+    vi.stubEnv("EXTRA_PAGE_ORIGINS", "https://*.poki-gdn.com");
+    const { headers, setHeader } = collect();
+    applyGameApiCorsHeaders("https://abc.poki-gdn.com", setHeader);
+    expect(headers.has("Access-Control-Allow-Credentials")).toBe(false);
+  });
+});

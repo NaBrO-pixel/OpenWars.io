@@ -8,8 +8,32 @@ import { ServerEnv } from "./ServerEnv";
  */
 export const DESKTOP_APP_ORIGIN = "app://openfront";
 
+/**
+ * Whether `origin` matches an EXTRA_PAGE_ORIGINS entry: exactly, or for a
+ * `https://*.domain` wildcard, as https on any subdomain of `domain` (not
+ * `domain` itself). Origins carry no path, so a suffix check on the host is
+ * exact once the scheme is fixed.
+ */
+function matchesExtraPageOrigin(origin: string): boolean {
+  for (const entry of ServerEnv.extraPageOrigins()) {
+    if (origin.toLowerCase() === entry.toLowerCase()) return true;
+    if (!entry.startsWith("https://*.")) continue;
+    const suffix = entry.slice("https://*".length).toLowerCase();
+    const lower = origin.toLowerCase();
+    if (
+      lower.startsWith("https://") &&
+      lower.endsWith(suffix) &&
+      lower.length > "https://".length + suffix.length
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function isAllowedOrigin(origin: string): boolean {
   if (origin === DESKTOP_APP_ORIGIN) return true;
+  if (matchesExtraPageOrigin(origin)) return true;
   const siteHost = ServerEnv.siteHost();
   if (siteHost !== undefined && origin === `https://${siteHost}`) return true;
 
