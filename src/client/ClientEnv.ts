@@ -206,6 +206,14 @@ export class ClientEnv {
   // whose list never loaded. A worker count is a property of ONE server, so
   // unlike the origin bases below there is no same-origin answer to fall back
   // on: any number would route to a worker that does not own the game.
+  // Whether the page was built to run with no game server (BOOTSTRAP_CONFIG
+  // .offline). Read straight off the page, not through get(): it is an
+  // optional hint, and a page missing the required values is not "offline".
+  static offline(): boolean {
+    return (
+      typeof window !== "undefined" && window.BOOTSTRAP_CONFIG?.offline === true
+    );
+  }
   static numWorkers(): number {
     const picked = ClientEnv.pickedServer();
     if (picked !== null) return picked.numWorkers;
