@@ -277,6 +277,22 @@ export class ServerEnv {
     const v = process.env.SITE_HOST;
     return v && v.length > 0 ? v : undefined;
   }
+  // Extra page origins granted the game API cross-origin (GameApiCors.ts),
+  // from EXTRA_PAGE_ORIGINS: a comma-separated list of exact https origins
+  // (`https://games.example.com`) or https subdomain wildcards
+  // (`https://*.poki-gdn.com`). For pages this deployment does not serve but
+  // whose players it hosts, such as a web build uploaded to a game portal
+  // (docs/PokiWebBuild.md). Empty when unset; malformed entries are dropped.
+  static extraPageOrigins(): string[] {
+    const raw = process.env.EXTRA_PAGE_ORIGINS;
+    if (!raw) return [];
+    return raw
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter((entry) =>
+        /^https:\/\/(\*\.)?[a-z0-9-]+(\.[a-z0-9-]+)+(:\d{1,5})?$/i.test(entry),
+      );
+  }
   // Whether the master joins its site's shared public-lobby roster
   // (LobbyCoordinatorClient.ts, infra docs/lobby-coordinator.md). "api"
   // connects to the API's coordinator and lets it schedule this site's public

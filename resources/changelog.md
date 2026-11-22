@@ -2,7 +2,7 @@
 - This file will be replaced with real release notes during the release build process.
   - Indented bullets look like this
 
-📦 **OpenFront v24 Changelog**
+📦 **OpenWars v24 Changelog**
 
 ⚖️ **Balance Changes**
 

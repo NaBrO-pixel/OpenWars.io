@@ -259,6 +259,18 @@ export function getProprietaryDir(rootDir: string = process.cwd()): string {
   return path.join(rootDir, "proprietary");
 }
 
+// proprietary/ is © OpenFront Inc. and may only ship as part of OpenFront.
+// OpenWars replaced those assets with its own in resources/, so only the files
+// listed here are published from it; the rest never reach a build.
+// KeyArt.jpg (the og:image social preview) has no replacement yet.
+export const PROPRIETARY_ASSETS_IN_USE: ReadonlySet<string> = new Set([
+  "images/KeyArt.jpg",
+]);
+
+export function isPublishedProprietaryAsset(relativePath: string): boolean {
+  return PROPRIETARY_ASSETS_IN_USE.has(normalizeAssetPath(relativePath));
+}
+
 // Scans directories with synchronous fs.existsSync — assumes a small number of sourceDirs.
 function resolveSourceDir(relativePath: string, sourceDirs: string[]): string {
   for (const dir of sourceDirs) {
@@ -280,6 +292,7 @@ function listHashedPublicAssetPaths(sourceDirs: string[]): string[] {
   const files = new Set<string>();
   for (const sourceDir of sourceDirs) {
     if (!fs.existsSync(sourceDir)) continue;
+    const isProprietary = path.basename(sourceDir) === "proprietary";
     for (const pattern of HASHED_PUBLIC_ASSET_GLOBS) {
       for (const dirent of fs.globSync(pattern, {
         cwd: sourceDir,
@@ -287,7 +300,9 @@ function listHashedPublicAssetPaths(sourceDirs: string[]): string[] {
         exclude: ["**/.*", ".*"], // .gitignore etc (like dot: false)
       })) {
         if (dirent.isDirectory()) continue;
-        files.add(normalizeAssetPath(toRelativePosixPath(sourceDir, dirent))); // convert dirent (like posix:true)
+        const rel = normalizeAssetPath(toRelativePosixPath(sourceDir, dirent)); // convert dirent (like posix:true)
+        if (isProprietary && !isPublishedProprietaryAsset(rel)) continue;
+        files.add(rel);
       }
     }
   }

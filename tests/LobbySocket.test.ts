@@ -1104,3 +1104,75 @@ describe("PublicLobbySocket.start on a replay shell host", () => {
     socket.stop();
   });
 });
+
+// A page built to run with no game server at all (the single-player Poki web
+// build, BOOTSTRAP_CONFIG.offline): nothing to dial, and the give-up alert
+// would interrupt single-player for a server that does not exist.
+describe("PublicLobbySocket.start on an offline page", () => {
+  const dialed: string[] = [];
+  class RecordingWebSocket {
+    static OPEN = 1;
+    readyState = 0;
+    binaryType = "";
+    constructor(public url: string) {
+      dialed.push(url);
+    }
+    addEventListener() {}
+    close() {}
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    dialed.length = 0;
+    mocks.ensureServerList.mockReset();
+    mocks.ensureServerList.mockResolvedValue("fallback");
+    mocks.showInGameAlert.mockClear();
+    vi.stubGlobal("WebSocket", RecordingWebSocket);
+    ClientEnv.reset();
+    // A static page: no cluster, letter, numWorkers or serverHost.
+    (window as any).BOOTSTRAP_CONFIG = {
+      gameEnv: "prod",
+      turnstileSiteKey: "k",
+      jwtAudience: "localhost",
+      gitCommit: "5ccc50a722222222222222222222222222222222",
+      offline: true,
+    };
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    ClientEnv.reset();
+    delete (window as any).BOOTSTRAP_CONFIG;
+  });
+
+  it("never dials, retries or raises the connection-error alert", async () => {
+    const onGaveUp = vi.fn();
+    const socket = new PublicLobbySocket(vi.fn(), {
+      onGaveUp,
+      maxWsAttempts: 1,
+    });
+
+    await socket.start();
+    await vi.advanceTimersByTimeAsync(10 * 60_000);
+
+    expect(dialed).toEqual([]);
+    expect(mocks.ensureServerList).not.toHaveBeenCalled();
+    expect(mocks.showInGameAlert).not.toHaveBeenCalled();
+    expect((socket as any).wsReconnectTimeout).toBeNull();
+    // The homepage's lobby list stops spinning.
+    expect(onGaveUp).toHaveBeenCalledTimes(1);
+    socket.stop();
+  });
+
+  it("keeps the connection-error alert for a static page without the flag", async () => {
+    delete (window as any).BOOTSTRAP_CONFIG.offline;
+    const socket = new PublicLobbySocket(vi.fn(), { maxWsAttempts: 1 });
+
+    await socket.start();
+
+    expect(mocks.showInGameAlert).toHaveBeenCalledTimes(1);
+    socket.stop();
+  });
+});

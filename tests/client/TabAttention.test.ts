@@ -15,7 +15,7 @@ vi.mock("../../src/client/UserSettings", () => ({
 
 import { TabAttention } from "../../src/client/TabAttention";
 
-const ORIGINAL_HREF = "/images/Favicon.svg";
+const ORIGINAL_HREF = "/images/OpenWarsFavicon.svg";
 
 function setHidden(hidden: boolean) {
   Object.defineProperty(document, "hidden", {

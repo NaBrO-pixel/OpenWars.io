@@ -102,9 +102,13 @@ export async function renderHtmlContent(
         ? undefined
         : JSON.stringify(ServerEnv.faroCollectorUrl()),
     manifestHref: buildAssetUrl("manifest.json", assetManifest, cdnBase),
-    faviconHref: buildAssetUrl("images/Favicon.svg", assetManifest, cdnBase),
+    faviconHref: buildAssetUrl(
+      "images/OpenWarsFavicon.svg",
+      assetManifest,
+      cdnBase,
+    ),
     appleTouchIconHref: buildAssetUrl(
-      "icons/icon512_maskable.png",
+      "icons/OpenWarsIcon512_maskable.png",
       assetManifest,
       cdnBase,
     ),
@@ -119,11 +123,11 @@ export async function renderHtmlContent(
       cdnBase,
     ),
     desktopLogoImageUrl: buildAssetUrl(
-      "images/OpenFront.png",
+      "images/OpenWars.png",
       assetManifest,
       cdnBase,
     ),
-    mobileLogoImageUrl: buildAssetUrl("images/OF.png", assetManifest, cdnBase),
+    mobileLogoImageUrl: buildAssetUrl("images/OW.png", assetManifest, cdnBase),
   });
 }
 

@@ -77,7 +77,10 @@ export class PublicLobbySocket {
     // only fail, and since the slow retry never stops, an idle replay tab
     // would re-dial every GAVE_UP_RETRY_MS for as long as it stays open.
     // Report it as given up so a caller showing the list stops spinning.
-    if (isReplayShellHost(window.location.hostname)) {
+    // The same for a page built with no game server at all (ClientEnv
+    // .offline): there is nothing to dial, and the give-up alert would
+    // interrupt single-player for a server that does not exist.
+    if (isReplayShellHost(window.location.hostname) || ClientEnv.offline()) {
       this.stop();
       this.onGaveUp?.();
       return;

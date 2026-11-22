@@ -43,6 +43,11 @@ declare global {
       // standalone deployments (beta, branch previews, dev), desktop, and
       // static pages.
       siteHost?: string;
+      // A page built to run with no game server at all (the single-player
+      // Poki web build, scripts/poki/buildPokiWeb.ts). It skips the homepage
+      // lobby feed, which would only fail and then raise a connection-error
+      // alert over a game that never needed a server. Absent everywhere else.
+      offline?: boolean;
     };
   }
 }

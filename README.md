@@ -5,7 +5,7 @@ OpenWars source code is licensed under the **GNU Affero General Public License v
 
 Current copyright notices
 # - Footer: "© OpenFront and Contributors"
-# - Loading screen: "© OpenFront and Contributors
+# - Loading screen: "© OpenFront and Contributors"
 See the [LICENSE](LICENSE) for complete requirements.
 
 For asset licensing, see [LICENSE-ASSETS](LICENSE-ASSETS).  

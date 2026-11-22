@@ -210,7 +210,7 @@ export function startMenuMusic(
       // browser's volume-lock state changes between two probes.
       const streaming = streamsMusic();
       theme = new Howl({
-        src: [assetUrl("sounds/music/menu-theme.mp3")],
+        src: [assetUrl("sounds/music/openwars-menu.mp3")],
         loop: true,
         volume: 0,
         // Stream rather than decode 2.2 MB up front -- see the gameplay track
