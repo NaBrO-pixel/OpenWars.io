@@ -190,12 +190,12 @@ Observed in the smoke test, single-player build: only `game-cdn.poki.com` and
 ## OpenFront's proprietary assets
 
 `proprietary/` is © OpenFront Inc. and may only be used as part of OpenFront.
-OpenWars has its own font, logos, icons, favicon, music and game-start sound
-in `resources/`, and builds publish only the proprietary files listed in
-`PROPRIETARY_ASSETS_IN_USE` (`src/server/PublicAssetManifest.ts`).
-`tests/NoProprietaryAssets.test.ts` enforces both. One is still listed:
-**`images/KeyArt.jpg`**, the social-preview image (`og:image`). It needs an
-OpenWars replacement before release.
+OpenWars has its own font, logos, icons, favicon, key art, music and
+game-start sound in `resources/`, so builds publish nothing from
+`proprietary/`: only files listed in `PROPRIETARY_ASSETS_IN_USE`
+(`src/server/PublicAssetManifest.ts`) would be, and it is empty.
+`tests/NoProprietaryAssets.test.ts` checks that no code refers to a
+proprietary file and that a build publishes none.
 
 ## Known review risks (Poki requirements)
 

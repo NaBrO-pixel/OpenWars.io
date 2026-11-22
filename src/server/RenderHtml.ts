@@ -113,7 +113,7 @@ export async function renderHtmlContent(
       cdnBase,
     ),
     gameplayScreenshotUrl: buildAssetUrl(
-      "images/KeyArt.jpg",
+      "images/OpenWarsKeyArt.jpg",
       assetManifest,
       cdnBase,
     ),

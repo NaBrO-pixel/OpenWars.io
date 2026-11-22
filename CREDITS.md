@@ -20,6 +20,12 @@ synthesized from code by `scripts/assets/generate_audio.py`, with no samples or
 recordings. They are licensed like the rest of `resources/`. Rerun the script to
 regenerate them.
 
+## Key Art
+
+`resources/images/OpenWarsKeyArt.jpg`, the social-preview image, is made by
+`scripts/assets/generate_key_art.py` from OpenWars' own gameplay screenshot and
+wordmark in `resources/images/`.
+
 ## Map Data
 
 ### OpenStreetMap

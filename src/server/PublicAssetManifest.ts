@@ -260,12 +260,11 @@ export function getProprietaryDir(rootDir: string = process.cwd()): string {
 }
 
 // proprietary/ is © OpenFront Inc. and may only ship as part of OpenFront.
-// OpenWars replaced those assets with its own in resources/, so only the files
-// listed here are published from it; the rest never reach a build.
-// KeyArt.jpg (the og:image social preview) has no replacement yet.
-export const PROPRIETARY_ASSETS_IN_USE: ReadonlySet<string> = new Set([
-  "images/KeyArt.jpg",
-]);
+// OpenWars replaced every one of those assets with its own in resources/, so
+// none is published. Only a file listed here would be; keep it empty.
+export const PROPRIETARY_ASSETS_IN_USE: ReadonlySet<string> = new Set<string>(
+  [],
+);
 
 export function isPublishedProprietaryAsset(relativePath: string): boolean {
   return PROPRIETARY_ASSETS_IN_USE.has(normalizeAssetPath(relativePath));

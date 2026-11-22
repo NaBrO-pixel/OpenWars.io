@@ -308,7 +308,7 @@ export default defineConfig(({ mode }) => {
       cdnBase,
     ),
     gameplayScreenshotUrl: buildAssetUrl(
-      "images/KeyArt.jpg",
+      "images/OpenWarsKeyArt.jpg",
       assetManifest,
       cdnBase,
     ),
