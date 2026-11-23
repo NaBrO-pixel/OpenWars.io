@@ -25,8 +25,6 @@ import {
   linkSteam,
   logOut,
   reauthAfterPortalChange,
-  sendMagicLink,
-  steamLogin,
 } from "./Auth";
 import "./components/baseComponents/stats/DiscordUserHeader";
 import "./components/baseComponents/stats/PlayerGameHistoryView";
@@ -101,7 +99,6 @@ let accountOpenings = 0;
 export class AccountModal extends BaseModal {
   protected routerName = "account";
 
-  @state() private email: string = "";
   @state() private isLoadingUser: boolean = false;
   // Counts openings, to key the profile card's and the Progression tab's
   // once-per-open flourish.
@@ -303,26 +300,6 @@ export class AccountModal extends BaseModal {
       default:
         return this.renderAccountTab();
     }
-  }
-
-  // Email input + "get magic link" button used by the sign-in form.
-  private renderEmailField(): TemplateResult {
-    return html`
-      <input
-        type="email"
-        .value=${this.email}
-        @input=${this.handleEmailInput}
-        placeholder=${translateText("account_modal.email_placeholder")}
-        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-malibu-blue/50 focus:border-malibu-blue/50 transition-all font-medium hover:bg-white/10"
-      />
-      <o-button
-        variant="primary"
-        width="block"
-        size="md"
-        translationKey="account_modal.get_magic_link"
-        @click=${this.handleSubmit}
-      ></o-button>
-    `;
   }
 
   private renderFriendsTab(): TemplateResult {
@@ -1112,37 +1089,7 @@ export class AccountModal extends BaseModal {
               >
             </button>
 
-            <!-- Sign in through Steam. Hidden inside the desktop shell: the
-                 player is already signed in there through the native Steam
-                 ticket, so the button would be a no-op that looks like an
-                 option. -->
-            ${
-              viaBrowser
-                ? nothing
-                : html`<button
-                    @click="${this.handleSteamLogin}"
-                    class="w-full px-6 py-4 text-white bg-[#1b2838] hover:bg-[#2a475e] border border-[#66c0f4]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#66c0f4] transition-colors duration-200 flex items-center justify-center gap-3 shadow-lg"
-                  >
-                    ${steamGlyph("w-6 h-6 shrink-0")}
-                    <span class="font-bold tracking-wide"
-                      >${translateText("main.login_steam")}</span
-                    >
-                  </button>`
-            }
-
-            <!-- Divider -->
-            <div class="flex items-center gap-4 py-2">
-              <div class="h-px bg-white/10 flex-1"></div>
-              <span
-                class="text-[10px] uppercase tracking-widest text-white/30 font-bold"
-              >
-                ${translateText("account_modal.or")}
-              </span>
-              <div class="h-px bg-white/10 flex-1"></div>
-            </div>
-
-            <!-- Email Recovery -->
-            <div class="space-y-3">${this.renderEmailField()}</div>
+            <!-- OpenWars signs in with Discord or Google only (src/accounts). -->
           </div>
 
           <!-- Not on Steam: the Steam ticket re-creates the session on reload. -->
@@ -1163,27 +1110,6 @@ export class AccountModal extends BaseModal {
         </div>
       </div>
     `;
-  }
-
-  private handleEmailInput(e: Event) {
-    const target = e.target as HTMLInputElement;
-    this.email = target.value;
-  }
-
-  private async handleSubmit() {
-    if (!this.email) {
-      await showInGameAlert(translateText("account_modal.enter_email_address"));
-      return;
-    }
-
-    const success = await sendMagicLink(this.email);
-    await showInGameAlert(
-      success
-        ? translateText("account_modal.recovery_email_sent", {
-            email: this.email,
-          })
-        : translateText("account_modal.failed_to_send_recovery_email"),
-    );
   }
 
   // Portal sign-in: after their prompt completes, exchange the new token
@@ -1209,10 +1135,6 @@ export class AccountModal extends BaseModal {
 
   private handleGoogleLogin() {
     void googleLogin();
-  }
-
-  private handleSteamLogin() {
-    steamLogin();
   }
 
   private handleLinkGoogle = async (): Promise<void> => {

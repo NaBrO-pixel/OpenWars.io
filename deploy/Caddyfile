@@ -1,0 +1,14 @@
+# Caddy gets and renews free HTTPS certificates (Let's Encrypt) by itself.
+# DOMAIN comes from deploy/.env.
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy game:80 {
+		# The game server reads each player's IP from this header (it is
+		# built to sit behind Cloudflare). Set here, so it cannot be faked.
+		header_up CF-Connecting-IP {remote_host}
+	}
+}
+
+api.{$DOMAIN} {
+	reverse_proxy accounts:8787
+}

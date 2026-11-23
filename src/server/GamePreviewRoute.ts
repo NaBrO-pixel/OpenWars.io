@@ -53,7 +53,7 @@ export function registerGamePreviewRoute(opts: {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 1500);
     try {
-      const apiDomain = ServerEnv.jwtIssuer();
+      const apiDomain = ServerEnv.apiOrigin();
       const encodedID = encodeURIComponent(gameID);
       const response = await fetch(`${apiDomain}/game/${encodedID}`, {
         headers: {

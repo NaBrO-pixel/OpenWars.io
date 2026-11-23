@@ -1,0 +1,54 @@
+# OpenWars on one server: the game, the accounts service and Caddy (HTTPS).
+# Setup: docs/SelfHosting.md. Run from this folder:
+#   docker compose up -d --build
+services:
+  game:
+    build:
+      context: ..
+      args:
+        GIT_COMMIT: ${GIT_COMMIT:-selfhosted}
+    image: openwars:local
+    restart: unless-stopped
+    environment:
+      GAME_ENV: prod
+      DOMAIN: ${DOMAIN}
+      GIT_COMMIT: ${GIT_COMMIT:-selfhosted}
+      NUM_WORKERS: ${NUM_WORKERS:-2}
+      INSTANCE_LETTER: a
+      API_KEY: ${API_KEY}
+      ADMIN_BOT_API_KEY: ${ADMIN_BOT_API_KEY:-}
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-1x00000000000000000000AA}
+      # Talk to the accounts container directly, not through the internet.
+      ACCOUNTS_INTERNAL_URL: http://accounts:8787
+
+  accounts:
+    image: openwars:local
+    depends_on: [game] # built by the game service
+    restart: unless-stopped
+    entrypoint: ["npm", "run", "start:accounts"]
+    environment:
+      DOMAIN: ${DOMAIN}
+      API_KEY: ${API_KEY}
+      ACCOUNTS_DATA_DIR: /data
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+    volumes:
+      # Accounts, progress and the sign-in key. Back this up.
+      - ./data/accounts:/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [game, accounts]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./data/caddy:/data

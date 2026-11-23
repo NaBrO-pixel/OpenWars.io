@@ -27,9 +27,12 @@ Limits of this setup:
 - It runs the development server: fine for friends, not for a public launch.
 - Public matches also contain AI nations and tribes; that is how the game's
   modes are set up, not a sign that nobody joined.
+- Sign-in and saved progress only work for the person running the Codespace
+  (the accounts service is reached at `localhost`); friends play as guests
+  whose progress is not saved.
 
 ## A permanent server
 
-For a game anyone can find at any time, deploy the Docker image built from
-`Dockerfile` to a server with a public HTTPS hostname (see
-`docs/PokiWebBuild.md`, "What multiplayer needs (backend)", for the settings).
+For a game anyone can find at any time, with Discord/Google sign-in and saved
+progress for everyone, follow `docs/SelfHosting.md`: a free server, a free
+web address, and one `docker compose` command.

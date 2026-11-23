@@ -115,9 +115,16 @@ export class ServerEnv {
       ? "http://localhost:8787"
       : `https://api.${audience}`;
   }
+  // Where this server sends its requests to the accounts API. The same as
+  // the JWT issuer unless ACCOUNTS_INTERNAL_URL names a direct address (a
+  // self-hosted deployment's accounts container, e.g. http://accounts:8787),
+  // so the server need not reach its own public hostname from inside.
+  static apiOrigin(): string {
+    return process.env.ACCOUNTS_INTERNAL_URL ?? ServerEnv.jwtIssuer();
+  }
   static async jwkPublicKey(): Promise<JWK> {
     if (ServerEnv.publicKey) return ServerEnv.publicKey;
-    const jwksUrl = ServerEnv.jwtIssuer() + "/.well-known/jwks.json";
+    const jwksUrl = ServerEnv.apiOrigin() + "/.well-known/jwks.json";
     console.log(`Fetching JWKS from ${jwksUrl}`);
     // A redirect would forward x-api-key to the new origin; the JWKS
     // endpoint never redirects, so refuse to follow one.

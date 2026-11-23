@@ -148,7 +148,7 @@ async function fetchJoinVerify(
   persistentId?: string,
   mode?: JoinVerifyMode,
 ): Promise<Response> {
-  return fetch(`${ServerEnv.jwtIssuer()}/join_verify`, {
+  return fetch(`${ServerEnv.apiOrigin()}/join_verify`, {
     method: "POST",
     // First sighting of a novel flagged name adds an LLM round-trip of
     // up to ~3s server-side, so the timeout must stay at 5s or above.

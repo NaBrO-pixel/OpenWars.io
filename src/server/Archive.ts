@@ -45,7 +45,7 @@ export async function archive(gameRecord: GameRecord) {
       });
       return;
     }
-    url = `${ServerEnv.jwtIssuer()}/game/${gameID}`;
+    url = `${ServerEnv.apiOrigin()}/game/${gameID}`;
     request = {
       method: "POST",
       body: JSON.stringify(gameRecord, replacer),

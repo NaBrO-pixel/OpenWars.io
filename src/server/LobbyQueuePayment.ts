@@ -42,7 +42,7 @@ async function payLobbyFee(
 ): Promise<LobbyQueuePaymentResult> {
   try {
     const response = await fetch(
-      `${ServerEnv.jwtIssuer()}/users/@me/${endpoint}`,
+      `${ServerEnv.apiOrigin()}/users/@me/${endpoint}`,
       {
         method: "POST",
         signal: AbortSignal.timeout(5000),
