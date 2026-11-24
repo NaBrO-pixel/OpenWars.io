@@ -277,3 +277,45 @@ Diplomacy:
   tests. Checked over real multiplayer: one browser proposed a trade
   agreement from the panel, another accepted it from theirs, and both
   clients then held the same agreement with the same expiry.
+
+### Milestone 5: intelligence and world events
+
+World events:
+
+- `engine-lib/configuration/EventConfig.ts`: the catalogue (global
+  recession, industrial boom, trade disruption, political instability,
+  technological breakthrough, natural disaster). Each has an id, scope
+  (world or one nation), trigger conditions (earliest minute, fewest
+  nations), weight, warning time, duration and effects. Adding an event is
+  adding an entry.
+- `game/WorldEvents.ts` (on GameImpl, Game snapshot v4): the first event
+  after 3 minutes, then one every 150–240 s, at most two at once, never the
+  same twice at once. Choices hash the tick, so there is no random state and
+  every client draws the same events. Most are announced before they start;
+  start and end are announced too.
+- Effects are temporary economy modifiers (tax, industry, industry money,
+  research, stability target, suspended trade bonuses); the natural disaster
+  also takes 20% of the nation's industry stockpile. Nothing destroys land or
+  units, so no event can eliminate a nation.
+- World events panel: current and upcoming events (phase, time left, who is
+  affected, effects) and the history.
+
+Intelligence:
+
+- `engine-lib/configuration/IntelRules.ts`: confidence per pair of nations
+  — unknown, limited (neighbours, agreement partners), estimated (allies),
+  detailed (intelligence sharing) — plus levels from research (Information
+  Systems and Advanced Computing now add one each). Figures are shown as
+  nothing, an order of magnitude, a ±20–25% range that always contains the
+  true value, or exactly. Territory share is always exact: it is on the map.
+- Neighbours come from the engine (`NationView.neighbours`).
+- Intelligence panel: country selection, confidence with its reason,
+  strength, economy and diplomacy at that confidence, territory history and
+  dated reports (expansion, losses, and military build-up alerts at
+  estimated confidence or better).
+- As planned in §3.3: every client holds the whole state (lockstep), so this
+  is fair-play information design, not secrecy against modified clients.
+
+Tests: `WorldEvents.test.ts` (catalogue, effects, warnings before effects,
+history, concurrency, fairness, determinism across runs, snapshot
+continuation), `IntelRules.test.ts`, panel tests.

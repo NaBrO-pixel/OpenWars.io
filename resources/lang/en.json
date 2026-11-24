@@ -972,6 +972,7 @@
     "development": "Development",
     "diplomacy": "Diplomacy",
     "economy": "Economy",
+    "events": "World events",
     "expense_structures": "Structure upkeep",
     "expense_structures_why": "Maintaining cities, factories, ports and other buildings.",
     "expense_territory": "Territory upkeep",
@@ -986,6 +987,7 @@
     "income_tax": "Taxation",
     "income_tax_why": "Paid by your population; more when stability is high.",
     "infrastructure": "Infrastructure",
+    "intelligence": "Intelligence",
     "label": "Command",
     "largest": "Largest nations",
     "nation": "Nation",
@@ -1411,7 +1413,25 @@
     "trade_ship_captured": "Your trade ship was captured by {name}",
     "unit_destroyed": "Your {unit} was destroyed",
     "unit_voluntarily_deleted": "Unit voluntarily deleted",
-    "wants_to_renew_alliance": "{name} wants to renew your alliance"
+    "wants_to_renew_alliance": "{name} wants to renew your alliance",
+    "world_event_global_recession_end": "The global recession is over.",
+    "world_event_global_recession_start": "A global recession has begun.",
+    "world_event_global_recession_warning": "Economists warn of a global recession within 30 seconds.",
+    "world_event_industrial_boom_end": "The industrial boom has ended.",
+    "world_event_industrial_boom_start": "An industrial boom has begun.",
+    "world_event_industrial_boom_warning": "Markets expect an industrial boom shortly.",
+    "world_event_natural_disaster_end": "{name} has recovered from the disaster.",
+    "world_event_natural_disaster_start": "A natural disaster strikes {name}.",
+    "world_event_natural_disaster_warning": "Forecasters warn of a coming disaster in {name}.",
+    "world_event_political_instability_end": "Calm returns to {name}.",
+    "world_event_political_instability_start": "Political instability grips {name}.",
+    "world_event_political_instability_warning": "Unrest is growing in {name}.",
+    "world_event_technological_breakthrough_end": "{name}'s breakthrough has been absorbed.",
+    "world_event_technological_breakthrough_start": "{name} makes a technological breakthrough.",
+    "world_event_technological_breakthrough_warning": "A nation's scientists make a major discovery.",
+    "world_event_trade_disruption_end": "World trade has recovered.",
+    "world_event_trade_disruption_start": "World trade is disrupted.",
+    "world_event_trade_disruption_warning": "Trade routes are threatened: disruption expected."
   },
   "featured_stream": {
     "expand": "Expand",
@@ -1899,6 +1919,28 @@
     "roads_effect": "Connects the region: cuts territory upkeep and raises stability.",
     "show_overlay": "Show on map",
     "site": "City {n}"
+  },
+  "intelligence": {
+    "agreements": "Agreements in force",
+    "alert_buildup": "Alert: rapid military build-up.",
+    "diplomacy": "Diplomacy",
+    "economy": "Economy",
+    "history": "Territory history and reports",
+    "history_pending": "History builds up as the match goes on.",
+    "intro": "What you know about other countries. Confidence comes from borders, agreements, alliances, intelligence sharing and research. Estimates are ranges, not exact figures.",
+    "level_detailed": "Detailed",
+    "level_detailed_why": "Intelligence shared: exact figures.",
+    "level_estimated": "Estimated",
+    "level_estimated_why": "An ally: estimates within about 25%.",
+    "level_limited": "Limited",
+    "level_limited_why": "A neighbour or agreement partner: rough orders of magnitude.",
+    "level_unknown": "Unknown",
+    "level_unknown_why": "No contact: only their territory on the map is known.",
+    "report_expanded": "Expanded from {from} to {to} of the map.",
+    "report_lost": "Lost ground: {from} to {to} of the map.",
+    "reputation": "Reputation",
+    "strength": "Strength",
+    "unknown": "Unknown"
   },
   "inventory": {
     "equipped": "Equipped",
@@ -2945,6 +2987,7 @@
     "effect_industry": "+{value}% industry output",
     "effect_industry_money": "+{value}% money from industry",
     "effect_infrastructure_cost": "−{value}% industry cost of infrastructure",
+    "effect_intel": "+{value} intelligence level on every country",
     "effect_projects": "+{value} infrastructure project at once",
     "effect_research": "+{value}% research",
     "effect_research_centres": "+{value}% research from research centres",
@@ -3804,5 +3847,49 @@
     "spectate": "Spectate",
     "you_won": "You Won!",
     "your_team": "Your team won!"
+  },
+  "world_event": {
+    "global_recession": {
+      "desc": "A worldwide downturn hits every economy.",
+      "effect": "−25% tax, −20% money from industry, for everyone.",
+      "name": "Global recession"
+    },
+    "industrial_boom": {
+      "desc": "Demand surges for manufactured goods.",
+      "effect": "+30% industry output, for everyone.",
+      "name": "Industrial boom"
+    },
+    "natural_disaster": {
+      "desc": "A disaster strikes one nation.",
+      "effect": "Loses 20% of its industry stockpile; −25% industry and −8% stability target while it lasts.",
+      "name": "Natural disaster"
+    },
+    "political_instability": {
+      "desc": "Unrest spreads through one nation.",
+      "effect": "−15% stability target for the affected nation.",
+      "name": "Political instability"
+    },
+    "technological_breakthrough": {
+      "desc": "A nation's scientists make a major discovery.",
+      "effect": "Doubled research for the affected nation.",
+      "name": "Technological breakthrough"
+    },
+    "trade_disruption": {
+      "desc": "Shipping lanes and markets are disrupted.",
+      "effect": "Trade agreements pay nothing; −15% money from industry.",
+      "name": "Trade disruption"
+    }
+  },
+  "world_events": {
+    "affects": "Affects: {target}",
+    "current": "Current and upcoming",
+    "ended": "Ended",
+    "ends_in": "{s}s left",
+    "everyone": "Every nation",
+    "history": "Past events",
+    "intro": "Events change conditions for everyone or for one nation, for a while. Most are announced in advance.",
+    "none": "No events right now.",
+    "starts_in": "Starts in {s}s",
+    "you": "Affects you"
   }
 }

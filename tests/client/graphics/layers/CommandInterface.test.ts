@@ -8,6 +8,10 @@ import {
   type CommandNav,
 } from "../../../../src/client/hud/layers/CommandNav";
 import { ToggleInfrastructureOverlayEvent } from "../../../../src/client/hud/layers/InfrastructureOverlay";
+import {
+  formatEstimate,
+  reports,
+} from "../../../../src/client/hud/layers/IntelligencePanel";
 import { effectLines } from "../../../../src/client/hud/layers/ResearchPanel";
 import {
   formatClock,
@@ -53,7 +57,8 @@ function player(
     allies: () => [],
     units: () => [],
     nation: () => nation,
-  };
+    type: () => "HUMAN",
+  } as FakePlayer;
 }
 
 const NATION: NationView = {
@@ -72,6 +77,10 @@ const NATION: NationView = {
   techs: [],
   researching: null,
   diplomacy: { reputation: 100, agreements: [], incoming: [], outgoing: [] },
+  events: [],
+  eventHistory: [],
+  neighbours: [],
+  intelLevels: 0,
 };
 
 function game(
@@ -514,6 +523,109 @@ describe("diplomacy panel", () => {
         .querySelector("[data-relationship]")
         ?.getAttribute("data-relationship"),
     ).toBe("allied");
+    nav.remove();
+  });
+});
+
+describe("intelligence and events panels", () => {
+  function setupNav(me: FakePlayer, others: FakePlayer[]) {
+    const nav = document.createElement("command-nav") as CommandNav;
+    document.body.appendChild(nav);
+    nav.game = {
+      ...(game(me, others) as object),
+      ticks: () => 100,
+    } as unknown as GameView;
+    nav.init();
+    nav.tick();
+    return nav;
+  }
+  function country(id: string, nation: NationView, tiles = 100) {
+    const p = player(id, tiles, 0, nation) as FakePlayer &
+      Record<string, unknown>;
+    Object.assign(p, {
+      type: () => "HUMAN",
+      isAlliedWith: () => false,
+      allies: () => [],
+    });
+    return p;
+  }
+
+  it("shows unknown and estimated figures without exact numbers", async () => {
+    const rival = country("rival", { ...NATION, stability: 640 }, 300);
+    const me = country("me", { ...NATION, neighbours: [] });
+    const nav = setupNav(me, [rival]);
+    nav.toggle("intelligence");
+    await nav.updateComplete;
+    const panel = nav.querySelector('[data-intel-target="rival"]')!;
+    expect(
+      panel.querySelector("[data-confidence]")?.getAttribute("data-confidence"),
+    ).toBe("unknown");
+    expect(panel.textContent).toContain("intelligence.unknown");
+    expect(panel.textContent).not.toContain("64%");
+    nav.remove();
+
+    // A neighbour with research: estimated, shown as a range.
+    const me2 = country("me", {
+      ...NATION,
+      neighbours: ["rival"],
+      intelLevels: 1,
+    });
+    const nav2 = setupNav(me2, [rival]);
+    nav2.toggle("intelligence");
+    await nav2.updateComplete;
+    const p2 = nav2.querySelector('[data-intel-target="rival"]')!;
+    expect(
+      p2.querySelector("[data-confidence]")?.getAttribute("data-confidence"),
+    ).toBe("estimated");
+    expect(p2.textContent).toMatch(/~\S+–\S+/);
+    nav2.remove();
+  });
+
+  it("formats estimates", () => {
+    expect(
+      formatEstimate({ kind: "range", low: 1_000, high: 2_000 }, String),
+    ).toBe("~1000–2000");
+    expect(formatEstimate({ kind: "unknown" }, String)).toBe(
+      "intelligence.unknown",
+    );
+  });
+
+  it("reports notable changes from the history", () => {
+    const samples = [0, 1, 2, 3, 4].map((i) => ({
+      t: i * 15,
+      share: 0.01 + i * 0.01,
+      troops: 1000 * (i + 1) * (i + 1),
+    }));
+    expect(reports(samples, "unknown").map((r) => r.key)).toEqual([
+      "intelligence.report_expanded",
+    ]);
+    expect(reports(samples, "estimated").map((r) => r.key)).toContain(
+      "intelligence.alert_buildup",
+    );
+  });
+
+  it("lists world events with their phase and who they affect", async () => {
+    const me = country("me", {
+      ...NATION,
+      events: [
+        { id: "global_recession", target: null, startsAt: 400, endsAt: 1600 },
+        { id: "natural_disaster", target: "me", startsAt: 50, endsAt: 650 },
+      ],
+      eventHistory: [
+        { id: "industrial_boom", target: null, startsAt: 0, endsAt: 90 },
+      ],
+    });
+    const nav = setupNav(me, []);
+    nav.toggle("events");
+    await nav.updateComplete;
+    const phase = (id: string) =>
+      nav
+        .querySelector(`[data-world-event="${id}"]`)
+        ?.getAttribute("data-phase");
+    expect(phase("global_recession")).toBe("warning");
+    expect(phase("natural_disaster")).toBe("active");
+    expect(phase("industrial_boom")).toBe("past");
+    expect(nav.textContent).toContain("world_events.you");
     nav.remove();
   });
 });

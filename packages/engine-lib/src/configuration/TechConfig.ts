@@ -28,6 +28,8 @@ export interface TechEffects {
   /** Growth and deficit stability penalties cut, permille. */
   growthPenaltyCutPermille?: number;
   deficitPenaltyCutPermille?: number;
+  /** Intelligence confidence levels gained on every country (milestone 5). */
+  intelLevels?: number;
 }
 
 export interface TechDefinition {
@@ -108,7 +110,7 @@ export const TECHS: readonly TechDefinition[] = [
     tier: 2,
     ...tier(2),
     requires: ["research_labs"],
-    effects: { taxPermille: 100 },
+    effects: { taxPermille: 100, intelLevels: 1 },
   },
   {
     id: "project_management",
@@ -124,7 +126,7 @@ export const TECHS: readonly TechDefinition[] = [
     tier: 4,
     ...tier(4),
     requires: ["project_management"],
-    effects: { researchPermille: 350 },
+    effects: { researchPermille: 350, intelLevels: 1 },
   },
   {
     id: "scientific_revolution",
@@ -195,6 +197,7 @@ export const NO_TECH: TechModifiers = {
   stabilityTarget: 0,
   growthPenaltyCutPermille: 0,
   deficitPenaltyCutPermille: 0,
+  intelLevels: 0,
 };
 
 /** The summed effects of the given completed technologies. */

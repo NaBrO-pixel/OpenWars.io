@@ -45,6 +45,9 @@ export class NationalEconomyExecution implements Execution {
     if (this.mg === null || ticks % ECONOMY_STEP_TICKS !== 0) return;
     this.steps++;
     this.mg.diplomacy().advance(this.mg, this.steps);
+    this.mg.worldEvents().advance(this.mg);
+    const events = this.mg.worldEvents().views();
+    const eventHistory = this.mg.worldEvents().historyViews();
     for (const player of this.mg.players()) {
       if (!player.isAlive() || player.type() === PlayerType.Bot) continue;
       const nation = player.ensureNation();
@@ -88,6 +91,14 @@ export class NationalEconomyExecution implements Execution {
         infra.projectViews(player),
       );
       nation.setDiplomacy(this.mg.diplomacy().view(player));
+      nation.setEvents(events, eventHistory);
+      nation.setNeighbours(
+        player
+          .nearby()
+          .filter((n): n is Player => n.isPlayer())
+          .map((n) => n.id())
+          .sort(),
+      );
     }
   }
 
@@ -205,6 +216,7 @@ export function economyInput(
     infrastructure: mg.infrastructure().totalsFor(player),
     tradeAgreements: mg.diplomacy().count("trade", player),
     alliances: player.alliances().length,
+    events: mg.worldEvents().modifiersFor(player),
   };
 }
 

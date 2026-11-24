@@ -109,6 +109,7 @@ import { Railroad } from "./Railroad";
 import { Stats } from "./Stats";
 import { StatsImpl, StatsSnapshot } from "./StatsImpl";
 import { WaterManager, WaterManagerSnapshot } from "./WaterManager";
+import { WorldEvents, WorldEventsDataSchema } from "./WorldEvents";
 
 export function createGame(
   humans: PlayerInfo[],
@@ -170,6 +171,8 @@ export class GameImpl implements Game {
   private _infrastructure = new InfrastructureMap();
   /** OpenWars diplomacy (milestone 4); empty under the classic rules. */
   private _diplomacy = new DiplomacyMap();
+  /** OpenWars world events (milestone 5). */
+  private _worldEvents = new WorldEvents();
 
   // Used to assign unique IDs to each new alliance
   private nextAllianceID: number = 0;
@@ -1713,6 +1716,10 @@ export class GameImpl implements Game {
   diplomacy(): DiplomacyMap {
     return this._diplomacy;
   }
+
+  worldEvents(): WorldEvents {
+    return this._worldEvents;
+  }
   mirvsLaunched(): number {
     return this._mirvsLaunched;
   }
@@ -1805,6 +1812,7 @@ export class GameImpl implements Game {
       stats: w.versioned(StatsSnapshot, (this._stats as StatsImpl).snapshot()),
       infrastructure: this._infrastructure.toData(),
       diplomacy: this._diplomacy.toData(),
+      worldEvents: this._worldEvents.toData(),
     };
   }
 
@@ -1869,6 +1877,7 @@ export class GameImpl implements Game {
     );
     this._infrastructure.restore(s.infrastructure);
     this._diplomacy.restore(s.diplomacy);
+    this._worldEvents.restore(s.worldEvents);
   }
 
   conquerPlayer(conqueror: Player, conquered: Player) {
@@ -1957,7 +1966,7 @@ export class GameImpl implements Game {
 
 export const GameSnapshot = snapshotType({
   name: "Game",
-  version: 3,
+  version: 4,
   migrations: {
     // v1 predates OpenWars infrastructure.
     1: (d) => ({ ...d, infrastructure: { sites: [], projects: [] } }),
@@ -1965,6 +1974,11 @@ export const GameSnapshot = snapshotType({
     2: (d) => ({
       ...d,
       diplomacy: { agreements: [], proposals: [], reputation: [] },
+    }),
+    // v3 predates world events.
+    3: (d) => ({
+      ...d,
+      worldEvents: { nextAt: 1800, active: [], history: [] },
     }),
   },
   schema: z.object({
@@ -2002,6 +2016,7 @@ export const GameSnapshot = snapshotType({
     stats: VersionedSchema,
     infrastructure: InfrastructureDataSchema,
     diplomacy: DiplomacyDataSchema,
+    worldEvents: WorldEventsDataSchema,
   }),
 });
 export type GameState = z.infer<typeof GameSnapshot.schema>;

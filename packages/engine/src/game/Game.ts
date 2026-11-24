@@ -56,6 +56,7 @@ import type { InfrastructureMap } from "./Infrastructure";
 import type { NationState } from "./NationState";
 import { RailNetwork } from "./RailNetwork";
 import { Stats } from "./Stats";
+import type { WorldEvents } from "./WorldEvents";
 
 export interface OwnerComp {
   owner: Player;
@@ -705,6 +706,8 @@ export interface Game extends GameLike {
   infrastructure(): InfrastructureMap;
   /** OpenWars diplomacy (milestone 4). */
   diplomacy(): DiplomacyMap;
+  /** OpenWars world events (milestone 5). */
+  worldEvents(): WorldEvents;
   /**
    * Bumped whenever a City, Port or Factory is added or removed (the
    * structures the rail network connects) and whenever land turns to water

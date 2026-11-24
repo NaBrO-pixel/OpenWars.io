@@ -25,8 +25,10 @@ import {
   nationalSummary,
 } from "../NationalSummary";
 import { renderDiplomacy } from "./DiplomacyPanel";
+import { renderEvents } from "./EventsPanel";
 import { ToggleInfrastructureOverlayEvent } from "./InfrastructureOverlay";
 import { renderInfrastructure } from "./InfrastructurePanel";
+import { IntelHistory, renderIntelligence } from "./IntelligencePanel";
 import { renderResearch } from "./ResearchPanel";
 
 interface SectionContext {
@@ -364,6 +366,31 @@ export const COMMAND_SECTIONS: readonly CommandSection[] = [
     available: (ctx) => ctx.summary.nation !== null,
   },
   {
+    id: "intelligence",
+    labelKey: "command_nav.intelligence",
+    icon: svg(
+      "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
+    ),
+    render: (ctx) =>
+      renderIntelligence(
+        ctx.game,
+        ctx.me,
+        ctx.nav.intelHistory,
+        ctx.nav.intelTarget,
+        (id) => ctx.nav.selectIntelTarget(id),
+      ),
+    available: (ctx) => ctx.summary.nation !== null,
+  },
+  {
+    id: "events",
+    labelKey: "command_nav.events",
+    icon: svg(
+      "M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z",
+    ),
+    render: (ctx) => renderEvents(ctx.game, ctx.me),
+    available: (ctx) => ctx.summary.nation !== null,
+  },
+  {
     id: "statistics",
     labelKey: "command_nav.statistics",
     icon: svg("M4 20V10m6 10V4m6 16v-7m4 7H2"),
@@ -382,6 +409,12 @@ export class CommandNav extends LitElement implements Controller {
   public eventBus: EventBus | undefined;
   @state() private open: string | null = null;
   @state() overlayOn = false;
+  @state() intelTarget: string | null = null;
+  readonly intelHistory = new IntelHistory();
+
+  selectIntelTarget(id: string) {
+    this.intelTarget = id;
+  }
 
   toggleOverlay() {
     this.overlayOn = !this.overlayOn;
@@ -397,6 +430,8 @@ export class CommandNav extends LitElement implements Controller {
   init() {
     this.open = null;
     this.overlayOn = false;
+    this.intelTarget = null;
+    this.intelHistory.reset();
     this.ctx = null;
     this.income.reset();
   }
@@ -411,6 +446,7 @@ export class CommandNav extends LitElement implements Controller {
       this.ctx = null;
       return;
     }
+    this.intelHistory.sample(this.game);
     this.ctx = {
       game: this.game,
       me,

@@ -1,5 +1,5 @@
 import { AllPlayersStats, ClientID, Winner } from "../Schemas";
-import type { DiplomacyView } from "./Diplomacy";
+import type { DiplomacyView, WorldEventView } from "./Diplomacy";
 import { TileRef } from "./GameMap";
 import {
   AircraftState,
@@ -328,6 +328,13 @@ export interface NationView {
   researching: { id: string; done: number; total: number } | null;
   /** Agreements, proposals and reputation (milestone 4). */
   diplomacy: DiplomacyView;
+  /** World events warned of or running, and past ones (milestone 5). */
+  events: WorldEventView[];
+  eventHistory: WorldEventView[];
+  /** PlayerIDs of the nations it borders (intelligence, milestone 5). */
+  neighbours: string[];
+  /** Intelligence levels from research. */
+  intelLevels: number;
 }
 
 export interface NationIncome {

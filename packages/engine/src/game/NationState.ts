@@ -2,7 +2,10 @@
 // milestone 2): industry and research stockpiles, stability, and the last
 // step's income and expenses. Updated once a second by
 // NationalEconomyExecution; integer arithmetic only, so every client agrees.
-import type { DiplomacyView } from "@openfront/engine-api/game/Diplomacy";
+import type {
+  DiplomacyView,
+  WorldEventView,
+} from "@openfront/engine-api/game/Diplomacy";
 import type {
   NationExpenses,
   NationIncome,
@@ -15,6 +18,10 @@ import type {
 } from "@openfront/engine-api/game/Infrastructure";
 import { DiplomacyConfig } from "@openfront/engine-lib/configuration/DiplomacyConfig";
 import { EconomyConfig } from "@openfront/engine-lib/configuration/EconomyConfig";
+import {
+  type EventModifiers,
+  NO_EVENT,
+} from "@openfront/engine-lib/configuration/EventConfig";
 import {
   NO_TECH,
   type TechModifiers,
@@ -40,6 +47,8 @@ export interface EconomyInput {
   /** Trade agreements and alliances in force (milestone 4). */
   tradeAgreements?: number;
   alliances?: number;
+  /** Running world events' effects on this nation (milestone 5). */
+  events?: EventModifiers;
 }
 
 /** What one economy step decides. */
@@ -66,7 +75,8 @@ export function economyStep(
   cfg = EconomyConfig,
 ): EconomyResult {
   const pm = (v: number, permille: number) =>
-    Math.floor((v * (1000 + permille)) / 1000);
+    Math.max(0, Math.floor((v * (1000 + permille)) / 1000));
+  const ev = input.events ?? NO_EVENT;
   const infra = input.infrastructure;
   const ic = cfg.infrastructure;
   // Production: factories, land, and industrial and research centres.
@@ -74,7 +84,7 @@ export function economyStep(
     input.factoryLevels * cfg.industryPerFactoryLevel +
       Math.floor(input.tiles / cfg.tilesPerIndustry) +
       infra.industry * ic.industryPerIndustrialLevel,
-    tech.industryPermille,
+    tech.industryPermille + ev.industryPermille,
   );
   const researchRate = pm(
     cfg.researchBase +
@@ -84,6 +94,7 @@ export function economyStep(
         tech.researchCentrePermille,
       ),
     tech.researchPermille +
+      ev.researchPermille +
       Math.min(
         DiplomacyConfig.allianceCap,
         (input.alliances ?? 0) * DiplomacyConfig.alliancePermille,
@@ -97,13 +108,12 @@ export function economyStep(
     Math.floor(((1000 - cfg.taxAtZeroStabilityPermille) * stability) / 1000);
   // Trade agreements: more tax and more money from industry, for both.
   const dc = DiplomacyConfig;
-  const tradeBonus = Math.min(
-    dc.tradeCap,
-    (input.tradeAgreements ?? 0) * dc.tradePermille,
-  );
+  const tradeBonus = ev.tradeSuspended
+    ? 0
+    : Math.min(dc.tradeCap, (input.tradeAgreements ?? 0) * dc.tradePermille);
   const tax = pm(
     Math.floor((fullTax * taxPermille) / 1000),
-    tech.taxPermille + tradeBonus,
+    tech.taxPermille + tradeBonus + ev.taxPermille,
   );
   // Railways carry industry's goods: more money per unit of industry.
   const railPermille = Math.min(
@@ -112,7 +122,10 @@ export function economyStep(
   );
   const industryMoney = pm(
     industryRate * cfg.moneyPerIndustry,
-    railPermille + tech.industryMoneyPermille + tradeBonus,
+    railPermille +
+      tech.industryMoneyPermille +
+      tradeBonus +
+      ev.industryMoneyPermille,
   );
 
   // Expenses: administering land beyond the free allowance, and upkeep of
@@ -171,7 +184,8 @@ export function economyStep(
   const stabilityTarget = clamp(
     cfg.stabilityBase +
       devBonus +
-      tech.stabilityTarget -
+      tech.stabilityTarget +
+      ev.stabilityTarget -
       growthPenalty -
       (deficit ? deficitPenalty : 0),
     0,
@@ -268,6 +282,28 @@ export class NationState {
   }
   /** Derived from the game's InfrastructureMap; not snapshotted. */
   private sites: InfrastructureSiteView[] = [];
+  private events: WorldEventView[] = [];
+  private eventHistory: WorldEventView[] = [];
+
+  private neighbours: string[] = [];
+
+  setNeighbours(ids: string[]): void {
+    if (
+      ids.length === this.neighbours.length &&
+      ids.every((id, i) => id === this.neighbours[i])
+    ) {
+      return;
+    }
+    this.neighbours = ids;
+    this.cachedView = null;
+  }
+
+  setEvents(events: WorldEventView[], history: WorldEventView[]): void {
+    this.events = events;
+    this.eventHistory = history;
+    this.cachedView = null;
+  }
+
   private diplomacy: DiplomacyView = {
     reputation: 100,
     agreements: [],
@@ -377,6 +413,10 @@ export class NationState {
               total: this.researching.total,
             },
       diplomacy: this.diplomacy,
+      events: this.events,
+      eventHistory: this.eventHistory,
+      neighbours: this.neighbours,
+      intelLevels: this.tech().intelLevels,
     };
     return this.cachedView;
   }

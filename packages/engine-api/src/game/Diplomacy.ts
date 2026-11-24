@@ -29,3 +29,12 @@ export interface DiplomacyView {
   incoming: ProposalView[];
   outgoing: ProposalView[];
 }
+
+/** A world event as the client shows it (milestone 5). */
+export interface WorldEventView {
+  id: string;
+  /** The nation it affects (PlayerID), or null for the whole world. */
+  target: string | null;
+  startsAt: number;
+  endsAt: number;
+}
