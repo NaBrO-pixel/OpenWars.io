@@ -386,7 +386,10 @@ continuation), `IntelRules.test.ts`, panel tests.
 
 - **Onboarding:** a "How OpenWars works" guide (`GuidePanel.ts`) covers the map, territory, resources, development, research, diplomacy and winning. It opens once on a player's first OpenWars game and can be reopened any time from the `?` button in the command nav. Tested in `CommandInterface.test.ts`.
 - **Multiplayer:** all 2.0 state is in the deterministic engine and in snapshots, so reconnecting clients restore it. `FullGameSnapshot` and each system's snapshot round-trip test check this. Diplomacy was verified end to end with two real clients.
-- **Balance:** `VictoryBalance.test.ts` checks pacing from the configs. Researching every technology takes about 16 minutes (945 s) and needs about 3 research points a second, which a few cities and research centres provide. The economic and diplomatic victories must be held for 90 s with at least 3 nations. Territorial victory is the classic one. Timing full AI games by simulation is still to do.
+- **Balance:** `VictoryBalance.test.ts` checks pacing from the configs, and `VictoryTiming.test.ts` plays a 30-minute world game of Hard nations under the OpenWars rules. Each minute it records how close the leading nation is to each victory, and it requires a winner between minutes 10 and 30.
+  - **First run:** a nation researched every technology and won by research at minute 18. The other paths were below 30%.
+  - **Retune:** technologies take longer to research (tiers 1–5: 40/60/90/120/150 s), the economic victory needs 30% of world income (was 40%), and the diplomatic victory needs agreements with 40% of the other nations (was 60%).
+  - **Now:** research decides AI-only games at minute 25. AI nations don't deliberately chase economic or diplomatic dominance, so those paths, and territory, are for players who pursue them; in the simulation they reach 25–50% by then.
 - **Still open:** the contextual territory panel and responsive polish for small screens.
 
 ### Release checklist

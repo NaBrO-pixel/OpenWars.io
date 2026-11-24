@@ -14,14 +14,14 @@ export type VictoryKind = (typeof VICTORY_KINDS)[number];
 export const VictoryConfig = {
   economic: {
     /** Share of the world's income (net, positive nations only). */
-    sharePermille: 400,
+    sharePermille: 300,
     /** Needs at least this many nations in the match. */
     minNations: 3,
     holdSteps: 90,
   },
   diplomatic: {
     /** Share of the other nations allied or under agreement. */
-    influencePermille: 600,
+    influencePermille: 400,
     minReputation: 70,
     minNations: 3,
     holdSteps: 90,

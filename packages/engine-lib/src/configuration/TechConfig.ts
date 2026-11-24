@@ -50,7 +50,7 @@ export interface TechDefinition {
 const tier = (n: number) => ({
   research: [0, 40, 90, 160, 260, 400][n],
   money: [0, 20_000, 50_000, 100_000, 180_000, 300_000][n],
-  steps: [0, 30, 45, 60, 80, 100][n],
+  steps: [0, 40, 60, 90, 120, 150][n],
 });
 
 export const TECHS: readonly TechDefinition[] = [
