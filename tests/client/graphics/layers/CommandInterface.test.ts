@@ -1,6 +1,7 @@
 import type { NationView } from "@openfront/engine-api/game/GameUpdates";
 import "../../../../src/client/hud/layers/CommandBar";
 import { EventBus } from "@openfront/shared/EventBus";
+import { nothing, render, type TemplateResult } from "lit";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import "../../../../src/client/components/OpenWarsModePicker";
 import type { OpenWarsModePicker } from "../../../../src/client/components/OpenWarsModePicker";
@@ -9,6 +10,7 @@ import {
   COMMAND_SECTIONS,
   type CommandNav,
 } from "../../../../src/client/hud/layers/CommandNav";
+import { renderCountryBrief } from "../../../../src/client/hud/layers/CountryBrief";
 import { guideMayAutoOpen } from "../../../../src/client/hud/layers/GuidePanel";
 import { ToggleInfrastructureOverlayEvent } from "../../../../src/client/hud/layers/InfrastructureOverlay";
 import {
@@ -779,5 +781,103 @@ describe("guide", () => {
   it("never opens itself in the onboarding tutorial game", () => {
     expect(guideMayAutoOpen(true, true)).toBe(false);
     expect(guideMayAutoOpen(false, false)).toBe(false);
+  });
+});
+
+describe("country brief", () => {
+  function host(t: TemplateResult | typeof nothing): HTMLElement {
+    const el = document.createElement("div");
+    render(t, el);
+    return el;
+  }
+  // Panels ask players many questions; anything not stubbed answers false.
+  const lenient = (p: object) =>
+    new Proxy(p, {
+      get: (t, k) => (k in t ? t[k as keyof typeof t] : () => false),
+    }) as FakePlayer;
+  const withAlliance = (p: FakePlayer, allied: boolean) =>
+    lenient({
+      ...p,
+      isAlliedWith: () => allied,
+      outgoingAttacks: () => [],
+      incomingAttacks: () => [],
+    });
+
+  it("shows a foreign nation, gated by intelligence", () => {
+    const me = withAlliance(player("me", 100, 0, NATION), false);
+    const them = player("them", 250, 0, NATION);
+    const g = game(me, [them]);
+    const strangers = host(
+      renderCountryBrief(g, me as never, them as never, () => {}),
+    );
+    expect(
+      strangers
+        .querySelector("[data-confidence]")
+        ?.getAttribute("data-confidence"),
+    ).toBe("unknown");
+    // Allies share exact figures.
+    const ally = withAlliance(player("me", 100, 0, NATION), true);
+    const friends = host(
+      renderCountryBrief(
+        game(ally, [them]),
+        ally as never,
+        them as never,
+        () => {},
+      ),
+    );
+    expect(
+      friends
+        .querySelector("[data-confidence]")
+        ?.getAttribute("data-confidence"),
+    ).not.toBe("unknown");
+    expect(friends.textContent).toContain("25.0%");
+  });
+
+  it("opens the Diplomacy and Intelligence panels on that country", async () => {
+    const me = withAlliance(player("me", 100, 0, NATION), false);
+    const them = lenient(player("them", 250, 0, NATION));
+    const bus = new EventBus();
+    const nav = document.createElement("command-nav") as CommandNav;
+    document.body.appendChild(nav);
+    nav.game = game(me, [them]);
+    nav.eventBus = bus;
+    nav.init();
+    nav.tick();
+    const el = host(
+      renderCountryBrief(nav.game, me as never, them as never, (e) =>
+        bus.emit(e),
+      ),
+    );
+    (
+      el.querySelector('[data-brief-open="intelligence"]') as HTMLElement
+    ).click();
+    await nav.updateComplete;
+    expect(nav.intelTarget).toBe("them");
+    expect(nav.querySelector("[data-intel-target]")).not.toBeNull();
+    (el.querySelector('[data-brief-open="diplomacy"]') as HTMLElement).click();
+    await nav.updateComplete;
+    expect(nav.querySelector("[data-intel-target]")).toBeNull();
+    nav.remove();
+  });
+
+  it("is not shown for yourself, tribes or classic games", () => {
+    const me = withAlliance(player("me", 100, 0, NATION), false);
+    const g = game(me);
+    expect(renderCountryBrief(g, me as never, me as never, () => {})).toBe(
+      nothing,
+    );
+    const tribe = { ...player("t", 5), type: () => "BOT" } as FakePlayer;
+    expect(renderCountryBrief(g, me as never, tribe as never, () => {})).toBe(
+      nothing,
+    );
+    const classic = player("me", 100);
+    expect(
+      renderCountryBrief(
+        g,
+        classic as never,
+        player("x", 5) as never,
+        () => {},
+      ),
+    ).toBe(nothing);
   });
 });

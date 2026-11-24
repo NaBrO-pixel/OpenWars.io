@@ -26,6 +26,7 @@ import {
   type NationalSummary,
   nationalSummary,
 } from "../NationalSummary";
+import { OpenCommandSectionEvent } from "./CountryBrief";
 import { renderDiplomacy } from "./DiplomacyPanel";
 import { renderEvents } from "./EventsPanel";
 import { guideMayAutoOpen, markGuideSeen, renderGuide } from "./GuidePanel";
@@ -452,7 +453,16 @@ export class CommandNav extends LitElement implements Controller {
     return this;
   }
 
+  private subscribed = false;
+
   init() {
+    if (!this.subscribed && this.eventBus !== undefined) {
+      this.subscribed = true;
+      this.eventBus.on(OpenCommandSectionEvent, (e) => {
+        if (e.target !== undefined) this.intelTarget = e.target;
+        this.open = e.section;
+      });
+    }
     this.open = null;
     this.overlayOn = false;
     this.intelTarget = null;

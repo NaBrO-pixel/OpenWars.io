@@ -1093,6 +1093,12 @@
     "verified_name": "Verified username",
     "verified_name_info": "Your username is reserved for your account and shows a verified badge in-game."
   },
+  "country_brief": {
+    "agreements": "Your agreements",
+    "open_diplomacy": "Diplomacy",
+    "open_intelligence": "Full intelligence",
+    "title": "Country brief"
+  },
   "creator_code": {
     "change": "Change",
     "confirm_lock": "Confirm — locks for 7 days",

@@ -20,11 +20,11 @@ import { html, LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import Countries from "resources/countries.json" with { type: "json" };
 import { fetchLobbyListed, getUserMe } from "../../Api";
+import { actionButton } from "../../components/ui/ActionButton";
 import "../../components/EquippedCosmeticsRow";
 import "../../components/LevelBadge";
-import { actionButton } from "../../components/ui/ActionButton";
-import "../../components/ui/Divider";
 import { Controller } from "../../Controller";
+import "../../components/ui/Divider";
 import {
   CloseViewEvent,
   ContextMenuEvent,
@@ -51,6 +51,7 @@ import { UserSettings } from "../../UserSettings";
 import { renderDuration, showToast, translateText } from "../../Utils";
 import { GameView, PlayerView } from "../../view";
 import { ChatModal, ShowPlayerChatEvent } from "./ChatModal";
+import { renderCountryBrief } from "./CountryBrief";
 import { EmojiTable, ShowPlayerEmojiMenuEvent } from "./EmojiTable";
 import "./PlayerModerationModal";
 import "./PlayerReportModal";
@@ -1310,6 +1311,16 @@ export class PlayerPanel extends LitElement implements Controller {
                     }
 
                     <ui-divider></ui-divider>
+
+                    <!-- OpenWars: the country brief -->
+                    ${
+                      my !== null && my.nation() !== null && other !== my
+                        ? html`${renderCountryBrief(this.g, my, other, (e) => {
+                              this.eventBus.emit(e);
+                              this.hide();
+                            })}<ui-divider></ui-divider>`
+                        : ""
+                    }
 
                     <!-- Stats: betrayals / trading -->
                     ${this.renderStats(other, viewer)}
