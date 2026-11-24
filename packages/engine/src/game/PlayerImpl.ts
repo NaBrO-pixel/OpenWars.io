@@ -1921,10 +1921,15 @@ export class PlayerImpl implements Player {
   }
 
   hash(): number {
-    return (
+    const classic =
       simpleHash(this.id()) * (this.troops() + this.numTilesOwned()) +
-      this._units.reduce((acc, unit) => acc + unit.hash(), 0)
-    );
+      this._units.reduce((acc, unit) => acc + unit.hash(), 0);
+    // OpenWars: the nation's economy and treasury are part of the state the
+    // clients must agree on. Classic games have no nation, so their hashes
+    // (and recorded replays) are unchanged.
+    const nation = this.nation();
+    if (nation === null) return classic;
+    return classic + nation.hash() + Number(this.gold() % 1_000_000_007n) * 31;
   }
   toString(): string {
     return `Player:{name:${this.info().name},clientID:${

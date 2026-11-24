@@ -450,6 +450,25 @@ export class NationState {
     return this.cachedView;
   }
 
+  /**
+   * A cheap digest of the nation's state for the per-turn desync hash
+   * (PlayerImpl.hash): every field that the economy, research and military
+   * steps change. Integer arithmetic only, so every client agrees.
+   */
+  hash(): number {
+    return Math.trunc(
+      this.industry * 3 +
+        this.research * 7 +
+        this.stability * 11 +
+        this.steps * 13 +
+        this.techs.length * 17 +
+        this.mobilisation * 19 +
+        this.supply +
+        this.defence * 23 +
+        (this.researching?.done ?? 0) * 29,
+    );
+  }
+
   toData(): NationStateData {
     return {
       industry: this.industry,

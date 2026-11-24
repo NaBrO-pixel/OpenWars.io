@@ -207,6 +207,17 @@ describe("national economy in a game", () => {
     );
   });
 
+  test("the economy is part of the desync hash", () => {
+    untilStep();
+    const before = (me as PlayerImpl).hash();
+    me.nation()!.research += 1;
+    expect((me as PlayerImpl).hash()).not.toBe(before);
+    me.nation()!.research -= 1;
+    expect((me as PlayerImpl).hash()).toBe(before);
+    me.addGold(1n);
+    expect((me as PlayerImpl).hash()).not.toBe(before);
+  });
+
   test("survives a snapshot and keeps ticking identically", async () => {
     for (let i = 0; i < 25; i++) game.executeNextTick();
     const { restored } = await roundTrip(game, "plains");
