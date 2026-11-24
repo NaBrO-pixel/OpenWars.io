@@ -523,7 +523,7 @@ export class CommandNav extends LitElement implements Controller {
           section === undefined
             ? nothing
             : html`<section
-                class="ml-2 w-[min(280px,calc(100vw-4rem))] max-h-[70vh] overflow-y-auto rounded-md border border-ow-border bg-ow-panel/95 backdrop-blur-sm p-4 shadow-xl"
+                class="ml-2 w-[min(280px,calc(100vw-4rem))] lg:w-[360px] max-h-[70vh] max-lg:max-h-[60vh] overflow-y-auto rounded-md border border-ow-border bg-ow-panel/95 backdrop-blur-sm p-4 shadow-xl"
                 data-command-panel=${section.id}
               >
                 <header class="mb-2 flex items-center justify-between">
