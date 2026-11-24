@@ -381,3 +381,16 @@ continuation), `IntelRules.test.ts`, panel tests.
   victories, Sandbox event and victory settings, classic games unchanged),
   picker tests. Checked in a browser: picking Cold War in the solo dialog
   starts a Cold War game.
+
+## Milestone 8 — testing and release preparation
+
+- **Onboarding:** a "How OpenWars works" guide (`GuidePanel.ts`) covers the map, territory, resources, development, research, diplomacy and winning. It opens once on a player's first OpenWars game and can be reopened any time from the `?` button in the command nav. Tested in `CommandInterface.test.ts`.
+- **Multiplayer:** all 2.0 state is in the deterministic engine and in snapshots, so reconnecting clients restore it. `FullGameSnapshot` and each system's snapshot round-trip test check this. Diplomacy was verified end to end with two real clients.
+- **Still open:** the contextual territory panel, responsive polish for small screens, and a simulated balance pass that times each victory path (the target is 10–30 minutes). Today the victory thresholds come from `VictoryConfig` and are covered only by unit tests.
+
+### Release checklist
+
+1. `npm test`. Known failures: `ClientRenderPipelinePerf`, which needs WebGL, and `WinModalProvisionalXp`. Both failed before 2.0.
+2. `npm run typecheck`, `npm run lint`, `npm run build-prod` (run the build after tests: `RenderHtml.test.ts` fails against local build output).
+3. Play one solo game in each mode: World Conquest, Cold War and Sandbox.
+4. Deploy with `deploy/` as described in `docs/SelfHosting.md`.
