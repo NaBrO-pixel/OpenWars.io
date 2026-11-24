@@ -90,10 +90,18 @@ function countryRow(
   const allied = me.isAlliedWith(other);
   const war = atWar(me, other);
   const theirs = other.nation();
+  // At the influence limit only existing partners can be offered more; a
+  // ceasefire is always possible (DiplomacyConfig.influencePerMinutePermille).
+  const partner = agreements.some((a) => a.kind !== "ceasefire");
+  const limited =
+    !partner &&
+    mine.influence !== undefined &&
+    mine.influence.partners >= mine.influence.cap;
   const shared = has("intel");
   const offers: TemplateResult[] = [];
   const offer = (k: AgreementKind) => {
     if (has(k)) return;
+    if (limited && k !== "ceasefire") return;
     offers.push(
       pending(k)
         ? html`<span class="text-[11px] text-ow-text-2"
@@ -197,6 +205,23 @@ export function renderDiplomacy(
     <p class="mt-1 text-xs text-ow-text-2">
       ${translateText("diplomacy.reputation_why")}
     </p>
+    ${
+      mine.influence === undefined
+        ? nothing
+        : html`<p
+            class="mt-1 text-xs ${
+              mine.influence.partners >= mine.influence.cap
+                ? "text-ow-warning"
+                : "text-ow-text-2"
+            }"
+            data-influence=${`${mine.influence.partners}/${mine.influence.cap}`}
+          >
+            ${translateText("diplomacy.influence", {
+              partners: mine.influence.partners,
+              cap: mine.influence.cap,
+            })}
+          </p>`
+    }
     ${
       mine.incoming.length === 0
         ? nothing

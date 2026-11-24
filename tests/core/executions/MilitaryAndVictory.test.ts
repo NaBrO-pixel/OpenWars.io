@@ -212,7 +212,11 @@ describe("victory conditions", () => {
     const { game, players } = await world(4);
     seconds(game, players[0], 2);
     const [me, ...others] = players;
-    for (const o of others) {
+    // Influence grows with time: in a game of four, a second partner is
+    // allowed from minute 17, and two of three is past the 40% needed.
+    while (game.diplomacy().influenceCap(game, me) < 2) game.executeNextTick();
+    expect(game.ticks()).toBeGreaterThanOrEqual(17 * 600);
+    for (const o of others.slice(0, 2)) {
       game.addExecution(new DiplomacyExecution(me, "propose", "trade", o.id()));
       game.executeNextTick();
       game.addExecution(new DiplomacyExecution(o, "accept", "trade", me.id()));

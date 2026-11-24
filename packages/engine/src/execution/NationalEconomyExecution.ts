@@ -108,7 +108,7 @@ export class NationalEconomyExecution implements Execution {
         infra.siteViews(player),
         infra.projectViews(player),
       );
-      nation.setDiplomacy(this.mg.diplomacy().view(player));
+      nation.setDiplomacy(this.mg.diplomacy().view(player, this.mg));
       nation.setEvents(events, eventHistory);
       nation.setNeighbours(
         player

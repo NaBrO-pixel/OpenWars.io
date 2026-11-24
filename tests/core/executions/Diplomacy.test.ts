@@ -1,5 +1,8 @@
 import { PlayerInfo, PlayerType } from "@openfront/engine-api/game/GameTypes";
-import { DiplomacyConfig } from "@openfront/engine-lib/configuration/DiplomacyConfig";
+import {
+  DiplomacyConfig,
+  influenceCap,
+} from "@openfront/engine-lib/configuration/DiplomacyConfig";
 import { AttackExecution } from "@openfront/engine/execution/AttackExecution";
 import {
   type DiplomacyAction,
@@ -213,5 +216,65 @@ describe("classic rules", () => {
     classic.addExecution(new DiplomacyExecution(p, "propose", "nap", q.id()));
     classic.executeNextTick();
     expect(classic.diplomacy().view(q).incoming).toEqual([]);
+  });
+});
+
+describe("influence", () => {
+  test("grows by a share of the world each minute", () => {
+    expect(influenceCap(38, 0)).toBe(1);
+    expect(influenceCap(38, 600 * 10)).toBe(8); // 20% of 38
+    expect(influenceCap(38, 600 * 20)).toBe(16); // 40%
+    expect(influenceCap(3, 600 * 20)).toBe(2);
+  });
+
+  test("limits new partners, not ceasefires or deals with partners", () => {
+    act(a, "propose", "trade", b);
+    act(b, "accept", "trade", a);
+    expect(game.diplomacy().has("trade", a, b)).toBe(true);
+    // One partner allowed this early: c is refused, b can sign more.
+    expect(game.diplomacy().canPropose(game, "trade", a, c)).toBe(
+      "influence_limit",
+    );
+    expect(game.diplomacy().canPropose(game, "nap", a, b)).toBeNull();
+    for (let y = 0; y < 10; y++) c.conquer(game.ref(20, y));
+    game.addExecution(new AttackExecution(1_000, c, a.id()));
+    ticks(2);
+    expect(game.diplomacy().canPropose(game, "ceasefire", a, c)).toBeNull();
+    // The view tells the panel.
+    ticks(10);
+    expect(a.nation()!.view().diplomacy.influence).toEqual({
+      partners: 1,
+      cap: 1,
+    });
+  });
+
+  test("an accepted proposal is checked again", () => {
+    act(a, "propose", "trade", c);
+    act(b, "propose", "trade", c);
+    act(c, "accept", "trade", a);
+    // c reached its limit since b proposed.
+    act(c, "accept", "trade", b);
+    expect(game.diplomacy().has("trade", b, c)).toBe(false);
+  });
+});
+
+describe("AI trade offers", () => {
+  test("nations offer trade to friendly neighbours", () => {
+    const nation = game.addPlayer(
+      new PlayerInfo("n", PlayerType.Nation, null, "n"),
+    );
+    for (let x = 20; x < 30; x++) {
+      for (let y = 0; y < 20; y++) nation.conquer(game.ref(x, y));
+    }
+    ticks(10 * (cfg.aiOfferEverySteps + 2));
+    const offered =
+      game
+        .diplomacy()
+        .view(a)
+        .incoming.some((p) => p.other === "n") ||
+      game.diplomacy().has("trade", a, nation);
+    expect(offered).toBe(true);
+    // Not to c, who doesn't border it.
+    expect(game.diplomacy().view(c).incoming).toEqual([]);
   });
 });

@@ -8,10 +8,15 @@ import type {
   DiplomacyView,
   ProposalView,
 } from "@openfront/engine-api/game/Diplomacy";
-import { MessageType, PlayerType } from "@openfront/engine-api/game/GameTypes";
+import {
+  MessageType,
+  PlayerType,
+  Relation,
+} from "@openfront/engine-api/game/GameTypes";
 import {
   type AgreementKind,
   DiplomacyConfig,
+  influenceCap,
 } from "@openfront/engine-lib/configuration/DiplomacyConfig";
 import { z } from "zod";
 import type { Game, Player } from "./Game";
@@ -40,7 +45,8 @@ export type DiplomacyRefusal =
   | "needs_alliance"
   | "needs_war"
   | "no_proposal"
-  | "no_agreement";
+  | "no_agreement"
+  | "influence_limit";
 
 const KindSchema = z.enum(["nap", "trade", "ceasefire", "intel"]);
 
@@ -158,7 +164,49 @@ export class DiplomacyMap {
     // A ceasefire ends a war: only between nations fighting each other.
     if (kind === "ceasefire" && !this.atWar(from, to)) return "needs_war";
     if (kind === "nap" && from.isAlliedWith(to)) return "already_agreed";
+    if (this.overInfluence(game, kind, from, to)) return "influence_limit";
     return null;
+  }
+
+  /** The nations `p` holds an agreement other than a ceasefire with. */
+  partners(p: Player): Set<string> {
+    const id = p.id();
+    const out = new Set<string>();
+    for (const x of this.agreements) {
+      if (x.kind === "ceasefire") continue;
+      if (x.a === id) out.add(x.b);
+      else if (x.b === id) out.add(x.a);
+    }
+    return out;
+  }
+
+  /** How many partners `p` may have now (DiplomacyConfig influence). */
+  influenceCap(game: Game, p: Player): number {
+    const others = game
+      .players()
+      .filter(
+        (o) => o !== p && o.isAlive() && o.type() !== PlayerType.Bot,
+      ).length;
+    return influenceCap(others, game.ticks());
+  }
+
+  /**
+   * A new partnership would take either side past its influence. Ceasefires
+   * end wars and are never limited; more agreements with an existing
+   * partner add no partner.
+   */
+  private overInfluence(
+    game: Game,
+    kind: AgreementKind,
+    p: Player,
+    q: Player,
+  ): boolean {
+    if (kind === "ceasefire") return false;
+    const full = (x: Player, y: Player) => {
+      const mine = this.partners(x);
+      return !mine.has(y.id()) && mine.size >= this.influenceCap(game, x);
+    };
+    return full(p, q) || full(q, p);
   }
 
   /** At war: one of them is attacking the other right now. */
@@ -218,6 +266,7 @@ export class DiplomacyMap {
     // Conditions may have changed since it was proposed.
     if (kind === "intel" && !from.isAlliedWith(by)) return "needs_alliance";
     if (this.has(kind, by, from)) return "already_agreed";
+    if (this.overInfluence(game, kind, from, by)) return "influence_limit";
     this.agreements.push({
       kind,
       a: from.id(),
@@ -334,6 +383,7 @@ export class DiplomacyMap {
         p.nation()?.invalidate();
       }
     }
+    this.aiOffers(game, steps);
     if (steps % cfg.reputationRecoverySteps === 0) {
       for (const [id, rep] of this.reputations) {
         if (rep >= 100) continue;
@@ -343,7 +393,7 @@ export class DiplomacyMap {
     }
   }
 
-  view(player: Player): DiplomacyView {
+  view(player: Player, game?: Game): DiplomacyView {
     const id = player.id();
     const agreements: AgreementView[] = this.agreements
       .filter((x) => x.a === id || x.b === id)
@@ -363,7 +413,39 @@ export class DiplomacyMap {
       agreements,
       incoming,
       outgoing,
+      ...(game === undefined
+        ? {}
+        : {
+            influence: {
+              partners: this.partners(player).size,
+              cap: this.influenceCap(game, player),
+            },
+          }),
     };
+  }
+
+  /**
+   * AI nations seek trade: every `aiOfferEverySteps` (staggered by nation),
+   * each offers a trade agreement to the first neighbouring nation, in id
+   * order, that it is on good terms with and may sign with now.
+   */
+  private aiOffers(game: Game, steps: number): void {
+    for (const p of game.players()) {
+      if (p.type() !== PlayerType.Nation || !p.isAlive()) continue;
+      if ((steps + p.smallID()) % cfg.aiOfferEverySteps !== 0) continue;
+      const partner = p
+        .nearby()
+        .filter((n): n is Player => n.isPlayer())
+        .filter(
+          (n) =>
+            n.type() !== PlayerType.Bot &&
+            p.relation(n) >= Relation.Neutral &&
+            !this.atWar(p, n) &&
+            this.canPropose(game, "trade", p, n) === null,
+        )
+        .sort((a, b) => a.smallID() - b.smallID())[0];
+      if (partner !== undefined) this.propose(game, "trade", p, partner);
+    }
   }
 
   /** Both sides' views changed. */

@@ -402,3 +402,12 @@ continuation), `IntelRules.test.ts`, panel tests.
 ## Armour update
 
 Tanks are ground units that roll out of factories, break through hostile land, duel other tanks and are stopped by defence posts. Nations use them against the player they are at war with. See `docs/Armour.md`.
+
+## Diplomacy pacing and AI trade
+
+- **Influence grows with time.** A nation may hold agreements other than ceasefires with at most 2% of the other nations per minute of play, and always with at least one (`DiplomacyConfig.influencePerMinutePermille`, `influenceCap`). The 40% the diplomatic victory needs takes about twenty minutes whatever the size of the game. Before this, AI nations accepted every proposal from a nation in good standing, so a player could win diplomatically within a few minutes.
+  - **What's limited:** new partners only. More agreements with an existing partner, and ceasefires, are always allowed.
+  - **Where the limit is checked:** when a deal is proposed and again when it is accepted.
+  - **In the Diplomacy panel:** it shows influence as partners against the limit, and hides offers to new partners once the limit is reached.
+- **AI nations offer trade.** Every 30 seconds (staggered by nation), each AI nation offers a trade agreement to the first neighbour it is on neutral or better terms with, isn't at war with, and may still sign with.
+- **Simulation:** in the 30-minute AI world game, the diplomatic path now passes its threshold at minute 22 and research wins at minute 25. Economic dominance reaches 43%.

@@ -28,6 +28,11 @@ export interface DiplomacyView {
   agreements: AgreementView[];
   incoming: ProposalView[];
   outgoing: ProposalView[];
+  /**
+   * Partners (nations it holds a non-ceasefire agreement with) and how many
+   * it may have now; influence grows with time (DiplomacyConfig).
+   */
+  influence?: { partners: number; cap: number };
 }
 
 /** A world event as the client shows it (milestone 5). */

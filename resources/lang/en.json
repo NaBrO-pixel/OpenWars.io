@@ -1241,6 +1241,7 @@
     "break_warning": "Break this agreement (costs reputation)",
     "countries": "Countries",
     "incoming": "Proposals to you",
+    "influence": "Influence: agreements with {partners} of {cap} nations. Your reach grows every minute.",
     "kind_ceasefire": "Ceasefire",
     "kind_intel": "Intelligence sharing",
     "kind_nap": "Non-aggression pact",
