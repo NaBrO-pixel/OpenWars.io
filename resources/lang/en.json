@@ -994,6 +994,7 @@
     "overview": "Country overview",
     "rank": "Rank",
     "rank_of": "{rank} of {total}",
+    "research": "Research",
     "stability_why": "Rises with development, falls with fast expansion and debts you can't pay. Low stability cuts tax income.",
     "statistics": "Statistics",
     "structures": "Structures",
@@ -1339,6 +1340,22 @@
     "reject_alliance": "Reject",
     "renew_alliance": "Request to renew",
     "request_alliance": "{name} requests an alliance!",
+    "research_completed": "Research complete.",
+    "research_completed_advanced_computing": "Research complete: Advanced Computing.",
+    "research_completed_assembly_lines": "Research complete: Assembly Lines.",
+    "research_completed_automation": "Research complete: Automation.",
+    "research_completed_civil_administration": "Research complete: Civil Administration.",
+    "research_completed_economic_resilience": "Research complete: Economic Resilience.",
+    "research_completed_heavy_industry": "Research complete: Heavy Industry.",
+    "research_completed_information_systems": "Research complete: Information Systems.",
+    "research_completed_logistics_networks": "Research complete: Logistics Networks.",
+    "research_completed_national_unity": "Research complete: National Unity.",
+    "research_completed_project_management": "Research complete: Project Management.",
+    "research_completed_public_services": "Research complete: Public Services.",
+    "research_completed_research_labs": "Research complete: Research Laboratories.",
+    "research_completed_scientific_revolution": "Research complete: Scientific Revolution.",
+    "research_completed_social_cohesion": "Research complete: Social Cohesion.",
+    "research_completed_standardised_parts": "Research complete: Standardised Parts.",
     "retreating": "retreating",
     "sent_emoji": "Sent {name}: {emoji}",
     "sent_emoji_all": "Sent everyone: {emoji}",
@@ -2871,6 +2888,38 @@
     "body": "A person who you recently reported has been banned, thanks for keeping OpenWars a safer and more enjoyable place",
     "heading": "Thank you"
   },
+  "research": {
+    "branch_industry": "Industry",
+    "branch_society": "Society",
+    "branch_technology": "Technology",
+    "cancel": "Cancel",
+    "effect_deficit_penalty": "−{value}% stability loss from debts",
+    "effect_growth_penalty": "−{value}% stability loss from expansion",
+    "effect_industry": "+{value}% industry output",
+    "effect_industry_money": "+{value}% money from industry",
+    "effect_infrastructure_cost": "−{value}% industry cost of infrastructure",
+    "effect_projects": "+{value} infrastructure project at once",
+    "effect_research": "+{value}% research",
+    "effect_research_centres": "+{value}% research from research centres",
+    "effect_stability": "+{value}% stability",
+    "effect_tax": "+{value}% tax income",
+    "effect_upkeep": "−{value}% territory upkeep",
+    "intro": "Research one technology at a time. Each costs research points and money, takes time, and has a lasting effect. Choose which branch to prioritise.",
+    "points": "Research points: {points} (+{rate}/s)",
+    "points_short": "pts",
+    "refusal_busy": "Already researching something.",
+    "refusal_cannot_afford": "Not enough research points or money.",
+    "refusal_done": "Already researched.",
+    "refusal_locked": "Research the previous technology first.",
+    "refusal_not_openwars": "Not available in this game.",
+    "refusal_unknown": "Unknown technology.",
+    "requires": "Requires: {tech}",
+    "start": "Research",
+    "state_available": "Available",
+    "state_completed": "Completed",
+    "state_locked": "Locked",
+    "state_researching": "Researching"
+  },
   "reward_track": {
     "after_level": "After level {level}",
     "caps_amount": "{amount} Caps",
@@ -3269,6 +3318,68 @@
     "red": "Red",
     "teal": "Teal",
     "yellow": "Yellow"
+  },
+  "tech": {
+    "advanced_computing": {
+      "desc": "Simulation and computing power for science.",
+      "name": "Advanced Computing"
+    },
+    "assembly_lines": {
+      "desc": "Organised production lines in every factory.",
+      "name": "Assembly Lines"
+    },
+    "automation": {
+      "desc": "Machines run the factories: industry pays far more.",
+      "name": "Automation"
+    },
+    "civil_administration": {
+      "desc": "A professional civil service keeps order.",
+      "name": "Civil Administration"
+    },
+    "economic_resilience": {
+      "desc": "Safety nets soften the blow of hard times.",
+      "name": "Economic Resilience"
+    },
+    "heavy_industry": {
+      "desc": "Steel, machinery and power at national scale.",
+      "name": "Heavy Industry"
+    },
+    "information_systems": {
+      "desc": "Computerised tax collection and administration.",
+      "name": "Information Systems"
+    },
+    "logistics_networks": {
+      "desc": "Supply chains that make distant land cheaper to run.",
+      "name": "Logistics Networks"
+    },
+    "national_unity": {
+      "desc": "A shared national identity: lasting stability.",
+      "name": "National Unity"
+    },
+    "project_management": {
+      "desc": "Run more national projects at the same time.",
+      "name": "Project Management"
+    },
+    "public_services": {
+      "desc": "Schools and hospitals: a healthier, richer tax base.",
+      "name": "Public Services"
+    },
+    "research_labs": {
+      "desc": "Dedicated laboratories speed up every discovery.",
+      "name": "Research Laboratories"
+    },
+    "scientific_revolution": {
+      "desc": "Research centres become engines of discovery.",
+      "name": "Scientific Revolution"
+    },
+    "social_cohesion": {
+      "desc": "New lands are integrated without unrest.",
+      "name": "Social Cohesion"
+    },
+    "standardised_parts": {
+      "desc": "Common parts make every project cheaper to build.",
+      "name": "Standardised Parts"
+    }
   },
   "territory_patterns": {
     "pattern": {

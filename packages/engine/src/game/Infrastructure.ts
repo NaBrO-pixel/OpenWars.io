@@ -115,6 +115,9 @@ export class InfrastructureMap {
       money: player.gold(),
       industry: player.nation()?.industry ?? 0,
       freeMoney: game.config().hasInfiniteGoldFor(player),
+      extraProjects: player.nation()?.tech().extraProjects ?? 0,
+      industryCutPermille:
+        player.nation()?.tech().infrastructureIndustryCutPermille ?? 0,
     });
   }
 
@@ -128,8 +131,12 @@ export class InfrastructureMap {
     const refusal = this.canStart(game, player, unitId, kind);
     if (refusal !== null) return refusal;
     const level = this.levels(unitId)[kind] + 1;
-    const cost = projectCost(kind, level);
     const nation = player.ensureNation();
+    const cost = projectCost(
+      kind,
+      level,
+      nation.tech().infrastructureIndustryCutPermille,
+    );
     const money = game.config().hasInfiniteGoldFor(player) ? 0 : cost.money;
     nation.spend(cost.industry, 0);
     player.removeGold(BigInt(money));

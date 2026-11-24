@@ -5,7 +5,10 @@ import { html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { Controller } from "../../Controller";
 import { GoToUnitEvent } from "../../TransformHandler";
-import { SendInfrastructureIntentEvent } from "../../Transport";
+import {
+  SendInfrastructureIntentEvent,
+  SendResearchIntentEvent,
+} from "../../Transport";
 import { translateText } from "../../Utils";
 import { GameView } from "../../view";
 import type { PlayerView } from "../../view/PlayerView";
@@ -20,6 +23,7 @@ import {
 } from "../NationalSummary";
 import { ToggleInfrastructureOverlayEvent } from "./InfrastructureOverlay";
 import { renderInfrastructure } from "./InfrastructurePanel";
+import { renderResearch } from "./ResearchPanel";
 
 interface SectionContext {
   game: GameView;
@@ -316,6 +320,20 @@ export const COMMAND_SECTIONS: readonly CommandSection[] = [
         },
         toggleOverlay: () => ctx.nav.toggleOverlay(),
         overlayOn: ctx.nav.overlayOn,
+        freeMoney: ctx.game.config().gameConfig().infiniteGold,
+      }),
+    available: (ctx) => ctx.summary.nation !== null,
+  },
+  {
+    id: "research",
+    labelKey: "command_nav.research",
+    icon: svg("M9 3h6M10 3v6L4 19a1 1 0 0 0 1 2h14a1 1 0 0 0 1-2l-6-10V3"),
+    render: (ctx) =>
+      renderResearch(ctx.summary.nation!, ctx.summary.money, {
+        start: (id) =>
+          ctx.nav.eventBus?.emit(new SendResearchIntentEvent("start", id)),
+        cancel: (id) =>
+          ctx.nav.eventBus?.emit(new SendResearchIntentEvent("cancel", id)),
         freeMoney: ctx.game.config().gameConfig().infiniteGold,
       }),
     available: (ctx) => ctx.summary.nation !== null,

@@ -8,6 +8,7 @@ import {
   type CommandNav,
 } from "../../../../src/client/hud/layers/CommandNav";
 import { ToggleInfrastructureOverlayEvent } from "../../../../src/client/hud/layers/InfrastructureOverlay";
+import { effectLines } from "../../../../src/client/hud/layers/ResearchPanel";
 import {
   formatClock,
   formatIncome,
@@ -15,7 +16,10 @@ import {
   IncomeTracker,
   nationalSummary,
 } from "../../../../src/client/hud/NationalSummary";
-import { SendInfrastructureIntentEvent } from "../../../../src/client/Transport";
+import {
+  SendInfrastructureIntentEvent,
+  SendResearchIntentEvent,
+} from "../../../../src/client/Transport";
 import type { GameView } from "../../../../src/client/view";
 
 interface FakePlayer {
@@ -64,6 +68,8 @@ const NATION: NationView = {
   netHistory: [500, 900, 1200, 1790],
   sites: [],
   projects: [],
+  techs: [],
+  researching: null,
 };
 
 function game(
@@ -321,5 +327,85 @@ describe("infrastructure panel", () => {
     await nav.updateComplete;
     expect(nav.querySelector("[data-no-sites]")).not.toBeNull();
     nav.remove();
+  });
+});
+
+describe("research panel", () => {
+  function open(nation: NationView) {
+    const nav = document.createElement("command-nav") as CommandNav;
+    document.body.appendChild(nav);
+    const me = player("me", 100, 0, nation);
+    me.gold = () => 10_000_000n;
+    nav.game = game(me);
+    const bus = new EventBus();
+    const sent: unknown[] = [];
+    bus.on(SendResearchIntentEvent, (e) => sent.push(e));
+    nav.eventBus = bus;
+    nav.init();
+    nav.tick();
+    nav.toggle("research");
+    return { nav, sent };
+  }
+
+  it("shows each technology's state distinctly", async () => {
+    const { nav } = open({
+      ...NATION,
+      research: 1_000,
+      techs: ["assembly_lines"],
+      researching: { id: "research_labs", done: 10, total: 30 },
+    });
+    await nav.updateComplete;
+    const state = (id: string) =>
+      nav.querySelector(`[data-tech="${id}"]`)?.getAttribute("data-tech-state");
+    expect(state("assembly_lines")).toBe("completed");
+    expect(state("research_labs")).toBe("researching");
+    expect(state("standardised_parts")).toBe("available");
+    expect(state("heavy_industry")).toBe("locked");
+    expect(nav.querySelectorAll("[data-branch]")).toHaveLength(3);
+    // Busy: nothing else can start.
+    const btn = nav.querySelector(
+      '[data-research-start="standardised_parts"]',
+    ) as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+    expect(btn.title).toBe("research.refusal_busy");
+    nav.remove();
+  });
+
+  it("starts and cancels research through intents", async () => {
+    const { nav, sent } = open({ ...NATION, research: 1_000 });
+    await nav.updateComplete;
+    (
+      nav.querySelector(
+        '[data-research-start="civil_administration"]',
+      ) as HTMLElement
+    ).click();
+    expect(sent).toEqual([
+      expect.objectContaining({
+        action: "start",
+        tech: "civil_administration",
+      }),
+    ]);
+    nav.remove();
+    const busy = open({
+      ...NATION,
+      researching: { id: "research_labs", done: 1, total: 30 },
+    });
+    await busy.nav.updateComplete;
+    (
+      busy.nav.querySelector(
+        '[data-research-cancel="research_labs"]',
+      ) as HTMLElement
+    ).click();
+    expect(busy.sent).toEqual([
+      expect.objectContaining({ action: "cancel", tech: "research_labs" }),
+    ]);
+    busy.nav.remove();
+  });
+
+  it("describes effects in plain numbers", () => {
+    expect(effectLines({ industryPermille: 150, extraProjects: 1 })).toEqual([
+      "research.effect_industry",
+      "research.effect_projects",
+    ]);
   });
 });

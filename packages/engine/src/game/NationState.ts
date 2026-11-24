@@ -13,6 +13,11 @@ import type {
   SiteLevels,
 } from "@openfront/engine-api/game/Infrastructure";
 import { EconomyConfig } from "@openfront/engine-lib/configuration/EconomyConfig";
+import {
+  NO_TECH,
+  type TechModifiers,
+  techModifiers,
+} from "@openfront/engine-lib/configuration/TechConfig";
 import { z } from "zod";
 
 /** What one economy step reads about a nation. */
@@ -52,41 +57,53 @@ const clamp = (v: number, lo: number, hi: number) =>
 export function economyStep(
   input: EconomyInput,
   stability: number,
+  tech: TechModifiers = NO_TECH,
   cfg = EconomyConfig,
 ): EconomyResult {
+  const pm = (v: number, permille: number) =>
+    Math.floor((v * (1000 + permille)) / 1000);
   const infra = input.infrastructure;
   const ic = cfg.infrastructure;
   // Production: factories, land, and industrial and research centres.
-  const industryRate =
+  const industryRate = pm(
     input.factoryLevels * cfg.industryPerFactoryLevel +
-    Math.floor(input.tiles / cfg.tilesPerIndustry) +
-    infra.industry * ic.industryPerIndustrialLevel;
-  const researchRate =
+      Math.floor(input.tiles / cfg.tilesPerIndustry) +
+      infra.industry * ic.industryPerIndustrialLevel,
+    tech.industryPermille,
+  );
+  const researchRate = pm(
     cfg.researchBase +
-    input.cityLevels * cfg.researchPerCityLevel +
-    infra.research * ic.researchPerResearchLevel;
+      input.cityLevels * cfg.researchPerCityLevel +
+      pm(
+        infra.research * ic.researchPerResearchLevel,
+        tech.researchCentrePermille,
+      ),
+    tech.researchPermille,
+  );
 
   // Income: tax on the population, scaled by stability, and industry.
   const fullTax = Math.floor((input.troops * cfg.taxPerThousandTroops) / 1000);
   const taxPermille =
     cfg.taxAtZeroStabilityPermille +
     Math.floor(((1000 - cfg.taxAtZeroStabilityPermille) * stability) / 1000);
-  const tax = Math.floor((fullTax * taxPermille) / 1000);
+  const tax = pm(Math.floor((fullTax * taxPermille) / 1000), tech.taxPermille);
   // Railways carry industry's goods: more money per unit of industry.
   const railPermille = Math.min(
     ic.industryMoneyCap,
     infra.railways * ic.industryMoneyPerRailLevel,
   );
-  const industryMoney = Math.floor(
-    (industryRate * cfg.moneyPerIndustry * (1000 + railPermille)) / 1000,
+  const industryMoney = pm(
+    industryRate * cfg.moneyPerIndustry,
+    railPermille + tech.industryMoneyPermille,
   );
 
   // Expenses: administering land beyond the free allowance, and upkeep of
   // what has been built.
   // Roads make land cheaper to administer.
   const roadCut = Math.min(
-    ic.upkeepCutCap,
-    infra.roads * ic.upkeepCutPerRoadLevel,
+    800,
+    Math.min(ic.upkeepCutCap, infra.roads * ic.upkeepCutPerRoadLevel) +
+      tech.upkeepCutPermille,
   );
   const territory = Math.floor(
     (Math.max(0, input.tiles - cfg.freeTiles) *
@@ -119,17 +136,26 @@ export function economyStep(
     (Math.max(0, input.tiles - input.tilesAMinuteAgo) * 1000) /
       Math.max(input.tilesAMinuteAgo, cfg.freeTiles),
   );
-  const growthPenalty = Math.min(
-    cfg.stabilityGrowthPenaltyCap,
-    Math.floor((growthPermille * cfg.stabilityPerTenPercentGrowth) / 100),
+  const growthPenalty = Math.floor(
+    (Math.min(
+      cfg.stabilityGrowthPenaltyCap,
+      Math.floor((growthPermille * cfg.stabilityPerTenPercentGrowth) / 100),
+    ) *
+      (1000 - tech.growthPenaltyCutPermille)) /
+      1000,
+  );
+  const deficitPenalty = Math.floor(
+    (cfg.stabilityDeficitPenalty * (1000 - tech.deficitPenaltyCutPermille)) /
+      1000,
   );
   // A deficit that the treasury cannot cover is what hurts.
   const deficit = net < 0 && input.money < BigInt(-net);
   const stabilityTarget = clamp(
     cfg.stabilityBase +
-      devBonus -
+      devBonus +
+      tech.stabilityTarget -
       growthPenalty -
-      (deficit ? cfg.stabilityDeficitPenalty : 0),
+      (deficit ? deficitPenalty : 0),
     0,
     1000,
   );
@@ -164,6 +190,16 @@ export const NationStateSchema = z.object({
   steps: z.number(),
   tileSamples: z.array(z.number()),
   netHistory: z.array(z.number()),
+  techs: z.array(z.string()),
+  researching: z
+    .object({
+      id: z.string(),
+      done: z.number(),
+      total: z.number(),
+      research: z.number(),
+      money: z.number(),
+    })
+    .nullable(),
   last: z
     .object({
       income: z.object({
@@ -190,7 +226,28 @@ export class NationState {
   /** Tile counts at each history sample, newest last (growth measurement). */
   tileSamples: number[] = [];
   netHistory: number[] = [];
+  /** Completed technologies, in completion order. */
+  techs: string[] = [];
+  researching: {
+    id: string;
+    done: number;
+    total: number;
+    /** What it cost (for the refund on cancel). */
+    research: number;
+    money: number;
+  } | null = null;
   last: Omit<EconomyResult, "moneyIn" | "moneyOut"> | null = null;
+  private modifiers: TechModifiers | null = null;
+
+  /** The summed effects of the completed technologies. */
+  tech(): TechModifiers {
+    this.modifiers ??= techModifiers(this.techs);
+    return this.modifiers;
+  }
+
+  hasTech(id: string): boolean {
+    return this.techs.includes(id);
+  }
   /** Derived from the game's InfrastructureMap; not snapshotted. */
   private sites: InfrastructureSiteView[] = [];
   private projects: InfrastructureProjectView[] = [];
@@ -210,6 +267,22 @@ export class NationState {
     this.cachedView = null;
   }
 
+  /**
+   * One second of research; the technology it completes, if any. Runs
+   * before the economy step, so a completed technology counts at once.
+   */
+  advanceResearch(): string | null {
+    const r = this.researching;
+    if (r === null) return null;
+    r.done++;
+    this.cachedView = null;
+    if (r.done < r.total) return null;
+    this.researching = null;
+    this.techs.push(r.id);
+    this.modifiers = null;
+    return r.id;
+  }
+
   /** Runs one economy step; returns the money to add and remove. */
   step(input: EconomyInput): { moneyIn: number; moneyOut: number } {
     const cfg = EconomyConfig;
@@ -217,6 +290,7 @@ export class NationState {
     const result = economyStep(
       { ...input, tilesAMinuteAgo: this.tileSamples[0] },
       this.stability,
+      this.tech(),
     );
     this.industry += result.industryRate;
     this.research += result.researchRate;
@@ -264,6 +338,15 @@ export class NationState {
       netHistory: [...this.netHistory],
       sites: this.sites,
       projects: this.projects,
+      techs: [...this.techs],
+      researching:
+        this.researching === null
+          ? null
+          : {
+              id: this.researching.id,
+              done: this.researching.done,
+              total: this.researching.total,
+            },
     };
     return this.cachedView;
   }
@@ -276,6 +359,8 @@ export class NationState {
       steps: this.steps,
       tileSamples: [...this.tileSamples],
       netHistory: [...this.netHistory],
+      techs: [...this.techs],
+      researching: this.researching === null ? null : { ...this.researching },
       last: copyLast(this.last),
     };
   }
@@ -288,6 +373,8 @@ export class NationState {
     n.steps = d.steps;
     n.tileSamples = [...d.tileSamples];
     n.netHistory = [...d.netHistory];
+    n.techs = [...d.techs];
+    n.researching = d.researching === null ? null : { ...d.researching };
     n.last = copyLast(d.last);
     return n;
   }

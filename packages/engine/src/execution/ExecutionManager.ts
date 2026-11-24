@@ -27,6 +27,7 @@ import { NationExecution } from "./NationExecution";
 import { NoOpExecution } from "./NoOpExecution";
 import { PauseExecution } from "./PauseExecution";
 import { QuickChatExecution } from "./QuickChatExecution";
+import { ResearchExecution } from "./ResearchExecution";
 import { RetreatExecution } from "./RetreatExecution";
 import { SpawnExecution } from "./SpawnExecution";
 import { TargetPlayerExecution } from "./TargetPlayerExecution";
@@ -134,6 +135,8 @@ export class Executor {
         );
       case "delete_unit":
         return new DeleteUnitExecution(player, intent.unitId);
+      case "research":
+        return new ResearchExecution(player, intent.action, intent.tech);
       case "infrastructure":
         return new InfrastructureExecution(
           player,

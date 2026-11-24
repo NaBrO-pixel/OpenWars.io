@@ -20,11 +20,15 @@ export interface ProjectCost {
 export function projectCost(
   kind: InfrastructureKind,
   level: number,
+  /** Research (standardised parts) cuts the industry cost, permille. */
+  industryCutPermille = 0,
 ): ProjectCost {
   const c = infra.cost[kind];
   return {
     money: c.moneyBase * level * level,
-    industry: c.industryBase * level,
+    industry: Math.floor(
+      (c.industryBase * level * (1000 - industryCutPermille)) / 1000,
+    ),
     steps: c.stepsBase * level,
   };
 }
@@ -53,6 +57,9 @@ export function startRefusal(args: {
   industry: number;
   /** Money costs nothing (infinite gold). */
   freeMoney?: boolean;
+  /** From research: more projects at once, cheaper industry. */
+  extraProjects?: number;
+  industryCutPermille?: number;
 }): StartRefusal | null {
   const level = args.levels[args.kind] + 1;
   if (level > infra.maxLevel) return "max_level";
@@ -65,8 +72,10 @@ export function startRefusal(args: {
   ) {
     return "already_building";
   }
-  if (args.projects.length >= infra.maxProjects) return "too_many_projects";
-  const cost = projectCost(args.kind, level);
+  if (args.projects.length >= infra.maxProjects + (args.extraProjects ?? 0)) {
+    return "too_many_projects";
+  }
+  const cost = projectCost(args.kind, level, args.industryCutPermille ?? 0);
   const shortOfMoney =
     args.freeMoney !== true && args.money < BigInt(cost.money);
   if (shortOfMoney || args.industry < cost.industry) {

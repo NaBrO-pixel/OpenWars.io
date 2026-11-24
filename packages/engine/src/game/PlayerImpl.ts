@@ -2170,12 +2170,20 @@ export class PlayerImpl implements Player {
 
 export const PlayerSnapshot = snapshotType({
   name: "Player",
-  version: 3,
+  version: 4,
   migrations: {
     // v1 had no scenario nations, so none was playable.
     1: (d) => ({ ...d, playable: false }),
     // v2 predates the OpenWars economy.
     2: (d) => ({ ...d, nation: null }),
+    // v3 predates research.
+    3: (d) => ({
+      ...d,
+      nation:
+        d.nation === null || d.nation === undefined
+          ? null
+          : { ...d.nation, techs: [], researching: null },
+    }),
   },
   schema: z.object({
     smallID: zInt(),

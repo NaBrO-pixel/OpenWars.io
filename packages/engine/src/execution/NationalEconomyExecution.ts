@@ -6,12 +6,17 @@ import {
 } from "@openfront/engine-api/game/GameTypes";
 import type { InfrastructureKind } from "@openfront/engine-api/game/Infrastructure";
 import { ECONOMY_STEP_TICKS } from "@openfront/engine-lib/configuration/EconomyConfig";
+import {
+  TECH_BRANCHES,
+  TECHS,
+} from "@openfront/engine-lib/configuration/TechConfig";
 import { z } from "zod";
 import { Execution, Game, Player } from "../game/Game";
 import { projectCost } from "../game/Infrastructure";
 import type { EconomyInput } from "../game/NationState";
 import { execSnapshotType } from "../snapshot/ExecutionSnapshot";
 import type { ExecRecord, SnapshotReader } from "../snapshot/SnapshotContext";
+import { startResearch } from "./ResearchExecution";
 
 /**
  * The OpenWars national economy (docs/OpenWars2.md, milestone 2): once a
@@ -50,6 +55,21 @@ export class NationalEconomyExecution implements Execution {
           done.unitId,
         );
       }
+      const researched = nation.advanceResearch();
+      if (researched !== null) {
+        this.mg.displayMessage(
+          RESEARCH_MESSAGE[researched] ?? "events_display.research_completed",
+          MessageType.NATIONAL_DEVELOPMENT,
+          player.id(),
+        );
+      }
+      if (
+        player.type() === PlayerType.Nation &&
+        nation.researching === null &&
+        nation.steps % NATION_DEVELOP_EVERY === 0
+      ) {
+        researchForNation(this.mg, player);
+      }
       const { moneyIn, moneyOut } = nation.step(economyInput(this.mg, player));
       if (moneyIn > 0) player.addGold(BigInt(moneyIn));
       if (moneyOut > 0) player.removeGold(BigInt(moneyOut));
@@ -84,6 +104,26 @@ const COMPLETED_MESSAGE: Record<InfrastructureKind, string> = {
   research: "events_display.infrastructure_completed_research",
 };
 
+const RESEARCH_MESSAGE: Readonly<Record<string, string>> = {
+  assembly_lines: "events_display.research_completed_assembly_lines",
+  standardised_parts: "events_display.research_completed_standardised_parts",
+  logistics_networks: "events_display.research_completed_logistics_networks",
+  heavy_industry: "events_display.research_completed_heavy_industry",
+  automation: "events_display.research_completed_automation",
+  research_labs: "events_display.research_completed_research_labs",
+  information_systems: "events_display.research_completed_information_systems",
+  project_management: "events_display.research_completed_project_management",
+  advanced_computing: "events_display.research_completed_advanced_computing",
+  scientific_revolution:
+    "events_display.research_completed_scientific_revolution",
+  civil_administration:
+    "events_display.research_completed_civil_administration",
+  public_services: "events_display.research_completed_public_services",
+  social_cohesion: "events_display.research_completed_social_cohesion",
+  economic_resilience: "events_display.research_completed_economic_resilience",
+  national_unity: "events_display.research_completed_national_unity",
+};
+
 /** Economy steps between an AI nation's development decisions. */
 const NATION_DEVELOP_EVERY = 15;
 /** The order AI nations develop in. */
@@ -108,6 +148,26 @@ export function developForNation(mg: Game, player: Player): void {
       infra.start(mg, player, site.id(), kind);
       return;
     }
+  }
+}
+
+/**
+ * AI nations research: the first technology they can start, taking the
+ * branches in turn (starting from one that depends on the nation, so
+ * nations specialise differently).
+ */
+export function researchForNation(mg: Game, player: Player): void {
+  const nation = player.ensureNation();
+  const start = player.smallID() % TECH_BRANCHES.length;
+  for (let i = 0; i < TECH_BRANCHES.length; i++) {
+    const branch = TECH_BRANCHES[(start + i) % TECH_BRANCHES.length];
+    const next = TECHS.find(
+      (t) => t.branch === branch && !nation.hasTech(t.id),
+    );
+    if (next === undefined) continue;
+    // Keep money for the military: research only from a comfortable surplus.
+    if (player.gold() < BigInt(next.money * 2)) continue;
+    if (startResearch(mg, player, next.id) === null) return;
   }
 }
 

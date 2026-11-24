@@ -49,7 +49,8 @@ export type Intent =
   | TogglePauseIntent
   | UpdateGameConfigIntent
   | ToggleGameStartTimer
-  | InfrastructureIntent;
+  | InfrastructureIntent
+  | ResearchIntent;
 
 export type AttackIntent = z.infer<typeof AttackIntentSchema>;
 export type CancelAttackIntent = z.infer<typeof CancelAttackIntentSchema>;
@@ -84,6 +85,7 @@ export type UpdateGameConfigIntent = z.infer<
   typeof UpdateGameConfigIntentSchema
 >;
 export type InfrastructureIntent = z.infer<typeof InfrastructureIntentSchema>;
+export type ResearchIntent = z.infer<typeof ResearchIntentSchema>;
 export type ToggleGameStartTimer = z.infer<
   typeof ToggleGameStartTimerIntentSchema
 >;
@@ -588,6 +590,14 @@ export const InfrastructureIntentSchema = z.object({
   kind: InfrastructureKindSchema,
 });
 
+// OpenWars research (milestone 4): start or cancel researching a technology
+// (engine-lib TechConfig ids). Validated by the engine (ResearchExecution).
+export const ResearchIntentSchema = z.object({
+  type: z.literal("research"),
+  action: z.enum(["start", "cancel"]),
+  tech: z.string().max(40),
+});
+
 export const IntentSchema = z.compile(
   z.discriminatedUnion("type", [
     AttackIntentSchema,
@@ -617,6 +627,7 @@ export const IntentSchema = z.compile(
     ToggleGameStartTimerIntentSchema,
     // Appended last: zbin encodes union members by position.
     InfrastructureIntentSchema,
+    ResearchIntentSchema,
   ]),
 );
 

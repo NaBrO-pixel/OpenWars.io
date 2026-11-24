@@ -321,6 +321,10 @@ export interface NationView {
   /** The nation's development sites (its cities) and projects under way. */
   sites: InfrastructureSiteView[];
   projects: InfrastructureProjectView[];
+  /** Completed technologies (TechConfig ids), in completion order. */
+  techs: string[];
+  /** The technology being researched, if any. */
+  researching: { id: string; done: number; total: number } | null;
 }
 
 export interface NationIncome {

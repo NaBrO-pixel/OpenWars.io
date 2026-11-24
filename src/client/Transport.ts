@@ -99,6 +99,14 @@ export class SendInfrastructureIntentEvent implements GameEvent {
   ) {}
 }
 
+/** OpenWars: start or cancel researching a technology. */
+export class SendResearchIntentEvent implements GameEvent {
+  constructor(
+    public readonly action: "start" | "cancel",
+    public readonly tech: string,
+  ) {}
+}
+
 export class SendAllianceRejectIntentEvent implements GameEvent {
   constructor(public readonly requestor: PlayerView) {}
 }
@@ -340,6 +348,9 @@ export class Transport {
     this.subscribe(SendAttackIntentEvent, (e) => this.onSendAttackIntent(e));
     this.subscribe(SendUpgradeStructureIntentEvent, (e) =>
       this.onSendUpgradeStructureIntent(e),
+    );
+    this.subscribe(SendResearchIntentEvent, (e) =>
+      this.sendIntent({ type: "research", action: e.action, tech: e.tech }),
     );
     this.subscribe(SendInfrastructureIntentEvent, (e) =>
       this.sendIntent({

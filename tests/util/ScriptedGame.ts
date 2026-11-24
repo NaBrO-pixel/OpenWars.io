@@ -22,6 +22,7 @@ import {
   StampedIntent,
   Turn,
 } from "@openfront/engine-api/Schemas";
+import { TECHS } from "@openfront/engine-lib/configuration/TechConfig";
 import { PseudoRandom } from "@openfront/engine-lib/PseudoRandom";
 import { Game, Player } from "@openfront/engine/game/Game";
 import {
@@ -233,6 +234,7 @@ function queuedIntent(game: Game, p: Player, tick: number): Intent | null {
     { type: "mark_disconnected", isDisconnected: false },
     { type: "toggle_pause", paused: false },
     { type: "infrastructure", action: "start", unitId: 1, kind: "roads" },
+    { type: "research", action: "start", tech: "assembly_lines" },
   ];
   return queued[(tick - 20) / 2] ?? null;
 }
@@ -559,6 +561,18 @@ function playIntent(game: Game, p: Player, rand: PseudoRandom): Intent | null {
   // OpenWars: develop cities. Guarded on the ruleset first, so the classic
   // variants draw the same random numbers as before.
   if (game.config().isOpenWars() && rand.chance(5)) {
+    const nation = p.nation();
+    if (nation !== null && nation.researching === null) {
+      const next = TECHS.find(
+        (t) =>
+          !nation.hasTech(t.id) &&
+          t.requires.every((r) => nation.hasTech(r)) &&
+          nation.research >= t.research,
+      );
+      if (next !== undefined) {
+        return { type: "research", action: "start", tech: next.id };
+      }
+    }
     const infra = game.infrastructure();
     for (const site of infra.sitesOf(p)) {
       for (const kind of INFRASTRUCTURE_KINDS) {
