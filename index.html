@@ -557,9 +557,19 @@
       <game-left-sidebar
         class="lg:col-start-1 lg:justify-self-start"
       ></game-left-sidebar>
-      <player-info-overlay
-        class="lg:col-start-2 lg:min-w-0"
-      ></player-info-overlay>
+      <!-- The resource bar (command-bar) above the hovered-player card. Below
+           lg the wrapper is layout-neutral: the card positions itself as
+           before, and the bar sits fixed at the top centre from tablet width
+           (phones show money and troops in the bottom panel). -->
+      <div
+        class="contents lg:flex lg:flex-col lg:items-center lg:col-start-2 lg:min-w-0"
+      >
+        <command-bar
+          class="max-md:hidden max-lg:fixed max-lg:top-0 max-lg:left-1/2 max-lg:-translate-x-1/2 max-lg:z-[999] lg:pointer-events-auto"
+        ></command-bar>
+        <player-info-overlay class="lg:min-w-0 lg:w-full"></player-info-overlay>
+      </div>
+      <command-nav></command-nav>
       <div
         id="game-right-hud"
         style="margin-top: var(--game-health-offset, 0px)"

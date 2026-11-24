@@ -12,6 +12,12 @@ See [Contributors](https://github.com/openfrontio/OpenFrontIO/graphs/contributor
 Display font. Copyright 2023 The Bungee Project Authors ([github.com/djrrb/Bungee](https://github.com/djrrb/Bungee)).  
 Licensed under the [SIL Open Font License 1.1](resources/fonts/Bungee-OFL.txt).
 
+### Inter
+
+The interface font, by The Inter Project Authors
+(<https://github.com/rsms/inter>), licensed under the SIL Open Font License 1.1
+(`resources/fonts/Inter-OFL.txt`).
+
 ## Music and Sound
 
 The music (`resources/sounds/music/openwars-*.mp3`) and the game-start alert

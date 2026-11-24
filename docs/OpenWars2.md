@@ -139,3 +139,26 @@ only when its tests, typecheck and production build pass.
   (method used for the accounts work), checking both see the same resources,
   agreements and victory.
 - Reconnect: a client drops mid-game and rejoins; its view must match.
+
+## 6. Milestone log
+
+### Milestone 1: visual redesign (first pass)
+
+- Design tokens `--color-ow-*` (the §3.2 palette) in `src/client/styles.css`.
+  Tailwind's gray, slate, zinc and neutral scales are remapped onto it, and
+  the accent moves to `#39BDE8`, so every existing surface (home page,
+  modals, HUD) takes the OpenWars look without touching each component.
+- Inter is bundled (`resources/fonts/Inter-*.woff2`, OFL) and is the UI font.
+- `<command-bar>` (`hud/layers/CommandBar.ts`): the top resource bar. Money,
+  measured income per second, population, territory share, match clock. From
+  tablet width up; phones keep the bottom panel's figures.
+- `<command-nav>` (`hud/layers/CommandNav.ts`): the collapsible left
+  navigation, with a section registry (`COMMAND_SECTIONS`). Working sections:
+  country overview, statistics. Economy, infrastructure, research,
+  diplomacy and intelligence are added by their milestones; no section is
+  listed before its system exists.
+- `hud/NationalSummary.ts`: the figures both read, in one place.
+
+Deferred to the milestone that gives them content: the right contextual
+territory panel (milestone 3, infrastructure), map overlays (milestones 3 and
+5), the activity feed's event and research entries (milestones 4 and 5).

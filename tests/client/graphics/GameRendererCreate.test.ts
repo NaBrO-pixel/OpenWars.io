@@ -26,6 +26,8 @@ const HUD_TAGS = [
   "build-menu",
   "game-left-sidebar",
   "control-panel",
+  "command-bar",
+  "command-nav",
   "events-display",
   "actionable-events",
   "attacks-display",

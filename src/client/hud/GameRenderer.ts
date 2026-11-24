@@ -28,6 +28,8 @@ import { AttacksDisplay } from "./layers/AttacksDisplay";
 import { BuildMenu } from "./layers/BuildMenu";
 import { ChatDisplay } from "./layers/ChatDisplay";
 import { ChatModal } from "./layers/ChatModal";
+import { CommandBar } from "./layers/CommandBar";
+import { CommandNav } from "./layers/CommandNav";
 import { ControlPanel } from "./layers/ControlPanel";
 import { EmojiTable } from "./layers/EmojiTable";
 import { EventsDisplay } from "./layers/EventsDisplay";
@@ -102,6 +104,18 @@ export function createRenderer(
   }
   gameLeftSidebar.game = game;
   gameLeftSidebar.eventBus = eventBus;
+
+  const commandBar = document.querySelector("command-bar") as CommandBar;
+  if (!(commandBar instanceof CommandBar)) {
+    console.error("CommandBar element not found in the DOM");
+  }
+  commandBar.game = game;
+
+  const commandNav = document.querySelector("command-nav") as CommandNav;
+  if (!(commandNav instanceof CommandNav)) {
+    console.error("CommandNav element not found in the DOM");
+  }
+  commandNav.game = game;
 
   const controlPanel = document.querySelector("control-panel") as ControlPanel;
   if (!(controlPanel instanceof ControlPanel)) {
@@ -379,6 +393,8 @@ export function createRenderer(
     unitDisplay,
     gameRightSidebar,
     controlPanel,
+    commandBar,
+    commandNav,
     playerInfo,
     winModal,
     newLobbyPrompt,
@@ -406,6 +422,8 @@ export function createRenderer(
     unitDisplay,
     gameRightSidebar,
     controlPanel,
+    commandBar,
+    commandNav,
     playerInfo,
     winModal,
     newLobbyPrompt,

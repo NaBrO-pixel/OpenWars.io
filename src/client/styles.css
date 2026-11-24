@@ -24,9 +24,70 @@
   --default-ring-width: 3px;
   --default-ring-color: var(--color-malibu-blue);
   --font-display: "OpenWars Display", Inter, Arial, sans-serif;
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
 
-  /* Openfront.io brand palette — see Openfront_Brand_Guidelines.pdf §4 */
-  --color-malibu-blue: #0084d1;
+  /* OpenWars design system (docs/OpenWars2.md). The ow-* tokens are the
+     palette; Tailwind's neutral scales below are remapped onto it, so every
+     existing gray/slate/zinc/neutral surface takes the OpenWars look. */
+  --color-ow-bg: #101827;
+  --color-ow-bg-2: #172337;
+  --color-ow-panel: #1c293a;
+  --color-ow-raised: #243449;
+  --color-ow-accent: #39bde8;
+  --color-ow-accent-2: #f0a84b;
+  --color-ow-success: #46c78b;
+  --color-ow-warning: #e9b44c;
+  --color-ow-error: #e46d75;
+  --color-ow-text: #f1f5f9;
+  --color-ow-text-2: #a7b4c5;
+  --color-ow-border: #34465b;
+  --color-gray-50: #f1f5f9;
+  --color-gray-100: #e2e8f0;
+  --color-gray-200: #cbd5e1;
+  --color-gray-300: #a7b4c5;
+  --color-gray-400: #8394a8;
+  --color-gray-500: #5d6f86;
+  --color-gray-600: #34465b;
+  --color-gray-700: #243449;
+  --color-gray-800: #1c293a;
+  --color-gray-900: #172337;
+  --color-gray-950: #101827;
+  --color-slate-50: #f1f5f9;
+  --color-slate-100: #e2e8f0;
+  --color-slate-200: #cbd5e1;
+  --color-slate-300: #a7b4c5;
+  --color-slate-400: #8394a8;
+  --color-slate-500: #5d6f86;
+  --color-slate-600: #34465b;
+  --color-slate-700: #243449;
+  --color-slate-800: #1c293a;
+  --color-slate-900: #172337;
+  --color-slate-950: #101827;
+  --color-zinc-50: #f1f5f9;
+  --color-zinc-100: #e2e8f0;
+  --color-zinc-200: #cbd5e1;
+  --color-zinc-300: #a7b4c5;
+  --color-zinc-400: #8394a8;
+  --color-zinc-500: #5d6f86;
+  --color-zinc-600: #34465b;
+  --color-zinc-700: #243449;
+  --color-zinc-800: #1c293a;
+  --color-zinc-900: #172337;
+  --color-zinc-950: #101827;
+  --color-neutral-50: #f1f5f9;
+  --color-neutral-100: #e2e8f0;
+  --color-neutral-200: #cbd5e1;
+  --color-neutral-300: #a7b4c5;
+  --color-neutral-400: #8394a8;
+  --color-neutral-500: #5d6f86;
+  --color-neutral-600: #34465b;
+  --color-neutral-700: #243449;
+  --color-neutral-800: #1c293a;
+  --color-neutral-900: #172337;
+  --color-neutral-950: #101827;
+
+  /* Accent, used across the UI under its historical name. */
+  --color-malibu-blue: #39bde8;
   --color-aquarius: #3fa9f5;
   --color-dawn-blue: #cccccc;
   --color-bright-white: #ffffff;
@@ -44,15 +105,15 @@
   /* App-specific surface colors */
   --color-surface: #0a1628;
 
-  --shadow-malibu-blue: 0 0 15px rgba(0, 132, 209, 0.2);
-  --shadow-malibu-blue-soft: 0 0 12px rgba(0, 132, 209, 0.2);
-  --shadow-malibu-blue-strong: 0 0 15px rgba(0, 132, 209, 0.3);
-  --shadow-malibu-blue-pill: 0 0 6px rgba(0, 132, 209, 0.35);
-  --shadow-malibu-blue-ring-sm: 0 0 0 4px rgba(0, 132, 209, 0.2);
-  --shadow-malibu-blue-ring-lg: 0 0 0 6px rgba(0, 132, 209, 0.3);
-  --shadow-lobby-card-hover: 0 0 0 2px #0084d1, 0 0 20px rgba(0, 132, 209, 0.5);
+  --shadow-malibu-blue: 0 0 15px rgba(57, 189, 232, 0.2);
+  --shadow-malibu-blue-soft: 0 0 12px rgba(57, 189, 232, 0.2);
+  --shadow-malibu-blue-strong: 0 0 15px rgba(57, 189, 232, 0.3);
+  --shadow-malibu-blue-pill: 0 0 6px rgba(57, 189, 232, 0.35);
+  --shadow-malibu-blue-ring-sm: 0 0 0 4px rgba(57, 189, 232, 0.2);
+  --shadow-malibu-blue-ring-lg: 0 0 0 6px rgba(57, 189, 232, 0.3);
+  --shadow-lobby-card-hover: 0 0 0 2px #39bde8, 0 0 20px rgba(57, 189, 232, 0.5);
   --shadow-action-card-hover:
-    0 0 0 1px #0084d1, 0 0 12px rgba(0, 132, 209, 0.35);
+    0 0 0 1px #39bde8, 0 0 12px rgba(57, 189, 232, 0.35);
 }
 
 /* Match the in-game HUD surface; opacity affects the surface, not the controls. */

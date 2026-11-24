@@ -3568,5 +3568,26 @@
     "spectate": "Spectate",
     "you_won": "You Won!",
     "your_team": "Your team won!"
+  },
+  "command_bar": {
+    "label": "National status",
+    "money": "Money",
+    "income": "Income",
+    "population": "Population",
+    "territory": "Territory",
+    "time": "Time"
+  },
+  "command_nav": {
+    "label": "Command",
+    "overview": "Country overview",
+    "statistics": "Statistics",
+    "country": "Country",
+    "rank": "Rank",
+    "rank_of": "{rank} of {total}",
+    "structures": "Structures",
+    "allies": "Allies",
+    "no_allies": "No allies yet. Propose an alliance from a country's menu.",
+    "nations_left": "Nations remaining",
+    "largest": "Largest nations"
   }
 }
