@@ -6,6 +6,9 @@ import { customElement, state } from "lit/decorators.js";
 import { Controller } from "../../Controller";
 import { GoToUnitEvent } from "../../TransformHandler";
 import {
+  SendAllianceRequestIntentEvent,
+  SendBreakAllianceIntentEvent,
+  SendDiplomacyIntentEvent,
   SendInfrastructureIntentEvent,
   SendResearchIntentEvent,
 } from "../../Transport";
@@ -21,6 +24,7 @@ import {
   type NationalSummary,
   nationalSummary,
 } from "../NationalSummary";
+import { renderDiplomacy } from "./DiplomacyPanel";
 import { ToggleInfrastructureOverlayEvent } from "./InfrastructureOverlay";
 import { renderInfrastructure } from "./InfrastructurePanel";
 import { renderResearch } from "./ResearchPanel";
@@ -335,6 +339,27 @@ export const COMMAND_SECTIONS: readonly CommandSection[] = [
         cancel: (id) =>
           ctx.nav.eventBus?.emit(new SendResearchIntentEvent("cancel", id)),
         freeMoney: ctx.game.config().gameConfig().infiniteGold,
+      }),
+    available: (ctx) => ctx.summary.nation !== null,
+  },
+  {
+    id: "diplomacy",
+    labelKey: "command_nav.diplomacy",
+    icon: svg("M7 11l5-5 5 5M7 11l5 5 5-5M3 12h4m10 0h4"),
+    render: (ctx) =>
+      renderDiplomacy(ctx.game, ctx.me, {
+        act: (action, kind, target) =>
+          ctx.nav.eventBus?.emit(
+            new SendDiplomacyIntentEvent(action, kind, target.id()),
+          ),
+        requestAlliance: (target) =>
+          ctx.nav.eventBus?.emit(
+            new SendAllianceRequestIntentEvent(ctx.me, target),
+          ),
+        leaveAlliance: (target) =>
+          ctx.nav.eventBus?.emit(
+            new SendBreakAllianceIntentEvent(ctx.me, target),
+          ),
       }),
     available: (ctx) => ctx.summary.nation !== null,
   },

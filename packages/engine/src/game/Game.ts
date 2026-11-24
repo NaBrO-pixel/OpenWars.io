@@ -51,6 +51,7 @@ import type { EngineConfig } from "../configuration/EngineConfig";
 import { AbstractGraph } from "../pathfinding/algorithms/AbstractGraph";
 import { PathFinder } from "../pathfinding/types";
 import type { ExecRecord, SnapshotWriter } from "../snapshot/SnapshotContext";
+import type { DiplomacyMap } from "./Diplomacy";
 import type { InfrastructureMap } from "./Infrastructure";
 import type { NationState } from "./NationState";
 import { RailNetwork } from "./RailNetwork";
@@ -702,6 +703,8 @@ export interface Game extends GameLike {
   railNetwork(): RailNetwork;
   /** OpenWars infrastructure (milestone 3). */
   infrastructure(): InfrastructureMap;
+  /** OpenWars diplomacy (milestone 4). */
+  diplomacy(): DiplomacyMap;
   /**
    * Bumped whenever a City, Port or Factory is added or removed (the
    * structures the rail network connects) and whenever land turns to water

@@ -17,6 +17,7 @@ import {
   nationalSummary,
 } from "../../../../src/client/hud/NationalSummary";
 import {
+  SendDiplomacyIntentEvent,
   SendInfrastructureIntentEvent,
   SendResearchIntentEvent,
 } from "../../../../src/client/Transport";
@@ -70,6 +71,7 @@ const NATION: NationView = {
   projects: [],
   techs: [],
   researching: null,
+  diplomacy: { reputation: 100, agreements: [], incoming: [], outgoing: [] },
 };
 
 function game(
@@ -407,5 +409,111 @@ describe("research panel", () => {
       "research.effect_industry",
       "research.effect_projects",
     ]);
+  });
+});
+
+describe("diplomacy panel", () => {
+  function country(id: string, nation: NationView | null = NATION) {
+    const p = player(id, 100, 0, nation) as FakePlayer &
+      Record<string, unknown>;
+    Object.assign(p, {
+      smallID: () => id.length,
+      type: () => "HUMAN",
+      isAlliedWith: () => false,
+      hasEmbargoAgainst: () => false,
+      outgoingAttacks: () => [],
+      incomingAttacks: () => [],
+    });
+    return p;
+  }
+
+  function open(diplomacy: NationView["diplomacy"], allied = false) {
+    const me = country("me", { ...NATION, diplomacy });
+    const rival = country("rival");
+    if (allied) {
+      me.isAlliedWith = () => true;
+      rival.isAlliedWith = () => true;
+    }
+    const nav = document.createElement("command-nav") as CommandNav;
+    document.body.appendChild(nav);
+    nav.game = {
+      ...(game(me, [rival]) as object),
+      ticks: () => 0,
+    } as unknown as GameView;
+    const bus = new EventBus();
+    const sent: unknown[] = [];
+    bus.on(SendDiplomacyIntentEvent, (e) => sent.push(e));
+    nav.eventBus = bus;
+    nav.init();
+    nav.tick();
+    nav.toggle("diplomacy");
+    return { nav, sent };
+  }
+
+  const EMPTY = { reputation: 100, agreements: [], incoming: [], outgoing: [] };
+
+  it("lists countries with relationship and proposes agreements", async () => {
+    const { nav, sent } = open(EMPTY);
+    await nav.updateComplete;
+    const row = nav.querySelector('[data-country="rival"]')!;
+    expect(
+      row
+        .querySelector("[data-relationship]")
+        ?.getAttribute("data-relationship"),
+    ).toBe("neutral");
+    // Not allied, not at war: pact and trade on offer, no ceasefire or intel.
+    expect(row.querySelector('[data-action="propose-ceasefire"]')).toBeNull();
+    expect(row.querySelector('[data-action="propose-intel"]')).toBeNull();
+    (row.querySelector('[data-action="propose-trade"]') as HTMLElement).click();
+    expect(sent).toEqual([
+      expect.objectContaining({
+        action: "propose",
+        kind: "trade",
+        target: "rival",
+      }),
+    ]);
+    nav.remove();
+  });
+
+  it("accepts and rejects proposals, and breaks agreements", async () => {
+    const { nav, sent } = open({
+      reputation: 72,
+      agreements: [{ kind: "nap", other: "rival", expiresAt: 600 }],
+      incoming: [{ kind: "trade", other: "rival", expiresAt: 300 }],
+      outgoing: [],
+    });
+    await nav.updateComplete;
+    expect(
+      nav.querySelector("[data-reputation]")?.getAttribute("data-reputation"),
+    ).toBe("72");
+    expect(
+      nav
+        .querySelector('[data-country="rival"] [data-relationship]')
+        ?.getAttribute("data-relationship"),
+    ).toBe("friendly");
+    (
+      nav.querySelector(
+        '[data-incoming="trade"] [data-action="accept"]',
+      ) as HTMLElement
+    ).click();
+    (nav.querySelector('[data-break="nap"]') as HTMLElement).click();
+    expect(sent).toEqual([
+      expect.objectContaining({ action: "accept", kind: "trade" }),
+      expect.objectContaining({ action: "break", kind: "nap" }),
+    ]);
+    nav.remove();
+  });
+
+  it("offers intelligence sharing to allies", async () => {
+    const { nav } = open(EMPTY, true);
+    await nav.updateComplete;
+    const row = nav.querySelector('[data-country="rival"]')!;
+    expect(row.querySelector('[data-action="propose-intel"]')).not.toBeNull();
+    expect(
+      row
+        .querySelector("[data-relationship]")
+        ?.getAttribute("data-relationship"),
+    ).toBe("allied");
+    nav.remove();
   });
 });

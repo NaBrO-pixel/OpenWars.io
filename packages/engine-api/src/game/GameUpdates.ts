@@ -1,4 +1,5 @@
 import { AllPlayersStats, ClientID, Winner } from "../Schemas";
+import type { DiplomacyView } from "./Diplomacy";
 import { TileRef } from "./GameMap";
 import {
   AircraftState,
@@ -325,6 +326,8 @@ export interface NationView {
   techs: string[];
   /** The technology being researched, if any. */
   researching: { id: string; done: number; total: number } | null;
+  /** Agreements, proposals and reputation (milestone 4). */
+  diplomacy: DiplomacyView;
 }
 
 export interface NationIncome {

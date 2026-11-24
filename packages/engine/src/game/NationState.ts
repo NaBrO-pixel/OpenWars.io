@@ -2,6 +2,7 @@
 // milestone 2): industry and research stockpiles, stability, and the last
 // step's income and expenses. Updated once a second by
 // NationalEconomyExecution; integer arithmetic only, so every client agrees.
+import type { DiplomacyView } from "@openfront/engine-api/game/Diplomacy";
 import type {
   NationExpenses,
   NationIncome,
@@ -12,6 +13,7 @@ import type {
   InfrastructureSiteView,
   SiteLevels,
 } from "@openfront/engine-api/game/Infrastructure";
+import { DiplomacyConfig } from "@openfront/engine-lib/configuration/DiplomacyConfig";
 import { EconomyConfig } from "@openfront/engine-lib/configuration/EconomyConfig";
 import {
   NO_TECH,
@@ -35,6 +37,9 @@ export interface EconomyInput {
   money: bigint;
   /** Infrastructure levels summed over the nation's cities. */
   infrastructure: SiteLevels;
+  /** Trade agreements and alliances in force (milestone 4). */
+  tradeAgreements?: number;
+  alliances?: number;
 }
 
 /** What one economy step decides. */
@@ -78,7 +83,11 @@ export function economyStep(
         infra.research * ic.researchPerResearchLevel,
         tech.researchCentrePermille,
       ),
-    tech.researchPermille,
+    tech.researchPermille +
+      Math.min(
+        DiplomacyConfig.allianceCap,
+        (input.alliances ?? 0) * DiplomacyConfig.alliancePermille,
+      ),
   );
 
   // Income: tax on the population, scaled by stability, and industry.
@@ -86,7 +95,16 @@ export function economyStep(
   const taxPermille =
     cfg.taxAtZeroStabilityPermille +
     Math.floor(((1000 - cfg.taxAtZeroStabilityPermille) * stability) / 1000);
-  const tax = pm(Math.floor((fullTax * taxPermille) / 1000), tech.taxPermille);
+  // Trade agreements: more tax and more money from industry, for both.
+  const dc = DiplomacyConfig;
+  const tradeBonus = Math.min(
+    dc.tradeCap,
+    (input.tradeAgreements ?? 0) * dc.tradePermille,
+  );
+  const tax = pm(
+    Math.floor((fullTax * taxPermille) / 1000),
+    tech.taxPermille + tradeBonus,
+  );
   // Railways carry industry's goods: more money per unit of industry.
   const railPermille = Math.min(
     ic.industryMoneyCap,
@@ -94,7 +112,7 @@ export function economyStep(
   );
   const industryMoney = pm(
     industryRate * cfg.moneyPerIndustry,
-    railPermille + tech.industryMoneyPermille,
+    railPermille + tech.industryMoneyPermille + tradeBonus,
   );
 
   // Expenses: administering land beyond the free allowance, and upkeep of
@@ -250,6 +268,17 @@ export class NationState {
   }
   /** Derived from the game's InfrastructureMap; not snapshotted. */
   private sites: InfrastructureSiteView[] = [];
+  private diplomacy: DiplomacyView = {
+    reputation: 100,
+    agreements: [],
+    incoming: [],
+    outgoing: [],
+  };
+
+  setDiplomacy(view: DiplomacyView): void {
+    this.diplomacy = view;
+    this.cachedView = null;
+  }
   private projects: InfrastructureProjectView[] = [];
   private cachedView: NationView | null = null;
 
@@ -347,6 +376,7 @@ export class NationState {
               done: this.researching.done,
               total: this.researching.total,
             },
+      diplomacy: this.diplomacy,
     };
     return this.cachedView;
   }

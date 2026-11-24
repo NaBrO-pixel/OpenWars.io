@@ -1971,6 +1971,8 @@ export class PlayerImpl implements Player {
     player: Player,
     treatAFKFriendly: boolean = false,
   ): boolean {
+    // OpenWars: a non-aggression pact or ceasefire stops all hostilities.
+    if (this.mg.diplomacy().blocksHostilities(this, player)) return false;
     if (this.type() !== PlayerType.Human) {
       // Only human attackers respect PVP immunity
       return !this.isFriendly(player, treatAFKFriendly);

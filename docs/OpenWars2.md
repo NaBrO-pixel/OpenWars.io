@@ -227,3 +227,53 @@ with infrastructure (milestone 3) and research (milestone 4).
 Not done here: a right-hand contextual panel for a clicked tile. Sites are
 reached through the Infrastructure panel (with Locate); the contextual panel
 is folded into milestone 8's interface pass.
+
+### Milestone 4: research and diplomacy
+
+Research:
+
+- `engine-lib/configuration/TechConfig.ts`: three branches (industry,
+  technology, society) of five technologies, basic to advanced, each a
+  chain. Every technology has a real effect (`techModifiers`): industry or
+  research output, tax, industry money, territory upkeep, infrastructure
+  industry cost, extra projects, research-centre output, stability target,
+  softer growth and deficit penalties.
+- `research` intent (start/cancel; `ResearchExecution`): one at a time,
+  paid in research points and money up front, takes time, 75% refund on
+  cancel. Progress and completed technologies live in `NationState`
+  (Player snapshot v4); completions are announced; AI nations research.
+- Research panel: the tree with locked / available / researching /
+  completed states, costs, durations, prerequisites, effects and progress.
+
+Diplomacy:
+
+- Built on the existing alliances (request, accept, reject, break,
+  extension, expiry), which stay as they are and are reachable from the new
+  panel too.
+- `game/Diplomacy.ts` (`DiplomacyMap` on GameImpl, Game snapshot v3):
+  agreements between two nations — non-aggression pacts, trade agreements,
+  ceasefires (only between nations at war), intelligence sharing (only
+  between allies) — each proposed, then accepted or rejected, timed, and
+  breakable. Simultaneous proposals agree. Expired, lapsed or orphaned
+  (eliminated party) agreements and proposals are cleared every second.
+- Effects: pacts and ceasefires block attacks both ways (in
+  `canAttackPlayer`, which every attack path checks) and turn attacks under
+  way into retreats; trade agreements raise both sides' tax and industry
+  money; alliances raise research; intelligence sharing shows the partner's
+  exact money and stability in the diplomacy panel.
+- Reputation 0–100: breaking an agreement or betraying an alliance costs
+  reputation; it recovers by 1 every 10 s. AI nations accept proposals from
+  nations of reputation 50 or more and refuse the rest.
+- `diplomacy` intent (propose/accept/reject/break; `DiplomacyExecution`):
+  the sender is always the one acting, and every rule runs in the engine on
+  every client, so no client can sign or break for another.
+- Diplomacy panel: reputation, proposals to you, every country with its
+  relationship (allied, friendly, neutral, hostile), reputation, agreements
+  with time left and break buttons, and the proposals available.
+- Tests: `tests/core/executions/Research.test.ts`, `Diplomacy.test.ts`
+  (acceptance, rejection, simultaneous proposals, expiry, prerequisites,
+  blocking attacks, ceasefire retreats, reputation loss and recovery, AI
+  answers, economic effects, snapshots), scripted-game coverage, panel
+  tests. Checked over real multiplayer: one browser proposed a trade
+  agreement from the panel, another accepted it from theirs, and both
+  clients then held the same agreement with the same expiry.

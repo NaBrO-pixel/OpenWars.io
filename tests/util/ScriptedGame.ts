@@ -235,6 +235,7 @@ function queuedIntent(game: Game, p: Player, tick: number): Intent | null {
     { type: "toggle_pause", paused: false },
     { type: "infrastructure", action: "start", unitId: 1, kind: "roads" },
     { type: "research", action: "start", tech: "assembly_lines" },
+    { type: "diplomacy", action: "propose", kind: "trade", target: other.id() },
   ];
   return queued[(tick - 20) / 2] ?? null;
 }
@@ -561,6 +562,28 @@ function playIntent(game: Game, p: Player, rand: PseudoRandom): Intent | null {
   // OpenWars: develop cities. Guarded on the ruleset first, so the classic
   // variants draw the same random numbers as before.
   if (game.config().isOpenWars() && rand.chance(5)) {
+    const partner = game
+      .players()
+      .find((o) => o !== p && SCRIPTED_HUMANS.includes(o.clientID() as never));
+    if (partner !== undefined) {
+      const incoming = game.diplomacy().view(p).incoming[0];
+      if (incoming !== undefined) {
+        return {
+          type: "diplomacy",
+          action: "accept",
+          kind: incoming.kind,
+          target: incoming.other,
+        };
+      }
+      if (!game.diplomacy().has("trade", p, partner)) {
+        return {
+          type: "diplomacy",
+          action: "propose",
+          kind: "trade",
+          target: partner.id(),
+        };
+      }
+    }
     const nation = p.nation();
     if (nation !== null && nation.researching === null) {
       const next = TECHS.find(

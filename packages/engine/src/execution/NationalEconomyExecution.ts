@@ -26,6 +26,8 @@ import { startResearch } from "./ResearchExecution";
  */
 export class NationalEconomyExecution implements Execution {
   private mg: Game | null = null;
+  /** Economy steps run (game-wide; drives reputation recovery). */
+  private steps = 0;
 
   init(mg: Game): void {
     this.mg = mg;
@@ -41,6 +43,8 @@ export class NationalEconomyExecution implements Execution {
 
   tick(ticks: number): void {
     if (this.mg === null || ticks % ECONOMY_STEP_TICKS !== 0) return;
+    this.steps++;
+    this.mg.diplomacy().advance(this.mg, this.steps);
     for (const player of this.mg.players()) {
       if (!player.isAlive() || player.type() === PlayerType.Bot) continue;
       const nation = player.ensureNation();
@@ -83,17 +87,20 @@ export class NationalEconomyExecution implements Execution {
         infra.siteViews(player),
         infra.projectViews(player),
       );
+      nation.setDiplomacy(this.mg.diplomacy().view(player));
     }
   }
 
   snapshot(): ExecRecord {
     return NationalEconomyExecutionSnapshot.write({
       initialized: this.mg !== null,
+      steps: this.steps,
     });
   }
 
   restoreSnapshot(s: NationalEconomyState, r: SnapshotReader): void {
     this.mg = s.initialized ? r.game : null;
+    this.steps = s.steps;
   }
 }
 
@@ -196,15 +203,21 @@ export function economyInput(
       Number(mg.config().goldAdditionRate(player)) * ECONOMY_STEP_TICKS,
     money: player.gold(),
     infrastructure: mg.infrastructure().totalsFor(player),
+    tradeAgreements: mg.diplomacy().count("trade", player),
+    alliances: player.alliances().length,
   };
 }
 
-const NationalEconomyStateSchema = z.object({ initialized: z.boolean() });
+const NationalEconomyStateSchema = z.object({
+  initialized: z.boolean(),
+  steps: z.number(),
+});
 type NationalEconomyState = z.infer<typeof NationalEconomyStateSchema>;
 
 export const NationalEconomyExecutionSnapshot = execSnapshotType({
   name: "NationalEconomy",
-  version: 1,
+  version: 2,
+  migrations: { 1: (d) => ({ ...d, steps: 0 }) },
   schema: NationalEconomyStateSchema,
   cls: () => NationalEconomyExecution,
 });

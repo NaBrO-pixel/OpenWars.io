@@ -15,6 +15,7 @@ import { AttackExecution } from "./AttackExecution";
 import { BoatRetreatExecution } from "./BoatRetreatExecution";
 import { ConstructionExecution } from "./ConstructionExecution";
 import { DeleteUnitExecution } from "./DeleteUnitExecution";
+import { DiplomacyExecution } from "./DiplomacyExecution";
 import { DonateGoldExecution } from "./DonateGoldExecution";
 import { DonateTroopsExecution } from "./DonateTroopExecution";
 import { EmbargoAllExecution } from "./EmbargoAllExecution";
@@ -135,6 +136,13 @@ export class Executor {
         );
       case "delete_unit":
         return new DeleteUnitExecution(player, intent.unitId);
+      case "diplomacy":
+        return new DiplomacyExecution(
+          player,
+          intent.action,
+          intent.kind,
+          intent.target,
+        );
       case "research":
         return new ResearchExecution(player, intent.action, intent.tech);
       case "infrastructure":

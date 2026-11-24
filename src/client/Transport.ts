@@ -14,6 +14,7 @@ import {
   Intent,
   Winner,
 } from "@openfront/engine-api/Schemas";
+import type { AgreementKind } from "@openfront/engine-lib/configuration/DiplomacyConfig";
 import {
   CloseCode,
   CloseReason,
@@ -96,6 +97,15 @@ export class SendInfrastructureIntentEvent implements GameEvent {
     public readonly action: "start" | "cancel",
     public readonly unitId: number,
     public readonly kind: InfrastructureKind,
+  ) {}
+}
+
+/** OpenWars: propose, accept, reject or break an agreement. */
+export class SendDiplomacyIntentEvent implements GameEvent {
+  constructor(
+    public readonly action: "propose" | "accept" | "reject" | "break",
+    public readonly kind: AgreementKind,
+    public readonly target: PlayerID,
   ) {}
 }
 
@@ -348,6 +358,14 @@ export class Transport {
     this.subscribe(SendAttackIntentEvent, (e) => this.onSendAttackIntent(e));
     this.subscribe(SendUpgradeStructureIntentEvent, (e) =>
       this.onSendUpgradeStructureIntent(e),
+    );
+    this.subscribe(SendDiplomacyIntentEvent, (e) =>
+      this.sendIntent({
+        type: "diplomacy",
+        action: e.action,
+        kind: e.kind,
+        target: e.target,
+      }),
     );
     this.subscribe(SendResearchIntentEvent, (e) =>
       this.sendIntent({ type: "research", action: e.action, tech: e.tech }),

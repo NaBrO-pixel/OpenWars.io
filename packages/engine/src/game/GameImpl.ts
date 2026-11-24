@@ -39,6 +39,7 @@ import {
   Winner,
 } from "@openfront/engine-api/Schemas";
 import { ATTACK_INDEX_SENT } from "@openfront/engine-api/StatsSchemas";
+import { DiplomacyConfig } from "@openfront/engine-lib/configuration/DiplomacyConfig";
 import { renderNumber } from "@openfront/engine-lib/Format";
 import { GameMapImpl } from "@openfront/engine-lib/game/GameMapImpl";
 import {
@@ -85,6 +86,7 @@ import type {
 } from "../snapshot/SnapshotContext";
 import { AllianceImpl } from "./AllianceImpl";
 import { AllianceRequestImpl } from "./AllianceRequestImpl";
+import { DiplomacyDataSchema, DiplomacyMap } from "./Diplomacy";
 import {
   Alliance,
   AllianceRequest,
@@ -166,6 +168,8 @@ export class GameImpl implements Game {
   private _railNetwork: RailNetwork = createRailNetwork(this);
   /** OpenWars infrastructure (milestone 3); empty under the classic rules. */
   private _infrastructure = new InfrastructureMap();
+  /** OpenWars diplomacy (milestone 4); empty under the classic rules. */
+  private _diplomacy = new DiplomacyMap();
 
   // Used to assign unique IDs to each new alliance
   private nextAllianceID: number = 0;
@@ -1166,6 +1170,9 @@ export class GameImpl implements Game {
     const duration = this._ticks - alliance.createdAt();
     if (!other.isTraitor() && !other.isDisconnected()) {
       breaker.markTraitor();
+      if (this.config().isOpenWars()) {
+        this._diplomacy.penalize(breaker, DiplomacyConfig.allianceBreakPenalty);
+      }
       // Only a real betrayal counts as being betrayed. Gated on the same
       // condition as markTraitor so that a teammate dropping their connection
       // is not recorded as having stabbed anyone in the back.
@@ -1702,6 +1709,10 @@ export class GameImpl implements Game {
   infrastructure(): InfrastructureMap {
     return this._infrastructure;
   }
+
+  diplomacy(): DiplomacyMap {
+    return this._diplomacy;
+  }
   mirvsLaunched(): number {
     return this._mirvsLaunched;
   }
@@ -1793,6 +1804,7 @@ export class GameImpl implements Game {
       ),
       stats: w.versioned(StatsSnapshot, (this._stats as StatsImpl).snapshot()),
       infrastructure: this._infrastructure.toData(),
+      diplomacy: this._diplomacy.toData(),
     };
   }
 
@@ -1856,6 +1868,7 @@ export class GameImpl implements Game {
       readVersioned(StatsSnapshot, s.stats),
     );
     this._infrastructure.restore(s.infrastructure);
+    this._diplomacy.restore(s.diplomacy);
   }
 
   conquerPlayer(conqueror: Player, conquered: Player) {
@@ -1944,10 +1957,15 @@ export class GameImpl implements Game {
 
 export const GameSnapshot = snapshotType({
   name: "Game",
-  version: 2,
+  version: 3,
   migrations: {
     // v1 predates OpenWars infrastructure.
     1: (d) => ({ ...d, infrastructure: { sites: [], projects: [] } }),
+    // v2 predates OpenWars diplomacy.
+    2: (d) => ({
+      ...d,
+      diplomacy: { agreements: [], proposals: [], reputation: [] },
+    }),
   },
   schema: z.object({
     ticks: zInt(),
@@ -1983,6 +2001,7 @@ export const GameSnapshot = snapshotType({
     sharedWaterCache: VersionedSchema,
     stats: VersionedSchema,
     infrastructure: InfrastructureDataSchema,
+    diplomacy: DiplomacyDataSchema,
   }),
 });
 export type GameState = z.infer<typeof GameSnapshot.schema>;

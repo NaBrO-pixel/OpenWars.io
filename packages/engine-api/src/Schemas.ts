@@ -1,6 +1,7 @@
 import { zb } from "@openfront/zbin";
 import quickChatData from "resources/QuickChat.json";
 import { z } from "zod";
+import { AgreementKindSchema } from "./game/Diplomacy";
 import {
   AllPlayers,
   CustomGameMap,
@@ -50,7 +51,8 @@ export type Intent =
   | UpdateGameConfigIntent
   | ToggleGameStartTimer
   | InfrastructureIntent
-  | ResearchIntent;
+  | ResearchIntent
+  | DiplomacyIntent;
 
 export type AttackIntent = z.infer<typeof AttackIntentSchema>;
 export type CancelAttackIntent = z.infer<typeof CancelAttackIntentSchema>;
@@ -86,6 +88,7 @@ export type UpdateGameConfigIntent = z.infer<
 >;
 export type InfrastructureIntent = z.infer<typeof InfrastructureIntentSchema>;
 export type ResearchIntent = z.infer<typeof ResearchIntentSchema>;
+export type DiplomacyIntent = z.infer<typeof DiplomacyIntentSchema>;
 export type ToggleGameStartTimer = z.infer<
   typeof ToggleGameStartTimerIntentSchema
 >;
@@ -598,6 +601,15 @@ export const ResearchIntentSchema = z.object({
   tech: z.string().max(40),
 });
 
+// OpenWars diplomacy (milestone 4): propose, accept, reject or break an
+// agreement with another nation. Validated by the engine (DiplomacyExecution).
+export const DiplomacyIntentSchema = z.object({
+  type: z.literal("diplomacy"),
+  action: z.enum(["propose", "accept", "reject", "break"]),
+  kind: AgreementKindSchema,
+  target: ID,
+});
+
 export const IntentSchema = z.compile(
   z.discriminatedUnion("type", [
     AttackIntentSchema,
@@ -628,6 +640,7 @@ export const IntentSchema = z.compile(
     // Appended last: zbin encodes union members by position.
     InfrastructureIntentSchema,
     ResearchIntentSchema,
+    DiplomacyIntentSchema,
   ]),
 );
 
