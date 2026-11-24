@@ -111,7 +111,8 @@
   --shadow-malibu-blue-pill: 0 0 6px rgba(57, 189, 232, 0.35);
   --shadow-malibu-blue-ring-sm: 0 0 0 4px rgba(57, 189, 232, 0.2);
   --shadow-malibu-blue-ring-lg: 0 0 0 6px rgba(57, 189, 232, 0.3);
-  --shadow-lobby-card-hover: 0 0 0 2px #39bde8, 0 0 20px rgba(57, 189, 232, 0.5);
+  --shadow-lobby-card-hover:
+    0 0 0 2px #39bde8, 0 0 20px rgba(57, 189, 232, 0.5);
   --shadow-action-card-hover:
     0 0 0 1px #39bde8, 0 0 12px rgba(57, 189, 232, 0.35);
 }

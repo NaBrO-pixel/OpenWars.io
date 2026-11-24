@@ -1,7 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { NationView } from "@openfront/engine-api/game/GameUpdates";
 import "../../../../src/client/hud/layers/CommandBar";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { CommandBar } from "../../../../src/client/hud/layers/CommandBar";
-import "../../../../src/client/hud/layers/CommandNav";
 import {
   COMMAND_SECTIONS,
   type CommandNav,
@@ -11,6 +11,7 @@ import {
   formatIncome,
   formatShare,
   IncomeTracker,
+  nationalSummary,
 } from "../../../../src/client/hud/NationalSummary";
 import type { GameView } from "../../../../src/client/view";
 
@@ -24,9 +25,15 @@ interface FakePlayer {
   numTilesOwned: () => number;
   allies: () => FakePlayer[];
   units: () => unknown[];
+  nation: () => NationView | null;
 }
 
-function player(id: string, tiles: number, earned = 0): FakePlayer {
+function player(
+  id: string,
+  tiles: number,
+  earned = 0,
+  nation: NationView | null = null,
+): FakePlayer {
   return {
     id: () => id,
     isAlive: () => true,
@@ -37,8 +44,22 @@ function player(id: string, tiles: number, earned = 0): FakePlayer {
     numTilesOwned: () => tiles,
     allies: () => [],
     units: () => [],
+    nation: () => nation,
   };
 }
+
+const NATION: NationView = {
+  industry: 340,
+  research: 75,
+  stability: 720,
+  stabilityTarget: 800,
+  income: { base: 1000, tax: 900, industry: 120 },
+  expenses: { territory: 200, structures: 30 },
+  industryRate: 8,
+  researchRate: 3,
+  development: 4,
+  netHistory: [500, 900, 1200, 1790],
+};
 
 function game(
   me: FakePlayer | null,
@@ -113,6 +134,55 @@ describe("command-bar", () => {
   });
 });
 
+describe("economy interface", () => {
+  it("the bar adds industry, research and stability", async () => {
+    const bar = document.createElement("command-bar") as CommandBar;
+    document.body.appendChild(bar);
+    bar.game = game(player("me", 250, 0, NATION));
+    bar.init();
+    bar.tick();
+    await bar.updateComplete;
+    expect(bar.querySelectorAll("[data-command-bar-item]")).toHaveLength(8);
+    expect(bar.textContent).toContain("72%");
+    bar.remove();
+  });
+
+  it("the economy panel explains income and expenses", async () => {
+    const nav = document.createElement("command-nav") as CommandNav;
+    document.body.appendChild(nav);
+    nav.game = game(player("me", 100, 0, NATION));
+    nav.init();
+    nav.tick();
+    nav.toggle("economy");
+    await nav.updateComplete;
+    const panel = nav.querySelector('[data-command-panel="economy"]')!;
+    const text = panel.textContent ?? "";
+    for (const key of [
+      "command_nav.income_tax_why",
+      "command_nav.expense_territory_why",
+      "command_nav.stability_why",
+    ]) {
+      expect(text).toContain(key);
+    }
+    expect(text).toContain("900/s"); // tax
+    expect(text).toContain("230/s"); // total expenses
+    expect(text).toContain("72% → 80%");
+    expect(panel.querySelector("[data-economy-trend] polyline")).not.toBeNull();
+    nav.remove();
+  });
+
+  it("net income takes the expenses off measured earnings", () => {
+    const t = new IncomeTracker();
+    const me = player("me", 100, 0, NATION);
+    const g = game(me, [], { seconds: () => 0 });
+    expect(nationalSummary(g, me as never, t).incomePerSecond).toBeNull();
+    const later = player("me", 100, 5_000, NATION);
+    const g2 = game(later, [], { seconds: () => 5 });
+    // 1,000/s earned, 230/s expenses.
+    expect(nationalSummary(g2, later as never, t).incomePerSecond).toBe(770);
+  });
+});
+
 describe("command-nav", () => {
   let nav: CommandNav;
   beforeEach(() => {
@@ -127,10 +197,18 @@ describe("command-nav", () => {
   });
   afterEach(() => nav.remove());
 
-  it("lists only sections that have a panel", async () => {
+  it("lists only sections whose system is on", async () => {
     await nav.updateComplete;
-    const buttons = nav.querySelectorAll("[data-command-section]");
-    expect(buttons).toHaveLength(COMMAND_SECTIONS.length);
+    const ids = () =>
+      Array.from(nav.querySelectorAll("[data-command-section]")).map((b) =>
+        b.getAttribute("data-command-section"),
+      );
+    // Classic rules: no economy section.
+    expect(ids()).toEqual(["overview", "statistics"]);
+    nav.game = game(player("me", 100, 0, NATION));
+    nav.tick();
+    await nav.updateComplete;
+    expect(ids()).toEqual(COMMAND_SECTIONS.map((s) => s.id));
     expect(nav.querySelector("[data-command-panel]")).toBeNull();
   });
 

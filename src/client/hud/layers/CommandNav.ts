@@ -10,6 +10,7 @@ import {
   formatClock,
   formatIncome,
   formatShare,
+  formatStability,
   IncomeTracker,
   type NationalSummary,
   nationalSummary,
@@ -26,6 +27,8 @@ interface CommandSection {
   labelKey: string;
   icon: TemplateResult;
   render: (ctx: SectionContext) => TemplateResult;
+  /** Shown only when this holds (e.g. the system it shows is on). */
+  available?: (ctx: SectionContext) => boolean;
 }
 
 const svg = (d: string) =>
@@ -154,6 +157,118 @@ function renderStatistics({ game, me, summary }: SectionContext) {
   `;
 }
 
+/** A line of net income per second over time (the economy's history). */
+function trend(values: number[]): TemplateResult {
+  if (values.length < 2) {
+    return html`<p class="text-sm text-ow-text-2">
+      ${translateText("command_nav.trend_pending")}
+    </p>`;
+  }
+  const w = 240;
+  const h = 48;
+  const max = Math.max(1, ...values.map((v) => Math.abs(v)));
+  const y = (v: number) => h / 2 - (v / max) * (h / 2 - 2);
+  const points = values
+    .map((v, i) => `${(i / (values.length - 1)) * w},${y(v).toFixed(1)}`)
+    .join(" ");
+  return html`<svg
+    viewBox="0 0 ${w} ${h}"
+    class="w-full h-12"
+    role="img"
+    aria-label=${translateText("command_nav.trend")}
+    data-economy-trend
+  >
+    <line
+      x1="0"
+      x2=${w}
+      y1=${h / 2}
+      y2=${h / 2}
+      stroke="currentColor"
+      class="text-ow-border"
+    />
+    <polyline
+      points=${points}
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      class="text-ow-accent"
+    />
+  </svg>`;
+}
+
+function explained(label: string, value: string, why: string) {
+  return html`<div class="py-1 border-b border-ow-border/60 last:border-0">
+    <div class="flex items-baseline justify-between gap-3">
+      <span class="text-ow-text-2 text-sm">${label}</span>
+      <span class="text-ow-text text-sm font-semibold tabular-nums"
+        >${value}</span
+      >
+    </div>
+    <p class="text-xs text-ow-text-2/80">${why}</p>
+  </div>`;
+}
+
+function renderEconomy({ summary }: SectionContext) {
+  const n = summary.nation!;
+  const perSec = (v: number) => `${renderNumber(v)}/s`;
+  const expenses = n.expenses.territory + n.expenses.structures;
+  return html`
+    ${row(translateText("command_bar.money"), renderNumber(summary.money))}
+    ${row(
+      translateText("command_nav.net_income"),
+      formatIncome(summary.incomePerSecond, renderNumber),
+    )}
+    ${heading(translateText("command_nav.income"))}
+    ${explained(
+      translateText("command_nav.income_base"),
+      perSec(n.income.base),
+      translateText("command_nav.income_base_why"),
+    )}
+    ${explained(
+      translateText("command_nav.income_tax"),
+      perSec(n.income.tax),
+      translateText("command_nav.income_tax_why"),
+    )}
+    ${explained(
+      translateText("command_nav.income_industry"),
+      perSec(n.income.industry),
+      translateText("command_nav.income_industry_why"),
+    )}
+    ${heading(translateText("command_nav.expenses"))}
+    ${explained(
+      translateText("command_nav.expense_territory"),
+      perSec(n.expenses.territory),
+      translateText("command_nav.expense_territory_why"),
+    )}
+    ${explained(
+      translateText("command_nav.expense_structures"),
+      perSec(n.expenses.structures),
+      translateText("command_nav.expense_structures_why"),
+    )}
+    ${row(translateText("command_nav.expenses_total"), perSec(expenses))}
+    ${heading(translateText("command_nav.nation"))}
+    ${row(
+      translateText("command_bar.industry"),
+      `${renderNumber(n.industry)} (+${n.industryRate}/s)`,
+    )}
+    ${row(
+      translateText("command_bar.research"),
+      `${renderNumber(n.research)} (+${n.researchRate}/s)`,
+    )}
+    ${row(
+      translateText("command_bar.population"),
+      `${renderTroops(summary.population)} / ${renderTroops(summary.maxPopulation)}`,
+    )}
+    ${explained(
+      translateText("command_bar.stability"),
+      `${formatStability(n.stability)} → ${formatStability(n.stabilityTarget)}`,
+      translateText("command_nav.stability_why"),
+    )}
+    ${row(translateText("command_nav.development"), String(n.development))}
+    ${heading(translateText("command_nav.trend"))} ${trend(n.netHistory)}
+  `;
+}
+
 /**
  * The command sections, in navigation order. Later milestones add theirs
  * (economy, infrastructure, research, diplomacy, intelligence) here; only
@@ -165,6 +280,13 @@ export const COMMAND_SECTIONS: readonly CommandSection[] = [
     labelKey: "command_nav.overview",
     icon: svg("M4 21V4m0 0h11l-2 4 2 4H4"),
     render: renderOverview,
+  },
+  {
+    id: "economy",
+    labelKey: "command_nav.economy",
+    icon: svg("M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"),
+    render: renderEconomy,
+    available: (ctx) => ctx.summary.nation !== null,
   },
   {
     id: "statistics",
@@ -220,7 +342,9 @@ export class CommandNav extends LitElement implements Controller {
 
   render() {
     if (this.ctx === null) return nothing;
-    const section = COMMAND_SECTIONS.find((s) => s.id === this.open);
+    const ctx = this.ctx;
+    const sections = COMMAND_SECTIONS.filter((s) => s.available?.(ctx) ?? true);
+    const section = sections.find((s) => s.id === this.open);
     return html`
       <nav
         class="pointer-events-auto fixed left-0 z-[950] flex max-lg:top-1/2 max-lg:-translate-y-1/2 max-lg:items-start lg:bottom-4 lg:items-end"
@@ -229,7 +353,7 @@ export class CommandNav extends LitElement implements Controller {
         <div
           class="flex flex-col gap-1 rounded-r-md border border-l-0 border-ow-border bg-ow-panel/92 backdrop-blur-sm p-1 shadow-lg"
         >
-          ${COMMAND_SECTIONS.map(
+          ${sections.map(
             (s) =>
               html`<button
                 class="flex h-10 w-10 items-center justify-center rounded transition-colors ${

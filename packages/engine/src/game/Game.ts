@@ -51,6 +51,7 @@ import type { EngineConfig } from "../configuration/EngineConfig";
 import { AbstractGraph } from "../pathfinding/algorithms/AbstractGraph";
 import { PathFinder } from "../pathfinding/types";
 import type { ExecRecord, SnapshotWriter } from "../snapshot/SnapshotContext";
+import type { NationState } from "./NationState";
 import { RailNetwork } from "./RailNetwork";
 import { Stats } from "./Stats";
 
@@ -346,6 +347,9 @@ export interface Player extends PlayerLike {
   isLobbyCreator(): boolean;
   /** A scenario nation a human may be assigned (docs/ScenarioEditor.md). */
   playable(): boolean;
+  /** The OpenWars national economy; null under the classic rules. */
+  nation(): NationState | null;
+  ensureNation(): NationState;
   setPlayable(playable: boolean): void;
 
   // State & Properties

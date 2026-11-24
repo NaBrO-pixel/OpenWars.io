@@ -352,6 +352,11 @@ export const GameConfigSchema = z.compile(
     // Stripped from gameStartInfo and from the advertised lobby config: sibling
     // ids are private lobby ids, which are join secrets.
     pool: PoolConfigSchema.optional(),
+    // OpenWars 2.0 systems (docs/OpenWars2.md): "openwars" turns on the
+    // national economy and the systems built on it. Absent: the classic
+    // rules, exactly as before (old records and replays play back unchanged).
+    // Appended last: zbin encodes fields in declaration order.
+    ruleset: z.enum(["openwars"]).optional(),
   }),
 );
 

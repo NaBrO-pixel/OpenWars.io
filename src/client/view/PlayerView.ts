@@ -15,6 +15,7 @@ import {
   Tick,
   UnitType,
 } from "@openfront/engine-api/game/GameTypes";
+import type { NationView } from "@openfront/engine-api/game/GameUpdates";
 import {
   AllianceView,
   AttackUpdate,
@@ -493,6 +494,11 @@ export class PlayerView implements PlayerLike {
 
   isLobbyCreator(): boolean {
     return this.static.isLobbyCreator;
+  }
+
+  /** The OpenWars national economy; null under the classic rules. */
+  nation(): NationView | null {
+    return this.state.nation ?? null;
   }
 
   isAlliedWith(other: PlayerView): boolean {

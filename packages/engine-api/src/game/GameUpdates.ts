@@ -292,6 +292,39 @@ export interface PlayerUpdate {
   isLobbyCreator?: boolean;
   /** Scenario nations: a human may be assigned this one. */
   playable?: boolean;
+  /** OpenWars national economy (ruleset "openwars"); absent otherwise. A new
+   * object only when the figures change, so it diffs by reference. */
+  nation?: NationView;
+}
+
+/** A nation's economy as the client shows it (EconomyConfig, milestone 2). */
+export interface NationView {
+  industry: number;
+  research: number;
+  /** Permille: 1000 = 100%. */
+  stability: number;
+  stabilityTarget: number;
+  /** Last economy step, money per second. */
+  income: NationIncome;
+  expenses: NationExpenses;
+  /** Production per second. */
+  industryRate: number;
+  researchRate: number;
+  /** Development score (structure levels). */
+  development: number;
+  /** Older first: net money per second, sampled every historyEvery steps. */
+  netHistory: number[];
+}
+
+export interface NationIncome {
+  base: number;
+  tax: number;
+  industry: number;
+}
+
+export interface NationExpenses {
+  territory: number;
+  structures: number;
 }
 
 export interface AllianceView {

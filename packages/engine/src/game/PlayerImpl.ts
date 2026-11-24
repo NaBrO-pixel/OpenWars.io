@@ -79,6 +79,7 @@ import {
 } from "./Game";
 import { GameImpl } from "./GameImpl";
 import { diffPlayerUpdate, packAttackTroopDeltas } from "./GameUpdateUtils";
+import { NationState, NationStateSchema } from "./NationState";
 import {
   bumpTraversalGeneration,
   tileTraversalScratch,
@@ -200,6 +201,8 @@ export class PlayerImpl implements Player {
   private _isDisconnected = false;
   private _disconnectSnapshot: DisconnectSnapshot | null = null;
   private _playable = false;
+  /** The OpenWars national economy; null under the classic rules. */
+  private _nation: NationState | null = null;
 
   /**
    * Last PlayerUpdate emitted for this player on the worker→main channel.
@@ -418,7 +421,18 @@ export class PlayerImpl implements Player {
       lastDeleteUnitTick: this.lastDeleteUnitTick,
       isLobbyCreator: this.isLobbyCreator(),
       playable: this._playable,
+      nation: this._nation?.view(),
     };
+  }
+
+  nation(): NationState | null {
+    return this._nation;
+  }
+
+  /** The nation's economy, created on first use (ruleset "openwars"). */
+  ensureNation(): NationState {
+    this._nation ??= new NationState();
+    return this._nation;
   }
 
   smallID(): number {
@@ -2061,6 +2075,7 @@ export class PlayerImpl implements Player {
         ? { ...this._disconnectSnapshot }
         : null,
       playable: this._playable,
+      nation: this._nation?.toData() ?? null,
       // Never assigned until the first PlayerExecution tick; keep that apart
       // from an explicit null.
       largestClusterBoundingBox: box
@@ -2139,6 +2154,7 @@ export class PlayerImpl implements Player {
       ? { ...s.disconnectSnapshot }
       : null;
     this._playable = s.playable;
+    this._nation = s.nation ? NationState.fromData(s.nation) : null;
     this.lastSentUpdate = undefined;
     const box = s.largestClusterBoundingBox;
     this.largestClusterBoundingBox = box
@@ -2154,10 +2170,12 @@ export class PlayerImpl implements Player {
 
 export const PlayerSnapshot = snapshotType({
   name: "Player",
-  version: 2,
+  version: 3,
   migrations: {
     // v1 had no scenario nations, so none was playable.
     1: (d) => ({ ...d, playable: false }),
+    // v2 predates the OpenWars economy.
+    2: (d) => ({ ...d, nation: null }),
   },
   schema: z.object({
     smallID: zInt(),
@@ -2218,6 +2236,7 @@ export const PlayerSnapshot = snapshotType({
       })
       .nullable(),
     playable: z.boolean(),
+    nation: NationStateSchema.nullable(),
     largestClusterBoundingBox: z
       .object({ minX: zInt(), minY: zInt(), maxX: zInt(), maxY: zInt() })
       .nullable()

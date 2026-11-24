@@ -124,6 +124,9 @@ const VARIANTS: [string, Partial<GameConfig>][] = [
   // Water nukes rewrite terrain and the water graph mid-game.
   ["water nukes", { waterNukes: true }],
   ["teams", { gameMode: GameMode.Team, playerTeams: 2 }],
+  // Free for all under the OpenWars rules: everything the first variant runs,
+  // plus the national economy.
+  ["openwars", { ruleset: "openwars" }],
 ];
 
 describe.each(VARIANTS)("full game snapshots: %s", (_, overrides) => {
@@ -193,7 +196,8 @@ describe.each(VARIANTS)("full game snapshots: %s", (_, overrides) => {
   test(
     "the game exercised every execution type",
     () => {
-      if (Object.keys(overrides).length > 0) return; // checked once, on FFA
+      // Checked once, on the variant that runs every execution type.
+      if (overrides.ruleset !== "openwars") return;
       // Runs during the spawn phase and finishes inside init, so it is never
       // alive at a tick boundary. BasicExecutions.test.ts covers it directly.
       const neverStored = new Set(["Pause"]);

@@ -1,4 +1,5 @@
 import type { TileRef } from "@openfront/engine-api/game/GameMap";
+import type { NationView } from "@openfront/engine-api/game/GameUpdates";
 
 /** TrainType enum — numeric values matching UnitState.trainType. */
 export enum TrainType {
@@ -93,6 +94,8 @@ export interface PlayerState {
   outgoingAllianceRequests: string[];
   alliances: AllianceData[];
   outgoingEmojis: EmojiData[];
+  /** OpenWars national economy (ruleset "openwars"); undefined otherwise. */
+  nation?: NationView;
 }
 
 export interface UnitState {

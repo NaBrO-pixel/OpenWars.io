@@ -1,6 +1,7 @@
 // The national figures the command interface shows (top bar, command
 // panels), read from the client's view of the simulation. One place, so the
 // bar and the panels never disagree.
+import type { NationView } from "@openfront/engine-api/game/GameUpdates";
 import type { GameView } from "../view/GameView";
 import type { PlayerView } from "../view/PlayerView";
 
@@ -16,6 +17,14 @@ export interface NationalSummary {
   tilesOwned: number;
   /** Seconds since the match started (after the spawn phase). */
   elapsedSeconds: number;
+  /** The OpenWars economy; null under the classic rules. */
+  nation: NationView | null;
+}
+
+/** Expenses per second under the OpenWars economy (0 under classic rules). */
+export function expensesPerSecond(nation: NationView | null): number {
+  if (nation === null) return 0;
+  return nation.expenses.territory + nation.expenses.structures;
 }
 
 const INCOME_WINDOW_S = 10;
@@ -54,15 +63,24 @@ export function nationalSummary(
 ): NationalSummary {
   const elapsedSeconds = Math.max(0, game.elapsedGameSeconds());
   const land = Math.max(1, game.numLandTiles());
+  const nation = player.nation();
+  // goldEarned counts every gain; the economy's expenses come off it.
+  const gross = income.sample(elapsedSeconds, player.goldEarned());
   return {
     money: player.gold(),
-    incomePerSecond: income.sample(elapsedSeconds, player.goldEarned()),
+    incomePerSecond: gross === null ? null : gross - expensesPerSecond(nation),
     population: player.troops(),
     maxPopulation: game.config().maxTroops(player),
     territoryShare: player.numTilesOwned() / land,
     tilesOwned: player.numTilesOwned(),
     elapsedSeconds,
+    nation,
   };
+}
+
+/** Stability (permille) as a percentage. */
+export function formatStability(permille: number): string {
+  return `${Math.round(permille / 10)}%`;
 }
 
 export function formatClock(totalSeconds: number): string {

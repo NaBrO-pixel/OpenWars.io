@@ -8,6 +8,7 @@ import {
   formatClock,
   formatIncome,
   formatShare,
+  formatStability,
   IncomeTracker,
   type NationalSummary,
   nationalSummary,
@@ -89,6 +90,24 @@ export class CommandBar extends LitElement implements Controller {
           formatShare(s.territoryShare),
           "text-ow-accent",
         )}
+        ${
+          s.nation === null
+            ? nothing
+            : html`${this.item(
+                translateText("command_bar.industry"),
+                renderNumber(s.nation.industry),
+              )}
+              ${this.item(
+                translateText("command_bar.research"),
+                renderNumber(s.nation.research),
+                "text-ow-accent",
+              )}
+              ${this.item(
+                translateText("command_bar.stability"),
+                formatStability(s.nation.stability),
+                stabilityTone(s.nation.stability),
+              )}`
+        }
         <div class="hidden sm:contents">
           ${this.item(
             translateText("command_bar.time"),
@@ -98,4 +117,11 @@ export class CommandBar extends LitElement implements Controller {
       </div>
     `;
   }
+}
+
+/** Colour for a stability value: healthy, strained, or in crisis. */
+export function stabilityTone(permille: number): string {
+  if (permille >= 600) return "text-ow-success";
+  if (permille >= 350) return "text-ow-warning";
+  return "text-ow-error";
 }

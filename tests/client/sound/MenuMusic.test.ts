@@ -116,7 +116,8 @@ afterEach(() => {
   for (const [type, fn] of registered) document.removeEventListener(type, fn);
 });
 
-const themes = () => howlInstances.filter((h) => h.src.includes("openwars-menu"));
+const themes = () =>
+  howlInstances.filter((h) => h.src.includes("openwars-menu"));
 
 /** Stands in for a browser that does (or does not) support the selector. */
 function setVolumeLocked(result: boolean | "unsupported") {

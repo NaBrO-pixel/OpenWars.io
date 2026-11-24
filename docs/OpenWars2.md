@@ -162,3 +162,35 @@ only when its tests, typecheck and production build pass.
 Deferred to the milestone that gives them content: the right contextual
 territory panel (milestone 3, infrastructure), map overlays (milestones 3 and
 5), the activity feed's event and research entries (milestones 4 and 5).
+
+### Milestone 2: national economy
+
+- `GameConfig.ruleset: "openwars"` turns the OpenWars systems on. New solo,
+  hosted and public games set it (`SinglePlayerModal`, `GameManager`,
+  `MapPlaylist`); without it the simulation is exactly the classic one.
+- All balance values: `packages/engine-lib/src/configuration/EconomyConfig.ts`.
+- `packages/engine/src/game/NationState.ts`: the economy rules
+  (`economyStep`, pure and unit-tested) and each nation's state: industry and
+  research stockpiles, stability (permille, moving toward a target), the last
+  step's income and expenses, and a net-income history.
+- `NationalEconomyExecution`, once a second for every nation (not tribes):
+  tax on population scaled by stability, industry income, territory upkeep
+  beyond a free heartland, structure upkeep. Stability's target rises with
+  development and falls with fast growth (measured against at least the
+  heartland, so opening expansion is not punished) and with debts the
+  treasury can't cover.
+- Synchronisation: the economy is part of the deterministic simulation, so
+  every client computes it identically (desyncs are caught by the existing
+  hashes); it reaches the UI as `PlayerUpdate.nation`, a new object only
+  when the figures change. Snapshots: `Player` v3 (migration from v2).
+  Reconnecting clients replay turns, so their economy is exact.
+- UI: the bar adds industry, research and stability; net income subtracts
+  the economy's expenses; an Economy panel explains every income and expense
+  line and shows stability against its target and a net-income trend.
+- Tests: `tests/core/executions/NationalEconomy.test.ts` (rules, a running
+  game, update diffing, snapshot continuation), the full-game snapshot test's
+  new `openwars` variant, `CommandInterface.test.ts`.
+
+No player action is added in this milestone, so there is nothing new to
+validate: the economy runs by itself. Spending industry and research comes
+with infrastructure (milestone 3) and research (milestone 4).

@@ -155,6 +155,11 @@ export class Config {
     return this.spawnImmunityDuration() > DEFAULT_SPAWN_IMMUNITY_TICKS;
   }
 
+  /** OpenWars 2.0 systems are on (GameConfig.ruleset, docs/OpenWars2.md). */
+  isOpenWars(): boolean {
+    return this.gameConfig().ruleset === "openwars";
+  }
+
   gameConfig(): GameConfig {
     return this._gameConfig;
   }

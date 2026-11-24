@@ -102,6 +102,7 @@ export class GameManager {
           infiniteTroops: false,
           maxTimerValue: undefined,
           instantBuild: false,
+          ruleset: "openwars",
           randomSpawn: false,
           gameMode: GameMode.FFA,
           bots: 400,

@@ -44,6 +44,7 @@ import { applyEditorCommand } from "./editor/EditorCommands";
 import { structureExecution } from "./execution/ConstructionExecution";
 import { DoomsdayClockExecution } from "./execution/DoomsdayClockExecution";
 import { Executor } from "./execution/ExecutionManager";
+import { NationalEconomyExecution } from "./execution/NationalEconomyExecution";
 import { PlayerExecution } from "./execution/PlayerExecution";
 import { RecomputeRailClusterExecution } from "./execution/RecomputeRailClusterExecution";
 import { SpawnTimerExecution } from "./execution/SpawnTimerExecution";
@@ -272,6 +273,9 @@ export class GameRunner {
   /** What every running game has, however it started. */
   private addRunningGameExecutions(): void {
     this.game.addExecution(new WinCheckExecution());
+    if (this.game.config().isOpenWars()) {
+      this.game.addExecution(new NationalEconomyExecution());
+    }
     if (this.game.config().doomsdayClockConfig().enabled) {
       this.game.addExecution(new DoomsdayClockExecution());
     }

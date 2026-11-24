@@ -1346,6 +1346,8 @@ export class SinglePlayerModal extends BaseModal {
             gameType: GameType.Singleplayer,
             gameMode: this.gameMode,
             playerTeams: this.teamCount,
+            // OpenWars 2.0 rules (docs/OpenWars2.md).
+            ruleset: "openwars",
             difficulty: this.selectedDifficulty,
             maxTimerValue: finalMaxTimerValue,
             bots: this.bots,
