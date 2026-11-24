@@ -1192,6 +1192,10 @@ describe("WinModal provisional XP at death", () => {
 
     it("shows the server's figure alone when it answers before one is worked out", async () => {
       stubXpEndpoint(() => json(endServerXp()));
+      // The rules are still loading when the server answers: no figure has
+      // been worked out yet (explicit, rather than left to how fast the
+      // modal's other loads happen to be).
+      fetchProgressionConfig.mockReturnValue(new Promise(() => {}));
       const { game, end } = aliveGame();
       await mount(game);
       await endGame(end);
