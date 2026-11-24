@@ -411,3 +411,10 @@ Tanks are ground units that roll out of factories, break through hostile land, d
   - **In the Diplomacy panel:** it shows influence as partners against the limit, and hides offers to new partners once the limit is reached.
 - **AI nations offer trade.** Every 30 seconds (staggered by nation), each AI nation offers a trade agreement to the first neighbour it is on neutral or better terms with, isn't at war with, and may still sign with.
 - **Simulation:** in the 30-minute AI world game, the diplomatic path now passes its threshold at minute 22 and research wins at minute 25. Economic dominance reaches 43%.
+
+## Victory thresholds scale with the game
+
+- **Economic:** a nation needs twice its fair share of world income, and never less than 30% (`economicShareNeeded`). That's 67% in a game of three, 50% in a game of four, and 30% from seven nations up. Before this, in a game of three the average share (33%) was already above the threshold.
+- **Diplomatic:** a nation needs agreements or alliances with 40% of the other nations, and never fewer than two (`diplomaticPartnersNeeded`). Before this, a single trade deal won a game of three.
+- **Influence in small games:** the limit also grows by one partner every 8 minutes, so small games can reach two partners from minute 8.
+- **Statistics panel:** victory descriptions show the real numbers for the current game, computed by the same functions the engine uses.

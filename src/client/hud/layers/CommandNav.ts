@@ -1,4 +1,4 @@
-import { UnitType } from "@openfront/engine-api/game/GameTypes";
+import { PlayerType, UnitType } from "@openfront/engine-api/game/GameTypes";
 import { renderNumber, renderTroops } from "@openfront/engine-lib/Format";
 import type { EventBus } from "@openfront/shared/EventBus";
 import { html, LitElement, nothing, type TemplateResult } from "lit";
@@ -176,7 +176,12 @@ function renderStatistics({ game, me, summary }: SectionContext) {
         </li>`;
       })}
     </ol>
-    ${renderVictoryProgress(me)}
+    ${renderVictoryProgress(
+      me,
+      game
+        .playerViews()
+        .filter((p) => p.isAlive() && p.type() !== PlayerType.Bot).length,
+    )}
   `;
 }
 

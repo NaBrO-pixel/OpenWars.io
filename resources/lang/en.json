@@ -3903,9 +3903,9 @@
   },
   "victory": {
     "diplomatic_title": "Diplomatic victory",
-    "diplomatic_why": "Have alliances or agreements with 60% of nations, with reputation 70+, for 90 seconds.",
+    "diplomatic_why": "Have alliances or agreements with {partners} of the {others} other nations, with reputation 70+, for 90 seconds.",
     "economic_title": "Economic victory",
-    "economic_why": "Earn 40% of the world's income and hold it for 90 seconds.",
+    "economic_why": "Earn {share}% of the world's income and hold it for 90 seconds.",
     "holding": "held {held}/{needed}s",
     "progress": "Victory progress",
     "technological_title": "Technological victory",

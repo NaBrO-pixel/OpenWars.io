@@ -2,6 +2,10 @@ import {
   MilitaryConfig,
   MOBILISATION_LEVELS,
 } from "@openfront/engine-lib/configuration/MilitaryConfig";
+import {
+  diplomaticPartnersNeeded,
+  economicShareNeeded,
+} from "@openfront/engine-lib/configuration/VictoryConfig";
 import { renderNumber, renderTroops } from "@openfront/engine-lib/Format";
 import { html, nothing, type TemplateResult } from "lit";
 import { translateText } from "../../Utils";
@@ -127,9 +131,20 @@ export function renderMilitary(
 }
 
 /** Progress toward each victory, for the Statistics panel. */
-export function renderVictoryProgress(me: PlayerView): TemplateResult {
+export function renderVictoryProgress(
+  me: PlayerView,
+  nations: number,
+): TemplateResult {
   const v = me.nation()?.victory ?? [];
   if (v.length === 0) return html``;
+  // The thresholds depend on the size of the game (VictoryConfig).
+  const why: Record<string, Record<string, string | number>> = {
+    economic: { share: Math.round(economicShareNeeded(nations) / 10) },
+    diplomatic: {
+      partners: diplomaticPartnersNeeded(Math.max(0, nations - 1)),
+      others: Math.max(0, nations - 1),
+    },
+  };
   return html`<h3
       class="mt-3 text-xs font-semibold uppercase tracking-wider text-ow-text-2"
     >
@@ -157,7 +172,7 @@ export function renderVictoryProgress(me: PlayerView): TemplateResult {
           ></div>
         </div>
         <p class="text-xs text-ow-text-2/80">
-          ${translateText(`victory.${p.kind}_why`)}
+          ${translateText(`victory.${p.kind}_why`, why[p.kind] ?? {})}
         </p>
       </div>`;
     })}`;

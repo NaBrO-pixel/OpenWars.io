@@ -187,14 +187,16 @@ describe("victory conditions", () => {
   test("economic: must be held, so a spike doesn't win", async () => {
     const { game, players } = await world(3);
     seconds(game, players[0], 2);
-    // The richest by far: industry money dwarfs the others.
+    // The richest by far: industry money dwarfs the others. In a game of
+    // three that has to be two-thirds of the world's income.
     const rich = players[0];
     for (let i = 0; i < 12; i++) {
-      rich.buildUnit(
+      const f = rich.buildUnit(
         UnitType.Factory,
         game.ref(1 + (i % 6) * 3, 2 + Math.floor(i / 6) * 6),
         {},
       );
+      for (let l = 0; l < 7; l++) f.increaseLevel();
     }
     seconds(game, rich, 2);
     const progress = () =>
@@ -213,9 +215,9 @@ describe("victory conditions", () => {
     seconds(game, players[0], 2);
     const [me, ...others] = players;
     // Influence grows with time: in a game of four, a second partner is
-    // allowed from minute 17, and two of three is past the 40% needed.
+    // allowed from minute 8, and two partners is what it needs.
     while (game.diplomacy().influenceCap(game, me) < 2) game.executeNextTick();
-    expect(game.ticks()).toBeGreaterThanOrEqual(17 * 600);
+    expect(game.ticks()).toBeGreaterThanOrEqual(8 * 600);
     for (const o of others.slice(0, 2)) {
       game.addExecution(new DiplomacyExecution(me, "propose", "trade", o.id()));
       game.executeNextTick();

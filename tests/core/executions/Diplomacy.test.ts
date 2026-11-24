@@ -224,7 +224,8 @@ describe("influence", () => {
     expect(influenceCap(38, 0)).toBe(1);
     expect(influenceCap(38, 600 * 10)).toBe(8); // 20% of 38
     expect(influenceCap(38, 600 * 20)).toBe(16); // 40%
-    expect(influenceCap(3, 600 * 20)).toBe(2);
+    // Small games: one more partner every 8 minutes.
+    expect(influenceCap(3, 600 * 20)).toBe(3);
   });
 
   test("limits new partners, not ceasefires or deals with partners", () => {

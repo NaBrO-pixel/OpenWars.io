@@ -36,6 +36,8 @@ export const DiplomacyConfig = {
    * size of the game.
    */
   influencePerMinutePermille: 20,
+  /** And at least one more partner every this many minutes. */
+  influenceMinutesPerPartner: 8,
   /** Economy steps between an AI nation's trade offers. */
   aiOfferEverySteps: 30,
 } as const;
@@ -48,7 +50,10 @@ export const DiplomacyConfig = {
 export function influenceCap(others: number, ticks: number): number {
   const minutes = Math.floor(Math.max(0, ticks) / 600);
   const share = minutes * DiplomacyConfig.influencePerMinutePermille;
-  return Math.max(1, Math.ceil((others * share) / 1000));
+  // Small games: one more partner every few minutes, whatever the share.
+  const floor =
+    1 + Math.floor(minutes / DiplomacyConfig.influenceMinutesPerPartner);
+  return Math.max(floor, Math.ceil((others * share) / 1000));
 }
 
 export const AGREEMENT_KINDS = ["nap", "trade", "ceasefire", "intel"] as const;

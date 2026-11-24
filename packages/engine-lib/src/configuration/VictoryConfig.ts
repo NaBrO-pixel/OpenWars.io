@@ -15,6 +15,13 @@ export const VictoryConfig = {
   economic: {
     /** Share of the world's income (net, positive nations only). */
     sharePermille: 300,
+    /**
+     * And at least this many times a fair share (1 / nations), so a small
+     * game isn't won by whoever happens to lead.
+     */
+    fairShareMultiple: 2,
+    /** Never more than this. */
+    maxSharePermille: 900,
     /** Needs at least this many nations in the match. */
     minNations: 3,
     holdSteps: 90,
@@ -22,6 +29,8 @@ export const VictoryConfig = {
   diplomatic: {
     /** Share of the other nations allied or under agreement. */
     influencePermille: 400,
+    /** And never fewer partners than this (or all the others, if fewer). */
+    minPartners: 2,
     minReputation: 70,
     minNations: 3,
     holdSteps: 90,
@@ -32,3 +41,17 @@ export const VictoryConfig = {
     holdSteps: 0,
   },
 } as const;
+
+/** The share of world income (permille) the economic victory needs. */
+export function economicShareNeeded(nations: number): number {
+  const c = VictoryConfig.economic;
+  const fair = Math.ceil((1000 * c.fairShareMultiple) / Math.max(1, nations));
+  return Math.min(c.maxSharePermille, Math.max(c.sharePermille, fair));
+}
+
+/** Partners (of `others` nations) the diplomatic victory needs. */
+export function diplomaticPartnersNeeded(others: number): number {
+  const c = VictoryConfig.diplomatic;
+  const share = Math.ceil((others * c.influencePermille) / 1000);
+  return Math.min(others, Math.max(c.minPartners, share));
+}

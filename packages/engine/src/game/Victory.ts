@@ -8,6 +8,8 @@ import { PlayerType } from "@openfront/engine-api/game/GameTypes";
 import type { VictoryProgressView } from "@openfront/engine-api/game/GameUpdates";
 import { TECHS } from "@openfront/engine-lib/configuration/TechConfig";
 import {
+  diplomaticPartnersNeeded,
+  economicShareNeeded,
   VictoryConfig,
   type VictoryKind,
 } from "@openfront/engine-lib/configuration/VictoryConfig";
@@ -60,7 +62,7 @@ export const VICTORY_CONDITIONS: readonly VictoryCondition[] = [
       if (nations.length < c.minNations) return 0;
       const world = nations.reduce((s, p) => s + Math.max(0, netIncome(p)), 0);
       const share = permille(Math.max(0, netIncome(player)), world);
-      return permille(share, c.sharePermille);
+      return permille(share, economicShareNeeded(nations.length));
     },
   },
   {
@@ -79,8 +81,8 @@ export const VICTORY_CONDITIONS: readonly VictoryCondition[] = [
           d.has("intel", player, o),
       ).length;
       const influence = permille(
-        permille(bound, others.length),
-        c.influencePermille,
+        bound,
+        diplomaticPartnersNeeded(others.length),
       );
       const trust = permille(d.reputation(player), c.minReputation);
       return Math.min(influence, trust);
