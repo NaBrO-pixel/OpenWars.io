@@ -386,7 +386,8 @@ continuation), `IntelRules.test.ts`, panel tests.
 
 - **Onboarding:** a "How OpenWars works" guide (`GuidePanel.ts`) covers the map, territory, resources, development, research, diplomacy and winning. It opens once on a player's first OpenWars game and can be reopened any time from the `?` button in the command nav. Tested in `CommandInterface.test.ts`.
 - **Multiplayer:** all 2.0 state is in the deterministic engine and in snapshots, so reconnecting clients restore it. `FullGameSnapshot` and each system's snapshot round-trip test check this. Diplomacy was verified end to end with two real clients.
-- **Still open:** the contextual territory panel, responsive polish for small screens, and a simulated balance pass that times each victory path (the target is 10–30 minutes). Today the victory thresholds come from `VictoryConfig` and are covered only by unit tests.
+- **Balance:** `VictoryBalance.test.ts` checks pacing from the configs. Researching every technology takes about 16 minutes (945 s) and needs about 3 research points a second, which a few cities and research centres provide. The economic and diplomatic victories must be held for 90 s with at least 3 nations. Territorial victory is the classic one. Timing full AI games by simulation is still to do.
+- **Still open:** the contextual territory panel and responsive polish for small screens.
 
 ### Release checklist
 
