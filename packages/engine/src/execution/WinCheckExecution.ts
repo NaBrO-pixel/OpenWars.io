@@ -135,6 +135,8 @@ export class WinCheckExecution implements Execution {
   // Hold more than the required share of non-fallout land, or outlast the
   // lobby timer / hard limit.
   private hasWon(tilesOwned: number): boolean {
+    // OpenWars modes can switch the territorial victory off (Cold War).
+    if (!this.mg!.config().victoryEnabled("territorial")) return false;
     if (this.mg === null) throw new Error("Not initialized");
     const timeElapsed = this.mg.elapsedGameSeconds();
     // null (host lobby, timer off) means no timer, same as undefined.

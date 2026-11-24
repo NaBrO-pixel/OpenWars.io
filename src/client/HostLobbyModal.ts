@@ -30,10 +30,15 @@ import {
   translateText,
 } from "../client/Utils";
 import { createLobby, getUserMe, queueLobby, setLobbyListed } from "./Api";
-import "./components/baseComponents/Modal";
 import { BaseModal } from "./components/BaseModal";
-import "./components/ConfirmDialog";
+import "./components/baseComponents/Modal";
 import { CopyButton } from "./components/CopyButton";
+import "./components/ConfirmDialog";
+import {
+  modeConfig,
+  type OpenWarsModeSettings,
+  VICTORY_OPTIONS,
+} from "./components/OpenWarsModePicker";
 import "./components/GameConfigSettings";
 import "./components/InputCard";
 import "./components/InsufficientCurrencyDialog";
@@ -108,6 +113,13 @@ export class HostLobbyModal extends BaseModal {
   @state() private startDelayValue: number | undefined = 3;
   @state() private instantBuild: boolean = false;
   @state() private randomSpawn: boolean = false;
+  /** OpenWars mode and its settings (milestone 7). */
+  @state() private owMode: OpenWarsModeSettings = modeConfig(
+    "openwars",
+    1000,
+    VICTORY_OPTIONS,
+  );
+
   @state() private compactMap: boolean = false;
   @state() private goldMultiplier: boolean = false;
   @state() private goldMultiplierValue: number | undefined = undefined;
@@ -698,6 +710,15 @@ export class HostLobbyModal extends BaseModal {
           }
           <!-- Players joined a listed lobby for its advertised settings, so
                they are frozen (the server rejects changes too). -->
+          <openwars-mode-picker
+            class="block ${this.publiclyListed ? "opacity-60" : ""}"
+            ?inert=${this.publiclyListed}
+            .mode=${this.owMode.ruleset}
+            @mode-change=${(e: CustomEvent<OpenWarsModeSettings>) => {
+              this.owMode = e.detail;
+              void this.putGameConfig();
+            }}
+          ></openwars-mode-picker>
           <game-config-settings
             class="block ${this.publiclyListed ? "opacity-60" : ""}"
             ?inert=${this.publiclyListed}
@@ -1946,6 +1967,7 @@ export class HostLobbyModal extends BaseModal {
             donateTroops: this.donateTroops,
             instantBuild: this.instantBuild,
             randomSpawn: this.randomSpawn,
+            ...this.owMode,
             gameMode: this.gameMode,
             disabledUnits: this.disabledUnits,
             spawnImmunityDuration: this.spawnImmunity

@@ -366,7 +366,15 @@ export const GameConfigSchema = z.compile(
     // national economy and the systems built on it. Absent: the classic
     // rules, exactly as before (old records and replays play back unchanged).
     // Appended last: zbin encodes fields in declaration order.
-    ruleset: z.enum(["openwars"]).optional(),
+    // "openwars" is World Conquest; "coldwar" and "sandbox" are the other
+    // OpenWars modes (milestone 7). Enum values only ever appended.
+    ruleset: z.enum(["openwars", "coldwar", "sandbox"]).optional(),
+    // OpenWars match settings (Sandbox exposes them): world-event frequency
+    // (1000 = normal, 0 = none) and the victory conditions in play.
+    eventFrequencyPermille: zb.uint({ max: 4000 }).optional(),
+    victoryConditions: z
+      .array(z.enum(["territorial", "economic", "diplomatic", "technological"]))
+      .optional(),
   }),
 );
 

@@ -1566,6 +1566,22 @@
     "hvn": "Humans vs Nations",
     "teams": "Teams"
   },
+  "game_modes": {
+    "coldwar": "Cold War",
+    "coldwar_desc": "Nations can't attack each other. Compete through economy, diplomacy, research and intelligence.",
+    "event_frequency": "World events",
+    "frequency_0": "Off",
+    "frequency_1000": "Normal",
+    "frequency_2000": "Frequent",
+    "frequency_500": "Rare",
+    "openwars": "World Conquest",
+    "openwars_desc": "Expand, build an economy, research, make deals and wars. Win by territory, economy, diplomacy or technology.",
+    "sandbox": "Sandbox",
+    "sandbox_desc": "Choose the world events and the ways to win, plus every setting below.",
+    "sandbox_more": "Starting gold, map, nations and more are in the settings below.",
+    "title": "Game mode",
+    "victories": "Ways to win"
+  },
   "game_right_sidebar": {
     "share_link": "Share Link"
   },

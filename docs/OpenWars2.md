@@ -353,3 +353,31 @@ continuation), `IntelRules.test.ts`, panel tests.
   growth, supply, combat factors, each victory path, holds, team wins,
   snapshot continuation). The full-game snapshot test now checks execution
   coverage across all its variants together.
+
+### Milestone 7: game modes
+
+- `GameConfig.ruleset` now takes `"openwars"` (World Conquest, the default
+  for new games), `"coldwar"` and `"sandbox"`; all three run every OpenWars
+  system. Two match settings join it: `eventFrequencyPermille` and
+  `victoryConditions`.
+- World Conquest: everything on; win by territory, economy, diplomacy or
+  technology.
+- Cold War: nations can't attack each other (in `canAttackPlayer`, so every
+  attack path respects it); tribes' land can still be taken. No territorial
+  victory; the other three decide the match.
+- Sandbox: choose world-event frequency (off, rare, normal, frequent) and
+  which victory conditions count. Everything else (starting gold, map,
+  nations, timers…) uses the existing lobby settings. Game speed is not
+  offered: the simulation has no speed setting, and only implemented
+  settings are exposed.
+- `Config.isColdWar / eventFrequencyPermille / victoryEnabled`;
+  `WinCheckExecution.hasWon` and the victory evaluator respect the enabled
+  list.
+- `<openwars-mode-picker>` in the solo and host-lobby dialogs. Every mode
+  sends its settings in full, so switching mode in a hosted lobby (partial
+  config patches) never keeps another mode's settings. Public lobbies stay
+  World Conquest.
+- Tests: `tests/core/executions/GameModes.test.ts` (Cold War attacks and
+  victories, Sandbox event and victory settings, classic games unchanged),
+  picker tests. Checked in a browser: picking Cold War in the solo dialog
+  starts a Cold War game.

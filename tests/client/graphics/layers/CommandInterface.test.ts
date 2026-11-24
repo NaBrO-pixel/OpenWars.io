@@ -2,6 +2,8 @@ import type { NationView } from "@openfront/engine-api/game/GameUpdates";
 import "../../../../src/client/hud/layers/CommandBar";
 import { EventBus } from "@openfront/shared/EventBus";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import "../../../../src/client/components/OpenWarsModePicker";
+import type { OpenWarsModePicker } from "../../../../src/client/components/OpenWarsModePicker";
 import type { CommandBar } from "../../../../src/client/hud/layers/CommandBar";
 import {
   COMMAND_SECTIONS,
@@ -678,5 +680,38 @@ describe("military panel and victory progress", () => {
       nav.querySelector('[data-victory="technological"]')?.textContent,
     ).toContain("33%");
     nav.remove();
+  });
+});
+
+describe("mode picker", () => {
+  it("emits each mode's full settings, and Sandbox's choices", async () => {
+    const picker = document.createElement(
+      "openwars-mode-picker",
+    ) as OpenWarsModePicker;
+    document.body.appendChild(picker);
+    const got: unknown[] = [];
+    picker.addEventListener("mode-change", (e) =>
+      got.push((e as CustomEvent).detail),
+    );
+    await picker.updateComplete;
+    (picker.querySelector('[data-mode="coldwar"]') as HTMLElement).click();
+    await picker.updateComplete;
+    expect(got[got.length - 1]).toEqual({
+      ruleset: "coldwar",
+      eventFrequencyPermille: 1000,
+      victoryConditions: ["economic", "diplomatic", "technological"],
+    });
+    (picker.querySelector('[data-mode="sandbox"]') as HTMLElement).click();
+    await picker.updateComplete;
+    (picker.querySelector('[data-frequency="0"]') as HTMLElement).click();
+    (
+      picker.querySelector('[data-victory-option="territorial"]') as HTMLElement
+    ).click();
+    expect(got[got.length - 1]).toEqual({
+      ruleset: "sandbox",
+      eventFrequencyPermille: 0,
+      victoryConditions: ["economic", "diplomatic", "technological"],
+    });
+    picker.remove();
   });
 });

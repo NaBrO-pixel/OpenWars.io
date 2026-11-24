@@ -51,7 +51,9 @@ export class NationalEconomyExecution implements Execution {
     if (this.mg === null || ticks % ECONOMY_STEP_TICKS !== 0) return;
     this.steps++;
     this.mg.diplomacy().advance(this.mg, this.steps);
-    this.mg.worldEvents().advance(this.mg);
+    this.mg
+      .worldEvents()
+      .advance(this.mg, this.mg.config().eventFrequencyPermille());
     const events = this.mg.worldEvents().views();
     this.checkVictory();
     const eventHistory = this.mg.worldEvents().historyViews();

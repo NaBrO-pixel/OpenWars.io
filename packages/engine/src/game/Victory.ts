@@ -122,6 +122,7 @@ export function evaluateVictory(
     if (nation === null) continue;
     const views: VictoryProgressView[] = [];
     for (const c of VICTORY_CONDITIONS) {
+      if (!game.config().victoryEnabled(c.kind)) continue;
       const progress = c.progress(game, player, nations);
       const needed = c.holdSteps ?? 0;
       let held = 0;

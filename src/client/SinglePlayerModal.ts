@@ -21,12 +21,17 @@ import { html, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { showToast, translateText } from "../client/Utils";
 import { responseHasLinkedIdentity } from "./AccountIdentity";
+import { BaseModal } from "./components/BaseModal";
 import "./components/baseComponents/Button";
 import "./components/baseComponents/Modal";
-import { BaseModal } from "./components/BaseModal";
+import { MEDAL_ORDER, medalIcon } from "./components/map/Medals";
 import "./components/GameConfigSettings";
 import "./components/LobbyPresetControls";
-import { MEDAL_ORDER, medalIcon } from "./components/map/Medals";
+import {
+  modeConfig,
+  type OpenWarsModeSettings,
+  VICTORY_OPTIONS,
+} from "./components/OpenWarsModePicker";
 import {
   type LoadSavedGameDetail,
   savedGameIdFrom,
@@ -247,6 +252,13 @@ export class SinglePlayerModal extends BaseModal {
   @state() private customAllianceMinutes: number | undefined =
     DEFAULT_OPTIONS.customAllianceMinutes;
   @state() private waterNukes: boolean = DEFAULT_OPTIONS.waterNukes;
+  /** OpenWars mode and its settings (milestone 7). */
+  @state() private owMode: OpenWarsModeSettings = modeConfig(
+    "openwars",
+    1000,
+    VICTORY_OPTIONS,
+  );
+
   @state() private doomsdayClock: boolean = DEFAULT_OPTIONS.doomsdayClock;
   @state() private doomsdayClockSpeed: DoomsdayClockSpeed =
     DEFAULT_OPTIONS.doomsdayClockSpeed;
@@ -556,6 +568,12 @@ export class SinglePlayerModal extends BaseModal {
         <div
           class="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 pt-4 pb-6 mr-1 mx-auto w-full max-w-5xl"
         >
+          <openwars-mode-picker
+            .mode=${this.owMode.ruleset}
+            @mode-change=${(e: CustomEvent<OpenWarsModeSettings>) => {
+              this.owMode = e.detail;
+            }}
+          ></openwars-mode-picker>
           <saved-games-panel
             class="block mb-6"
             .signedIn=${responseHasLinkedIdentity(this.userMeResponse)}
@@ -1346,8 +1364,8 @@ export class SinglePlayerModal extends BaseModal {
             gameType: GameType.Singleplayer,
             gameMode: this.gameMode,
             playerTeams: this.teamCount,
-            // OpenWars 2.0 rules (docs/OpenWars2.md).
-            ruleset: "openwars",
+            // OpenWars 2.0 mode and settings (docs/OpenWars2.md).
+            ...this.owMode,
             difficulty: this.selectedDifficulty,
             maxTimerValue: finalMaxTimerValue,
             bots: this.bots,

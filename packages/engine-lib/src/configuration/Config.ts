@@ -157,7 +157,25 @@ export class Config {
 
   /** OpenWars 2.0 systems are on (GameConfig.ruleset, docs/OpenWars2.md). */
   isOpenWars(): boolean {
-    return this.gameConfig().ruleset === "openwars";
+    return this.gameConfig().ruleset !== undefined;
+  }
+
+  /** Cold War: nations can't attack each other (milestone 7). */
+  isColdWar(): boolean {
+    return this.gameConfig().ruleset === "coldwar";
+  }
+
+  /** World-event frequency, permille of normal. */
+  eventFrequencyPermille(): number {
+    return this.gameConfig().eventFrequencyPermille ?? 1000;
+  }
+
+  /** Whether a victory condition is in play. Cold War has no territorial
+   * victory unless the match says otherwise. */
+  victoryEnabled(kind: string): boolean {
+    const list = this.gameConfig().victoryConditions;
+    if (list !== undefined) return (list as string[]).includes(kind);
+    return !(this.isColdWar() && kind === "territorial");
   }
 
   gameConfig(): GameConfig {

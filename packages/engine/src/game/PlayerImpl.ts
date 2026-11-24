@@ -1973,6 +1973,14 @@ export class PlayerImpl implements Player {
   ): boolean {
     // OpenWars: a non-aggression pact or ceasefire stops all hostilities.
     if (this.mg.diplomacy().blocksHostilities(this, player)) return false;
+    // Cold War: nations never attack each other; tribes are fair game.
+    if (
+      this.mg.config().isColdWar() &&
+      this.type() !== PlayerType.Bot &&
+      player.type() !== PlayerType.Bot
+    ) {
+      return false;
+    }
     if (this.type() !== PlayerType.Human) {
       // Only human attackers respect PVP immunity
       return !this.isFriendly(player, treatAFKFriendly);
