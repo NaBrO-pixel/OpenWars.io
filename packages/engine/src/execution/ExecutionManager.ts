@@ -20,6 +20,7 @@ import { DonateTroopsExecution } from "./DonateTroopExecution";
 import { EmbargoAllExecution } from "./EmbargoAllExecution";
 import { EmbargoExecution } from "./EmbargoExecution";
 import { EmojiExecution } from "./EmojiExecution";
+import { InfrastructureExecution } from "./InfrastructureExecution";
 import { MarkDisconnectedExecution } from "./MarkDisconnectedExecution";
 import { MoveWarshipExecution } from "./MoveWarshipExecution";
 import { NationExecution } from "./NationExecution";
@@ -133,6 +134,13 @@ export class Executor {
         );
       case "delete_unit":
         return new DeleteUnitExecution(player, intent.unitId);
+      case "infrastructure":
+        return new InfrastructureExecution(
+          player,
+          intent.action,
+          intent.unitId,
+          intent.kind,
+        );
       case "quick_chat":
         return new QuickChatExecution(
           player,

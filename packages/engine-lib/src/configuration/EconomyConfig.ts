@@ -53,6 +53,32 @@ export const EconomyConfig = {
   /** How far stability moves toward its target per second. */
   stabilityStep: 8,
 
+  // --- infrastructure (milestone 3) ---------------------------------------
+  infrastructure: {
+    maxLevel: 3,
+    /** Projects a nation may run at once. */
+    maxProjects: 3,
+    /** Cost of level L (1..3): money moneyBase * L * L, industry
+     * industryBase * L; build time stepsBase * L economy steps (seconds). */
+    cost: {
+      roads: { moneyBase: 40_000, industryBase: 60, stepsBase: 20 },
+      railways: { moneyBase: 70_000, industryBase: 100, stepsBase: 30 },
+      industry: { moneyBase: 60_000, industryBase: 80, stepsBase: 25 },
+      research: { moneyBase: 60_000, industryBase: 80, stepsBase: 25 },
+    },
+    /** Cancelling refunds all industry and this share of money. */
+    cancelMoneyRefundPermille: 750,
+    /** Effects per level, summed over a nation's cities. */
+    industryPerIndustrialLevel: 5,
+    researchPerResearchLevel: 3,
+    /** Territory upkeep saved per road level, permille, capped. */
+    upkeepCutPerRoadLevel: 40,
+    upkeepCutCap: 500,
+    /** Industry money bonus per railway level, permille, capped. */
+    industryMoneyPerRailLevel: 50,
+    industryMoneyCap: 600,
+  },
+
   // --- history (economy panel trends) -------------------------------------
   /** Economy steps between history samples, and samples kept. */
   historyEvery: 10,

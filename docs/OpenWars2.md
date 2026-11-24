@@ -194,3 +194,36 @@ territory panel (milestone 3, infrastructure), map overlays (milestones 3 and
 No player action is added in this milestone, so there is nothing new to
 validate: the economy runs by itself. Spending industry and research comes
 with infrastructure (milestone 3) and research (milestone 4).
+
+### Milestone 3: infrastructure
+
+- Each city is a development site with four tracks, levels 0–3: roads,
+  railways, industrial centre, research centre. Infrastructure belongs to the
+  city: a captured city keeps it for its new owner; a destroyed one loses it.
+- Projects cost money (quadratic in level) and industry, take time (once a
+  second, in the economy step), show progress, and can be cancelled (all
+  industry and 75% of money back). At most 3 at once; railways need roads of
+  the same level. Infinite-gold games pay no money (as for units).
+- Effects (EconomyConfig.infrastructure): industrial centres add industry,
+  research centres add research, roads cut territory upkeep, railways raise
+  the money industry earns, and every level counts as development
+  (stability).
+- Engine: `game/Infrastructure.ts` (InfrastructureMap on GameImpl; Game
+  snapshot v2), `InfrastructureExecution` for the new `infrastructure`
+  intent (start/cancel), appended last to the intent union. Costs and the
+  start checks are shared with the client
+  (`engine-lib/configuration/InfrastructureRules.ts`); the engine's check is
+  the one that decides, identically on every client.
+- AI nations develop their cities every 15 s, keeping a money reserve.
+- UI: Infrastructure panel (sites, levels, costs, effects, progress,
+  cancel, locate, refusal reasons), `<infrastructure-overlay>` map badges,
+  completion notices in the events feed (`MessageType.NATIONAL_DEVELOPMENT`).
+- Tests: `tests/core/executions/Infrastructure.test.ts` (costs, building,
+  effects, refunds, every refusal, capture, snapshot continuation, AI),
+  scripted-game coverage in the full-game snapshot test, client panel tests.
+  Checked end to end in a browser: a project started from the panel finished
+  and showed in the overlay and the events feed.
+
+Not done here: a right-hand contextual panel for a clicked tile. Sites are
+reached through the Infrastructure panel (with Locate); the contextual panel
+is folded into milestone 8's interface pass.

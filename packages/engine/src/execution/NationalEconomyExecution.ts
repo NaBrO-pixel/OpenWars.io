@@ -1,11 +1,14 @@
 import {
+  MessageType,
   PlayerType,
   Structures,
   UnitType,
 } from "@openfront/engine-api/game/GameTypes";
+import type { InfrastructureKind } from "@openfront/engine-api/game/Infrastructure";
 import { ECONOMY_STEP_TICKS } from "@openfront/engine-lib/configuration/EconomyConfig";
 import { z } from "zod";
 import { Execution, Game, Player } from "../game/Game";
+import { projectCost } from "../game/Infrastructure";
 import type { EconomyInput } from "../game/NationState";
 import { execSnapshotType } from "../snapshot/ExecutionSnapshot";
 import type { ExecRecord, SnapshotReader } from "../snapshot/SnapshotContext";
@@ -36,9 +39,30 @@ export class NationalEconomyExecution implements Execution {
     for (const player of this.mg.players()) {
       if (!player.isAlive() || player.type() === PlayerType.Bot) continue;
       const nation = player.ensureNation();
+      const infra = this.mg.infrastructure();
+      for (const done of infra.advance(this.mg, player)) {
+        this.mg.displayMessage(
+          COMPLETED_MESSAGE[done.kind],
+          MessageType.NATIONAL_DEVELOPMENT,
+          player.id(),
+          undefined,
+          { level: done.level },
+          done.unitId,
+        );
+      }
       const { moneyIn, moneyOut } = nation.step(economyInput(this.mg, player));
       if (moneyIn > 0) player.addGold(BigInt(moneyIn));
       if (moneyOut > 0) player.removeGold(BigInt(moneyOut));
+      if (
+        player.type() === PlayerType.Nation &&
+        nation.steps % NATION_DEVELOP_EVERY === 0
+      ) {
+        developForNation(this.mg, player);
+      }
+      nation.setInfrastructure(
+        infra.siteViews(player),
+        infra.projectViews(player),
+      );
     }
   }
 
@@ -50,6 +74,40 @@ export class NationalEconomyExecution implements Execution {
 
   restoreSnapshot(s: NationalEconomyState, r: SnapshotReader): void {
     this.mg = s.initialized ? r.game : null;
+  }
+}
+
+const COMPLETED_MESSAGE: Record<InfrastructureKind, string> = {
+  roads: "events_display.infrastructure_completed_roads",
+  railways: "events_display.infrastructure_completed_railways",
+  industry: "events_display.infrastructure_completed_industry",
+  research: "events_display.infrastructure_completed_research",
+};
+
+/** Economy steps between an AI nation's development decisions. */
+const NATION_DEVELOP_EVERY = 15;
+/** The order AI nations develop in. */
+const NATION_PRIORITIES: readonly InfrastructureKind[] = [
+  "industry",
+  "research",
+  "roads",
+  "railways",
+];
+
+/**
+ * AI nations develop their cities: the first project they can start while
+ * keeping at least as much money again in reserve for their military.
+ */
+export function developForNation(mg: Game, player: Player): void {
+  const infra = mg.infrastructure();
+  for (const kind of NATION_PRIORITIES) {
+    for (const site of infra.sitesOf(player)) {
+      if (infra.canStart(mg, player, site.id(), kind) !== null) continue;
+      const level = infra.levels(site.id())[kind] + 1;
+      if (player.gold() < BigInt(projectCost(kind, level).money * 2)) continue;
+      infra.start(mg, player, site.id(), kind);
+      return;
+    }
   }
 }
 
@@ -77,6 +135,7 @@ export function economyInput(
     baseIncome:
       Number(mg.config().goldAdditionRate(player)) * ECONOMY_STEP_TICKS,
     money: player.gold(),
+    infrastructure: mg.infrastructure().totalsFor(player),
   };
 }
 

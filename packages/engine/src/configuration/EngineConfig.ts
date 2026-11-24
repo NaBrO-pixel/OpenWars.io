@@ -328,7 +328,8 @@ export class EngineConfig extends Config {
     );
   }
 
-  private hasInfiniteGoldFor(player: PlayerLike): boolean {
+  /** Gold costs nothing for this player (infinite gold, or host cheats). */
+  hasInfiniteGoldFor(player: PlayerLike): boolean {
     if (this.infiniteGold()) return true;
     const hc = this._gameConfig.hostCheats;
     return (hc?.infiniteGold ?? false) && player.isLobbyCreator();

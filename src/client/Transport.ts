@@ -7,6 +7,7 @@ import {
   Tick,
   UnitType,
 } from "@openfront/engine-api/game/GameTypes";
+import type { InfrastructureKind } from "@openfront/engine-api/game/Infrastructure";
 import {
   AllPlayersStats,
   ClientID,
@@ -86,6 +87,15 @@ export class SendUpgradeStructureIntentEvent implements GameEvent {
     public readonly unitId: number,
     public readonly unitType: UnitType,
     public readonly amount: number = 1,
+  ) {}
+}
+
+/** OpenWars: start or cancel an infrastructure project on one of your cities. */
+export class SendInfrastructureIntentEvent implements GameEvent {
+  constructor(
+    public readonly action: "start" | "cancel",
+    public readonly unitId: number,
+    public readonly kind: InfrastructureKind,
   ) {}
 }
 
@@ -330,6 +340,14 @@ export class Transport {
     this.subscribe(SendAttackIntentEvent, (e) => this.onSendAttackIntent(e));
     this.subscribe(SendUpgradeStructureIntentEvent, (e) =>
       this.onSendUpgradeStructureIntent(e),
+    );
+    this.subscribe(SendInfrastructureIntentEvent, (e) =>
+      this.sendIntent({
+        type: "infrastructure",
+        action: e.action,
+        unitId: e.unitId,
+        kind: e.kind,
+      }),
     );
     this.subscribe(SendBoatAttackIntentEvent, (e) =>
       this.onSendBoatAttackIntent(e),

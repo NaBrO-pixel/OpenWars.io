@@ -30,6 +30,7 @@ function input(over: Partial<EconomyInput> = {}): EconomyInput {
     structureLevels: 0,
     baseIncome: 1_000,
     money: 0n,
+    infrastructure: { roads: 0, railways: 0, industry: 0, research: 0 },
     ...over,
   };
 }

@@ -12,6 +12,7 @@ import {
   ErrorUpdate,
   GameUpdateViewData,
 } from "@openfront/engine-api/game/GameUpdates";
+import { INFRASTRUCTURE_KINDS } from "@openfront/engine-api/game/Infrastructure";
 import { MapManifest } from "@openfront/engine-api/game/MapFiles";
 import {
   flattenedEmojiTable,
@@ -231,6 +232,7 @@ function queuedIntent(game: Game, p: Player, tick: number): Intent | null {
     },
     { type: "mark_disconnected", isDisconnected: false },
     { type: "toggle_pause", paused: false },
+    { type: "infrastructure", action: "start", unitId: 1, kind: "roads" },
   ];
   return queued[(tick - 20) / 2] ?? null;
 }
@@ -552,6 +554,24 @@ function playIntent(game: Game, p: Player, rand: PseudoRandom): Intent | null {
   if (game.ticks() > 300 && rand.chance(4)) {
     const air = airIntent(game, p, rand, other);
     if (air !== null) return air;
+  }
+
+  // OpenWars: develop cities. Guarded on the ruleset first, so the classic
+  // variants draw the same random numbers as before.
+  if (game.config().isOpenWars() && rand.chance(5)) {
+    const infra = game.infrastructure();
+    for (const site of infra.sitesOf(p)) {
+      for (const kind of INFRASTRUCTURE_KINDS) {
+        if (infra.canStart(game, p, site.id(), kind) === null) {
+          return {
+            type: "infrastructure",
+            action: "start",
+            unitId: site.id(),
+            kind,
+          };
+        }
+      }
+    }
   }
 
   switch (rand.nextInt(0, 22)) {

@@ -1,8 +1,11 @@
 import { UnitType } from "@openfront/engine-api/game/GameTypes";
 import { renderNumber, renderTroops } from "@openfront/engine-lib/Format";
+import type { EventBus } from "@openfront/shared/EventBus";
 import { html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { Controller } from "../../Controller";
+import { GoToUnitEvent } from "../../TransformHandler";
+import { SendInfrastructureIntentEvent } from "../../Transport";
 import { translateText } from "../../Utils";
 import { GameView } from "../../view";
 import type { PlayerView } from "../../view/PlayerView";
@@ -15,11 +18,15 @@ import {
   type NationalSummary,
   nationalSummary,
 } from "../NationalSummary";
+import { ToggleInfrastructureOverlayEvent } from "./InfrastructureOverlay";
+import { renderInfrastructure } from "./InfrastructurePanel";
 
 interface SectionContext {
   game: GameView;
   me: PlayerView;
   summary: NationalSummary;
+  /** Sends the player's actions (intents) and UI events. */
+  nav: CommandNav;
 }
 
 interface CommandSection {
@@ -289,6 +296,31 @@ export const COMMAND_SECTIONS: readonly CommandSection[] = [
     available: (ctx) => ctx.summary.nation !== null,
   },
   {
+    id: "infrastructure",
+    labelKey: "command_nav.infrastructure",
+    icon: svg("M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"),
+    render: (ctx) =>
+      renderInfrastructure(ctx.summary.nation!, ctx.summary.money, {
+        start: (unitId, kind) =>
+          ctx.nav.eventBus?.emit(
+            new SendInfrastructureIntentEvent("start", unitId, kind),
+          ),
+        cancel: (unitId, kind) =>
+          ctx.nav.eventBus?.emit(
+            new SendInfrastructureIntentEvent("cancel", unitId, kind),
+          ),
+        locate: (unitId) => {
+          const unit = ctx.game.unit(unitId);
+          if (unit !== undefined)
+            ctx.nav.eventBus?.emit(new GoToUnitEvent(unit));
+        },
+        toggleOverlay: () => ctx.nav.toggleOverlay(),
+        overlayOn: ctx.nav.overlayOn,
+        freeMoney: ctx.game.config().gameConfig().infiniteGold,
+      }),
+    available: (ctx) => ctx.summary.nation !== null,
+  },
+  {
     id: "statistics",
     labelKey: "command_nav.statistics",
     icon: svg("M4 20V10m6 10V4m6 16v-7m4 7H2"),
@@ -304,7 +336,14 @@ export const COMMAND_SECTIONS: readonly CommandSection[] = [
 export class CommandNav extends LitElement implements Controller {
   public game: GameView;
 
+  public eventBus: EventBus | undefined;
   @state() private open: string | null = null;
+  @state() overlayOn = false;
+
+  toggleOverlay() {
+    this.overlayOn = !this.overlayOn;
+    this.eventBus?.emit(new ToggleInfrastructureOverlayEvent(this.overlayOn));
+  }
   @state() private ctx: SectionContext | null = null;
   private income = new IncomeTracker();
 
@@ -314,6 +353,7 @@ export class CommandNav extends LitElement implements Controller {
 
   init() {
     this.open = null;
+    this.overlayOn = false;
     this.ctx = null;
     this.income.reset();
   }
@@ -332,6 +372,7 @@ export class CommandNav extends LitElement implements Controller {
       game: this.game,
       me,
       summary: nationalSummary(this.game, me, this.income),
+      nav: this,
     };
   }
 

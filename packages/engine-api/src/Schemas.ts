@@ -17,6 +17,7 @@ import {
   Trios,
   UnitType,
 } from "./game/GameTypes";
+import { InfrastructureKindSchema } from "./game/Infrastructure";
 import { PlayerStatsSchema } from "./StatsSchemas";
 
 export type GameID = string;
@@ -47,7 +48,8 @@ export type Intent =
   | KickPlayerIntent
   | TogglePauseIntent
   | UpdateGameConfigIntent
-  | ToggleGameStartTimer;
+  | ToggleGameStartTimer
+  | InfrastructureIntent;
 
 export type AttackIntent = z.infer<typeof AttackIntentSchema>;
 export type CancelAttackIntent = z.infer<typeof CancelAttackIntentSchema>;
@@ -81,6 +83,7 @@ export type TogglePauseIntent = z.infer<typeof TogglePauseIntentSchema>;
 export type UpdateGameConfigIntent = z.infer<
   typeof UpdateGameConfigIntentSchema
 >;
+export type InfrastructureIntent = z.infer<typeof InfrastructureIntentSchema>;
 export type ToggleGameStartTimer = z.infer<
   typeof ToggleGameStartTimerIntentSchema
 >;
@@ -575,6 +578,16 @@ export const ToggleGameStartTimerIntentSchema = z.object({
   type: z.literal("toggle_game_start_timer"),
 });
 
+// OpenWars infrastructure (docs/OpenWars2.md, milestone 3): start or cancel
+// a project on one of the sender's cities. Validated by the engine
+// (InfrastructureExecution), identically on every client.
+export const InfrastructureIntentSchema = z.object({
+  type: z.literal("infrastructure"),
+  action: z.enum(["start", "cancel"]),
+  unitId: zb.uint(),
+  kind: InfrastructureKindSchema,
+});
+
 export const IntentSchema = z.compile(
   z.discriminatedUnion("type", [
     AttackIntentSchema,
@@ -602,6 +615,8 @@ export const IntentSchema = z.compile(
     TogglePauseIntentSchema,
     UpdateGameConfigIntentSchema,
     ToggleGameStartTimerIntentSchema,
+    // Appended last: zbin encodes union members by position.
+    InfrastructureIntentSchema,
   ]),
 );
 

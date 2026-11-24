@@ -95,6 +95,7 @@ import {
   Player,
   Unit,
 } from "./Game";
+import { InfrastructureDataSchema, InfrastructureMap } from "./Infrastructure";
 import { PlayerImpl } from "./PlayerImpl";
 import { RailNetwork } from "./RailNetwork";
 import {
@@ -163,6 +164,8 @@ export class GameImpl implements Game {
   private playerTeams: Team[] = [];
   private botTeam: Team = ColoredTeams.Bot;
   private _railNetwork: RailNetwork = createRailNetwork(this);
+  /** OpenWars infrastructure (milestone 3); empty under the classic rules. */
+  private _infrastructure = new InfrastructureMap();
 
   // Used to assign unique IDs to each new alliance
   private nextAllianceID: number = 0;
@@ -1695,6 +1698,10 @@ export class GameImpl implements Game {
   railNetwork(): RailNetwork {
     return this._railNetwork;
   }
+
+  infrastructure(): InfrastructureMap {
+    return this._infrastructure;
+  }
   mirvsLaunched(): number {
     return this._mirvsLaunched;
   }
@@ -1785,6 +1792,7 @@ export class GameImpl implements Game {
         this._sharedWaterCache.snapshot(w),
       ),
       stats: w.versioned(StatsSnapshot, (this._stats as StatsImpl).snapshot()),
+      infrastructure: this._infrastructure.toData(),
     };
   }
 
@@ -1847,6 +1855,7 @@ export class GameImpl implements Game {
     (this._stats as StatsImpl).restoreSnapshot(
       readVersioned(StatsSnapshot, s.stats),
     );
+    this._infrastructure.restore(s.infrastructure);
   }
 
   conquerPlayer(conqueror: Player, conquered: Player) {
@@ -1935,7 +1944,11 @@ export class GameImpl implements Game {
 
 export const GameSnapshot = snapshotType({
   name: "Game",
-  version: 1,
+  version: 2,
+  migrations: {
+    // v1 predates OpenWars infrastructure.
+    1: (d) => ({ ...d, infrastructure: { sites: [], projects: [] } }),
+  },
   schema: z.object({
     ticks: zInt(),
     startTick: zInt().nullable(),
@@ -1969,6 +1982,7 @@ export const GameSnapshot = snapshotType({
     water: VersionedSchema,
     sharedWaterCache: VersionedSchema,
     stats: VersionedSchema,
+    infrastructure: InfrastructureDataSchema,
   }),
 });
 export type GameState = z.infer<typeof GameSnapshot.schema>;

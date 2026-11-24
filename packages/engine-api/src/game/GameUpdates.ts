@@ -18,6 +18,10 @@ import {
   UnitType,
   WarshipState,
 } from "./GameTypes";
+import type {
+  InfrastructureProjectView,
+  InfrastructureSiteView,
+} from "./Infrastructure";
 
 export interface GameUpdateViewData {
   tick: number;
@@ -314,6 +318,9 @@ export interface NationView {
   development: number;
   /** Older first: net money per second, sampled every historyEvery steps. */
   netHistory: number[];
+  /** The nation's development sites (its cities) and projects under way. */
+  sites: InfrastructureSiteView[];
+  projects: InfrastructureProjectView[];
 }
 
 export interface NationIncome {

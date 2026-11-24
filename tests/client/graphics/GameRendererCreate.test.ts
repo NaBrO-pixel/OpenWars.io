@@ -28,6 +28,7 @@ const HUD_TAGS = [
   "control-panel",
   "command-bar",
   "command-nav",
+  "infrastructure-overlay",
   "events-display",
   "actionable-events",
   "attacks-display",

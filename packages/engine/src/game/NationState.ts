@@ -7,6 +7,11 @@ import type {
   NationIncome,
   NationView,
 } from "@openfront/engine-api/game/GameUpdates";
+import type {
+  InfrastructureProjectView,
+  InfrastructureSiteView,
+  SiteLevels,
+} from "@openfront/engine-api/game/Infrastructure";
 import { EconomyConfig } from "@openfront/engine-lib/configuration/EconomyConfig";
 import { z } from "zod";
 
@@ -23,6 +28,8 @@ export interface EconomyInput {
   /** Base (worker) income per second, already paid by PlayerExecution. */
   baseIncome: number;
   money: bigint;
+  /** Infrastructure levels summed over the nation's cities. */
+  infrastructure: SiteLevels;
 }
 
 /** What one economy step decides. */
@@ -47,12 +54,17 @@ export function economyStep(
   stability: number,
   cfg = EconomyConfig,
 ): EconomyResult {
-  // Production.
+  const infra = input.infrastructure;
+  const ic = cfg.infrastructure;
+  // Production: factories, land, and industrial and research centres.
   const industryRate =
     input.factoryLevels * cfg.industryPerFactoryLevel +
-    Math.floor(input.tiles / cfg.tilesPerIndustry);
+    Math.floor(input.tiles / cfg.tilesPerIndustry) +
+    infra.industry * ic.industryPerIndustrialLevel;
   const researchRate =
-    cfg.researchBase + input.cityLevels * cfg.researchPerCityLevel;
+    cfg.researchBase +
+    input.cityLevels * cfg.researchPerCityLevel +
+    infra.research * ic.researchPerResearchLevel;
 
   // Income: tax on the population, scaled by stability, and industry.
   const fullTax = Math.floor((input.troops * cfg.taxPerThousandTroops) / 1000);
@@ -60,13 +72,27 @@ export function economyStep(
     cfg.taxAtZeroStabilityPermille +
     Math.floor(((1000 - cfg.taxAtZeroStabilityPermille) * stability) / 1000);
   const tax = Math.floor((fullTax * taxPermille) / 1000);
-  const industryMoney = industryRate * cfg.moneyPerIndustry;
+  // Railways carry industry's goods: more money per unit of industry.
+  const railPermille = Math.min(
+    ic.industryMoneyCap,
+    infra.railways * ic.industryMoneyPerRailLevel,
+  );
+  const industryMoney = Math.floor(
+    (industryRate * cfg.moneyPerIndustry * (1000 + railPermille)) / 1000,
+  );
 
   // Expenses: administering land beyond the free allowance, and upkeep of
   // what has been built.
+  // Roads make land cheaper to administer.
+  const roadCut = Math.min(
+    ic.upkeepCutCap,
+    infra.roads * ic.upkeepCutPerRoadLevel,
+  );
   const territory = Math.floor(
-    (Math.max(0, input.tiles - cfg.freeTiles) * cfg.upkeepPerHundredTiles) /
-      100,
+    (Math.max(0, input.tiles - cfg.freeTiles) *
+      cfg.upkeepPerHundredTiles *
+      (1000 - roadCut)) /
+      100_000,
   );
   const structures = input.structureLevels * cfg.upkeepPerStructureLevel;
 
@@ -76,7 +102,12 @@ export function economyStep(
 
   // Stability target: development raises it; fast growth and deficits
   // lower it.
-  const development = input.structureLevels;
+  const development =
+    input.structureLevels +
+    infra.roads +
+    infra.railways +
+    infra.industry +
+    infra.research;
   const devBonus = Math.min(
     cfg.stabilityDevelopmentCap,
     development * cfg.stabilityPerDevelopment,
@@ -160,7 +191,24 @@ export class NationState {
   tileSamples: number[] = [];
   netHistory: number[] = [];
   last: Omit<EconomyResult, "moneyIn" | "moneyOut"> | null = null;
+  /** Derived from the game's InfrastructureMap; not snapshotted. */
+  private sites: InfrastructureSiteView[] = [];
+  private projects: InfrastructureProjectView[] = [];
   private cachedView: NationView | null = null;
+
+  /** Forces a new view object (the figures changed between steps). */
+  invalidate(): void {
+    this.cachedView = null;
+  }
+
+  setInfrastructure(
+    sites: InfrastructureSiteView[],
+    projects: InfrastructureProjectView[],
+  ): void {
+    this.sites = sites;
+    this.projects = projects;
+    this.cachedView = null;
+  }
 
   /** Runs one economy step; returns the money to add and remove. */
   step(input: EconomyInput): { moneyIn: number; moneyOut: number } {
@@ -214,6 +262,8 @@ export class NationState {
       researchRate: last?.researchRate ?? 0,
       development: last?.development ?? 0,
       netHistory: [...this.netHistory],
+      sites: this.sites,
+      projects: this.projects,
     };
     return this.cachedView;
   }

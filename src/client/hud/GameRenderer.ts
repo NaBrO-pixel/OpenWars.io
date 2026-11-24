@@ -37,6 +37,7 @@ import { GameLeftSidebar } from "./layers/GameLeftSidebar";
 import { GameRightSidebar } from "./layers/GameRightSidebar";
 import { HeadsUpMessage } from "./layers/HeadsUpMessage";
 import { ImmunityTimer } from "./layers/ImmunityTimer";
+import { InfrastructureOverlay } from "./layers/InfrastructureOverlay";
 import { InGamePromo } from "./layers/InGamePromo";
 import { MainRadialMenu } from "./layers/MainRadialMenu";
 import { MultiTabModal } from "./layers/MultiTabModal";
@@ -116,6 +117,17 @@ export function createRenderer(
     console.error("CommandNav element not found in the DOM");
   }
   commandNav.game = game;
+  commandNav.eventBus = eventBus;
+
+  const infrastructureOverlay = document.querySelector(
+    "infrastructure-overlay",
+  ) as InfrastructureOverlay;
+  if (!(infrastructureOverlay instanceof InfrastructureOverlay)) {
+    console.error("InfrastructureOverlay element not found in the DOM");
+  }
+  infrastructureOverlay.game = game;
+  infrastructureOverlay.eventBus = eventBus;
+  infrastructureOverlay.transformHandler = transformHandler;
 
   const controlPanel = document.querySelector("control-panel") as ControlPanel;
   if (!(controlPanel instanceof ControlPanel)) {
@@ -395,6 +407,7 @@ export function createRenderer(
     controlPanel,
     commandBar,
     commandNav,
+    infrastructureOverlay,
     playerInfo,
     winModal,
     newLobbyPrompt,
@@ -424,6 +437,7 @@ export function createRenderer(
     controlPanel,
     commandBar,
     commandNav,
+    infrastructureOverlay,
     playerInfo,
     winModal,
     newLobbyPrompt,

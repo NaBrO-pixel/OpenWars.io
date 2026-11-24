@@ -1,11 +1,13 @@
 import type { NationView } from "@openfront/engine-api/game/GameUpdates";
 import "../../../../src/client/hud/layers/CommandBar";
+import { EventBus } from "@openfront/shared/EventBus";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { CommandBar } from "../../../../src/client/hud/layers/CommandBar";
 import {
   COMMAND_SECTIONS,
   type CommandNav,
 } from "../../../../src/client/hud/layers/CommandNav";
+import { ToggleInfrastructureOverlayEvent } from "../../../../src/client/hud/layers/InfrastructureOverlay";
 import {
   formatClock,
   formatIncome,
@@ -13,6 +15,7 @@ import {
   IncomeTracker,
   nationalSummary,
 } from "../../../../src/client/hud/NationalSummary";
+import { SendInfrastructureIntentEvent } from "../../../../src/client/Transport";
 import type { GameView } from "../../../../src/client/view";
 
 interface FakePlayer {
@@ -59,6 +62,8 @@ const NATION: NationView = {
   researchRate: 3,
   development: 4,
   netHistory: [500, 900, 1200, 1790],
+  sites: [],
+  projects: [],
 };
 
 function game(
@@ -72,7 +77,7 @@ function game(
     elapsedGameSeconds: opts.seconds ?? (() => 125),
     numLandTiles: () => 1000,
     playerViews: () => (me ? [me, ...others] : others),
-    config: () => ({ maxTroops: () => 100_000 }),
+    config: () => ({ maxTroops: () => 100_000, gameConfig: () => ({}) }),
   } as unknown as GameView;
 }
 
@@ -235,5 +240,86 @@ describe("command-nav", () => {
     nav.toggle("statistics");
     await nav.updateComplete;
     expect(nav.querySelector("[data-command-panel]")).toBeNull();
+  });
+});
+
+describe("infrastructure panel", () => {
+  const SITE = { unitId: 7, roads: 1, railways: 0, industry: 3, research: 0 };
+  function open(nation: NationView, gold = 10_000_000n) {
+    const nav = document.createElement("command-nav") as CommandNav;
+    document.body.appendChild(nav);
+    const me = player("me", 100, 0, nation);
+    me.gold = () => gold;
+    nav.game = {
+      ...(game(me) as object),
+      unit: () => undefined,
+    } as unknown as GameView;
+    const bus = new EventBus();
+    const sent: unknown[] = [];
+    bus.on(SendInfrastructureIntentEvent, (e) => sent.push(e));
+    bus.on(ToggleInfrastructureOverlayEvent, (e) => sent.push(e));
+    nav.eventBus = bus;
+    nav.init();
+    nav.tick();
+    nav.toggle("infrastructure");
+    return { nav, sent };
+  }
+
+  it("starts and cancels projects through intents", async () => {
+    const { nav, sent } = open({ ...NATION, industry: 5_000, sites: [SITE] });
+    await nav.updateComplete;
+    const site = nav.querySelector('[data-site="7"]')!;
+    // Industry is at level 3: fully developed, no button.
+    expect(site.querySelector('[data-start="industry"]')).toBeNull();
+    (site.querySelector('[data-start="roads"]') as HTMLButtonElement).click();
+    expect(sent).toEqual([
+      expect.objectContaining({ action: "start", unitId: 7, kind: "roads" }),
+    ]);
+    nav.remove();
+
+    const building = open({
+      ...NATION,
+      sites: [SITE],
+      projects: [{ unitId: 7, kind: "research", level: 1, done: 5, total: 25 }],
+    });
+    await building.nav.updateComplete;
+    (
+      building.nav.querySelector('[data-cancel="research"]') as HTMLElement
+    ).click();
+    expect(building.sent).toEqual([
+      expect.objectContaining({ action: "cancel", kind: "research" }),
+    ]);
+    building.nav.remove();
+  });
+
+  it("disables what the engine would refuse, and says why", async () => {
+    const { nav } = open({ ...NATION, industry: 0, sites: [SITE] }, 0n);
+    await nav.updateComplete;
+    const roads = nav.querySelector(
+      '[data-start="roads"]',
+    ) as HTMLButtonElement;
+    expect(roads.disabled).toBe(true);
+    expect(roads.title).toBe("infrastructure.refusal_cannot_afford");
+    // Railways at level 1 need roads at level 1: met. Level 2 would not be.
+    const rail = nav.querySelector(
+      '[data-start="railways"]',
+    ) as HTMLButtonElement;
+    expect(rail.title).toBe("infrastructure.refusal_cannot_afford");
+    nav.remove();
+  });
+
+  it("toggles the map overlay", async () => {
+    const { nav, sent } = open({ ...NATION, sites: [SITE] });
+    await nav.updateComplete;
+    (nav.querySelector("[data-overlay-toggle]") as HTMLElement).click();
+    expect(sent).toEqual([expect.objectContaining({ visible: true })]);
+    nav.remove();
+  });
+
+  it("explains how to start when there are no cities", async () => {
+    const { nav } = open({ ...NATION, sites: [] });
+    await nav.updateComplete;
+    expect(nav.querySelector("[data-no-sites]")).not.toBeNull();
+    nav.remove();
   });
 });
