@@ -9,6 +9,7 @@ import {
   COMMAND_SECTIONS,
   type CommandNav,
 } from "../../../../src/client/hud/layers/CommandNav";
+import { guideMayAutoOpen } from "../../../../src/client/hud/layers/GuidePanel";
 import { ToggleInfrastructureOverlayEvent } from "../../../../src/client/hud/layers/InfrastructureOverlay";
 import {
   formatEstimate,
@@ -28,6 +29,7 @@ import {
   SendMobiliseIntentEvent,
   SendResearchIntentEvent,
 } from "../../../../src/client/Transport";
+import { UserSettings } from "../../../../src/client/UserSettings";
 import type { GameView } from "../../../../src/client/view";
 
 beforeEach(() => {
@@ -351,6 +353,11 @@ describe("infrastructure panel", () => {
     expect(nav.querySelector("[data-no-sites]")).not.toBeNull();
     nav.remove();
   });
+
+  it("never opens itself in the onboarding tutorial game", () => {
+    expect(guideMayAutoOpen(true, true)).toBe(false);
+    expect(guideMayAutoOpen(false, false)).toBe(false);
+  });
 });
 
 describe("research panel", () => {
@@ -537,6 +544,11 @@ describe("diplomacy panel", () => {
     ).toBe("allied");
     nav.remove();
   });
+
+  it("never opens itself in the onboarding tutorial game", () => {
+    expect(guideMayAutoOpen(true, true)).toBe(false);
+    expect(guideMayAutoOpen(false, false)).toBe(false);
+  });
 });
 
 describe("intelligence and events panels", () => {
@@ -640,6 +652,11 @@ describe("intelligence and events panels", () => {
     expect(nav.textContent).toContain("world_events.you");
     nav.remove();
   });
+
+  it("never opens itself in the onboarding tutorial game", () => {
+    expect(guideMayAutoOpen(true, true)).toBe(false);
+    expect(guideMayAutoOpen(false, false)).toBe(false);
+  });
 });
 
 describe("military panel and victory progress", () => {
@@ -686,6 +703,11 @@ describe("military panel and victory progress", () => {
     ).toContain("33%");
     nav.remove();
   });
+
+  it("never opens itself in the onboarding tutorial game", () => {
+    expect(guideMayAutoOpen(true, true)).toBe(false);
+    expect(guideMayAutoOpen(false, false)).toBe(false);
+  });
 });
 
 describe("mode picker", () => {
@@ -724,6 +746,17 @@ describe("mode picker", () => {
 describe("guide", () => {
   it("opens once on the first OpenWars game, then on demand", async () => {
     localStorage.removeItem("openwars.guideSeen");
+    // While the tutorial panel runs, the guide waits.
+    new UserSettings().setTutorialDismissed(false);
+    const waiting = document.createElement("command-nav") as CommandNav;
+    document.body.appendChild(waiting);
+    waiting.game = game(player("me", 100, 0, NATION));
+    waiting.init();
+    waiting.tick();
+    await waiting.updateComplete;
+    expect(waiting.querySelector("[data-guide]")).toBeNull();
+    waiting.remove();
+    new UserSettings().setTutorialDismissed(true);
     const nav = document.createElement("command-nav") as CommandNav;
     document.body.appendChild(nav);
     nav.game = game(player("me", 100, 0, NATION));
@@ -741,5 +774,10 @@ describe("guide", () => {
     await nav.updateComplete;
     expect(nav.querySelectorAll("[data-guide]")).toHaveLength(7);
     nav.remove();
+  });
+
+  it("never opens itself in the onboarding tutorial game", () => {
+    expect(guideMayAutoOpen(true, true)).toBe(false);
+    expect(guideMayAutoOpen(false, false)).toBe(false);
   });
 });

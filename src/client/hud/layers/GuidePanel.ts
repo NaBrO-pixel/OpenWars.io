@@ -23,6 +23,18 @@ export function guideSeen(): boolean {
   }
 }
 
+/**
+ * Whether the guide may open itself now: not in the onboarding tutorial game
+ * (it has its own guide), and only once the step-by-step tutorial panel has
+ * been finished or dismissed, so the two never overlap.
+ */
+export function guideMayAutoOpen(
+  tutorialGame: boolean,
+  tutorialDismissed: boolean,
+): boolean {
+  return !tutorialGame && tutorialDismissed && !guideSeen();
+}
+
 export function markGuideSeen(): void {
   try {
     localStorage.setItem(GUIDE_SEEN_KEY, "1");

@@ -13,6 +13,7 @@ import {
   SendMobiliseIntentEvent,
   SendResearchIntentEvent,
 } from "../../Transport";
+import { UserSettings } from "../../UserSettings";
 import { translateText } from "../../Utils";
 import { GameView } from "../../view";
 import type { PlayerView } from "../../view/PlayerView";
@@ -27,7 +28,7 @@ import {
 } from "../NationalSummary";
 import { renderDiplomacy } from "./DiplomacyPanel";
 import { renderEvents } from "./EventsPanel";
-import { guideSeen, markGuideSeen, renderGuide } from "./GuidePanel";
+import { guideMayAutoOpen, markGuideSeen, renderGuide } from "./GuidePanel";
 import { ToggleInfrastructureOverlayEvent } from "./InfrastructureOverlay";
 import { renderInfrastructure } from "./InfrastructurePanel";
 import { IntelHistory, renderIntelligence } from "./IntelligencePanel";
@@ -445,6 +446,7 @@ export class CommandNav extends LitElement implements Controller {
   }
   @state() private ctx: SectionContext | null = null;
   private income = new IncomeTracker();
+  private userSettings = new UserSettings();
 
   createRenderRoot() {
     return this;
@@ -471,7 +473,14 @@ export class CommandNav extends LitElement implements Controller {
     }
     this.intelHistory.sample(this.game);
     // First OpenWars game: open the guide once (replayable from its button).
-    if (me.nation() !== null && !guideSeen()) {
+    // It waits for the tutorial panel, so the two never overlap.
+    if (
+      me.nation() !== null &&
+      guideMayAutoOpen(
+        this.game.config().gameConfig().tutorial === true,
+        this.userSettings.tutorialDismissed(),
+      )
+    ) {
       markGuideSeen();
       this.open = "guide";
     }
