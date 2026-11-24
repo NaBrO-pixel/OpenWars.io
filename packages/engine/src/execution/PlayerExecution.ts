@@ -5,6 +5,7 @@ import {
   Structures,
   UnitType,
 } from "@openfront/engine-api/game/GameTypes";
+import { MilitaryConfig } from "@openfront/engine-lib/configuration/MilitaryConfig";
 import { zInt, zPlayerRef } from "@openfront/engine-lib/snapshot/SnapshotType";
 import { getMode, simpleHash } from "@openfront/engine-lib/Util";
 import { z } from "zod";
@@ -96,7 +97,14 @@ export class PlayerExecution implements Execution {
       return;
     }
 
-    const troopInc = this.config.troopIncreaseRate(this.player);
+    let troopInc = this.config.troopIncreaseRate(this.player);
+    // OpenWars mobilisation (milestone 6) scales troop growth.
+    const nation = this.player.nation();
+    if (nation !== null) {
+      troopInc =
+        (troopInc * MilitaryConfig.troopGrowthPermille[nation.mobilisation]) /
+        1000;
+    }
     this.player.addTroops(troopInc);
     const goldFromWorkers = this.config.goldAdditionRate(this.player);
     this.player.addGold(goldFromWorkers);

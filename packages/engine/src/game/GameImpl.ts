@@ -1282,6 +1282,7 @@ export class GameImpl implements Game {
   setWinner(
     winner: Player | Team | null,
     allPlayersStats: AllPlayersStats,
+    victory?: string,
   ): void {
     this._winner = winner;
     // OFM: snapshot final tiles for standings (bots skipped in recordFinalTiles).
@@ -1299,6 +1300,7 @@ export class GameImpl implements Game {
       type: GameUpdateType.Win,
       winner: winner === null ? undefined : this.makeWinner(winner),
       allPlayersStats,
+      ...(victory === undefined ? {} : { victory }),
     });
   }
 

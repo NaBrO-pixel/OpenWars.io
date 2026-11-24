@@ -10,6 +10,7 @@ import {
   SendBreakAllianceIntentEvent,
   SendDiplomacyIntentEvent,
   SendInfrastructureIntentEvent,
+  SendMobiliseIntentEvent,
   SendResearchIntentEvent,
 } from "../../Transport";
 import { translateText } from "../../Utils";
@@ -29,6 +30,7 @@ import { renderEvents } from "./EventsPanel";
 import { ToggleInfrastructureOverlayEvent } from "./InfrastructureOverlay";
 import { renderInfrastructure } from "./InfrastructurePanel";
 import { IntelHistory, renderIntelligence } from "./IntelligencePanel";
+import { renderMilitary, renderVictoryProgress } from "./MilitaryPanel";
 import { renderResearch } from "./ResearchPanel";
 
 interface SectionContext {
@@ -171,6 +173,7 @@ function renderStatistics({ game, me, summary }: SectionContext) {
         </li>`;
       })}
     </ol>
+    ${renderVictoryProgress(me)}
   `;
 }
 
@@ -363,6 +366,16 @@ export const COMMAND_SECTIONS: readonly CommandSection[] = [
             new SendBreakAllianceIntentEvent(ctx.me, target),
           ),
       }),
+    available: (ctx) => ctx.summary.nation !== null,
+  },
+  {
+    id: "military",
+    labelKey: "command_nav.military",
+    icon: svg("M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"),
+    render: (ctx) =>
+      renderMilitary(ctx.game, ctx.me, (level) =>
+        ctx.nav.eventBus?.emit(new SendMobiliseIntentEvent(level)),
+      ),
     available: (ctx) => ctx.summary.nation !== null,
   },
   {

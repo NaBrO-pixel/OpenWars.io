@@ -319,3 +319,37 @@ Intelligence:
 Tests: `WorldEvents.test.ts` (catalogue, effects, warnings before effects,
 history, concurrency, fairness, determinism across runs, snapshot
 continuation), `IntelRules.test.ts`, panel tests.
+
+### Milestone 6: military and victory conditions
+
+- `engine-lib/configuration/MilitaryConfig.ts`:
+  - Mobilisation (peacetime, standard, mobilised, total war) scales troop
+    growth (60%–160%), costs army upkeep per 1,000 troops, and lowers
+    stability at the higher levels. It is set with the new `mobilise` intent
+    (`MobiliseExecution`).
+  - Supply efficiency (50–100%) comes from roads and railways relative to
+    territory size: poorly supplied attackers lose up to 50% more troops.
+  - Defensive development: infrastructure levels raise attackers' losses
+    against the nation (capped at +25%).
+- Combat: `attackLogic` takes the attacker's supply and the defender's
+  defence as optional inputs (OpenWars games only). Both are saved in
+  snapshots, so restored games fight identically.
+- Victory (`game/Victory.ts`): a list of conditions, each giving progress
+  (permille) and how long it must hold.
+  - Territorial: the classic win check, listed for progress.
+  - Economic: 40% of the world's net income, held for 90 s.
+  - Diplomatic: alliances or agreements with 60% of nations and reputation
+    70+, held for 90 s.
+  - Technological: all three advanced specialisations.
+    The economic and diplomatic holds reset when the condition lapses, so a
+    passing spike can't win. A team game goes to the winner's team. Adding a
+    condition is adding an entry; `setWinner` gains an optional victory type,
+    carried on the Win update and shown on the end screen.
+- UI:
+  - Military panel: mobilisation control, forces, expenditure, supply,
+    defence, and fronts (attacks in and out).
+  - Victory progress in Statistics.
+- Tests: `tests/core/executions/MilitaryAndVictory.test.ts` (upkeep,
+  growth, supply, combat factors, each victory path, holds, team wins,
+  snapshot continuation). The full-game snapshot test now checks execution
+  coverage across all its variants together.

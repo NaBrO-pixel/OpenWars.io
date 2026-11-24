@@ -990,6 +990,7 @@
     "intelligence": "Intelligence",
     "label": "Command",
     "largest": "Largest nations",
+    "military": "Military",
     "nation": "Nation",
     "nations_left": "Nations remaining",
     "net_income": "Net income",
@@ -2424,6 +2425,30 @@
     "title_clanwars": "Clan Wars Ranked Matchmaking (ALPHA)",
     "waiting_for_game": "Waiting for game to start..."
   },
+  "military": {
+    "attacked_by": "Attacked by {attacker} with {troops}",
+    "attacking": "Troops attacking",
+    "attacking_target": "Attacking {target} with {troops}",
+    "defence": "Defensive bonus",
+    "defence_why": "Developed infrastructure makes attacks on you costlier.",
+    "expenditure": "Military expenditure",
+    "expenditure_why": "Army upkeep: grows with your troops and your mobilisation level.",
+    "forces": "Forces",
+    "fronts": "Fronts",
+    "level_mobilised": "Mobilised",
+    "level_mobilised_why": "Troops grow at {growth}%; high upkeep and some unrest.",
+    "level_peacetime": "Peacetime",
+    "level_peacetime_why": "Troops grow at {growth}% of normal; no army upkeep.",
+    "level_standard": "Standard",
+    "level_standard_why": "Troops grow at {growth}%; small army upkeep.",
+    "level_total_war": "Total war",
+    "level_total_war_why": "Troops grow at {growth}%; very high upkeep and serious unrest.",
+    "mobilisation": "Mobilisation",
+    "no_fronts": "No fighting right now.",
+    "supply": "Supply efficiency",
+    "supply_why": "Roads and railways keep your armies supplied; big countries need more of them. Poor supply means heavier losses when attacking.",
+    "wilderness": "Unclaimed land"
+  },
   "mode_selector": {
     "lobbies_unreachable": "Can't reach the public lobbies right now",
     "offline_lobbies": "Public lobbies aren't available while you're offline",
@@ -3832,6 +3857,18 @@
     "verified_use": "Use verified",
     "verified_use_custom": "Switch back to a custom name",
     "verified_use_hint": "Play under your verified account name"
+  },
+  "victory": {
+    "diplomatic_title": "Diplomatic victory",
+    "diplomatic_why": "Have alliances or agreements with 60% of nations, with reputation 70+, for 90 seconds.",
+    "economic_title": "Economic victory",
+    "economic_why": "Earn 40% of the world's income and hold it for 90 seconds.",
+    "holding": "held {held}/{needed}s",
+    "progress": "Victory progress",
+    "technological_title": "Technological victory",
+    "technological_why": "Complete the three advanced specialisations of the research tree.",
+    "territorial_title": "Territorial victory",
+    "territorial_why": "Control enough of the map."
   },
   "win_modal": {
     "died": "You died",

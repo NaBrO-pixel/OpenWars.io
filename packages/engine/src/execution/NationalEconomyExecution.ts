@@ -1,4 +1,5 @@
 import {
+  GameMode,
   MessageType,
   PlayerType,
   Structures,
@@ -7,6 +8,10 @@ import {
 import type { InfrastructureKind } from "@openfront/engine-api/game/Infrastructure";
 import { ECONOMY_STEP_TICKS } from "@openfront/engine-lib/configuration/EconomyConfig";
 import {
+  defencePermille,
+  supplyPermille,
+} from "@openfront/engine-lib/configuration/MilitaryConfig";
+import {
   TECH_BRANCHES,
   TECHS,
 } from "@openfront/engine-lib/configuration/TechConfig";
@@ -14,6 +19,7 @@ import { z } from "zod";
 import { Execution, Game, Player } from "../game/Game";
 import { projectCost } from "../game/Infrastructure";
 import type { EconomyInput } from "../game/NationState";
+import { evaluateVictory } from "../game/Victory";
 import { execSnapshotType } from "../snapshot/ExecutionSnapshot";
 import type { ExecRecord, SnapshotReader } from "../snapshot/SnapshotContext";
 import { startResearch } from "./ResearchExecution";
@@ -47,6 +53,7 @@ export class NationalEconomyExecution implements Execution {
     this.mg.diplomacy().advance(this.mg, this.steps);
     this.mg.worldEvents().advance(this.mg);
     const events = this.mg.worldEvents().views();
+    this.checkVictory();
     const eventHistory = this.mg.worldEvents().historyViews();
     for (const player of this.mg.players()) {
       if (!player.isAlive() || player.type() === PlayerType.Bot) continue;
@@ -86,6 +93,15 @@ export class NationalEconomyExecution implements Execution {
       ) {
         developForNation(this.mg, player);
       }
+      const totals = infra.totalsFor(player);
+      nation.supply = supplyPermille({
+        roads: totals.roads,
+        railways: totals.railways,
+        tiles: player.numTilesOwned(),
+      });
+      nation.defence = defencePermille(
+        totals.roads + totals.railways + totals.industry + totals.research,
+      );
       nation.setInfrastructure(
         infra.siteViews(player),
         infra.projectViews(player),
@@ -100,6 +116,22 @@ export class NationalEconomyExecution implements Execution {
           .sort(),
       );
     }
+  }
+
+  /** Alternative victories (milestone 6); the territorial one is WinCheck's. */
+  private checkVictory(): void {
+    const mg = this.mg!;
+    if (mg.getWinner() !== null) return;
+    const result = evaluateVictory(mg);
+    if (result === null) return;
+    const team = result.player.team();
+    mg.setWinner(
+      mg.config().gameConfig().gameMode === GameMode.Team && team !== null
+        ? team
+        : result.player,
+      mg.stats().stats(),
+      result.kind,
+    );
   }
 
   snapshot(): ExecRecord {
@@ -217,6 +249,7 @@ export function economyInput(
     tradeAgreements: mg.diplomacy().count("trade", player),
     alliances: player.alliances().length,
     events: mg.worldEvents().modifiersFor(player),
+    mobilisation: player.nation()?.mobilisation,
   };
 }
 

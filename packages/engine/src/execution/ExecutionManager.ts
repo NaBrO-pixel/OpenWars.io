@@ -23,6 +23,7 @@ import { EmbargoExecution } from "./EmbargoExecution";
 import { EmojiExecution } from "./EmojiExecution";
 import { InfrastructureExecution } from "./InfrastructureExecution";
 import { MarkDisconnectedExecution } from "./MarkDisconnectedExecution";
+import { MobiliseExecution } from "./MobiliseExecution";
 import { MoveWarshipExecution } from "./MoveWarshipExecution";
 import { NationExecution } from "./NationExecution";
 import { NoOpExecution } from "./NoOpExecution";
@@ -136,6 +137,8 @@ export class Executor {
         );
       case "delete_unit":
         return new DeleteUnitExecution(player, intent.unitId);
+      case "mobilise":
+        return new MobiliseExecution(player, intent.level);
       case "diplomacy":
         return new DiplomacyExecution(
           player,

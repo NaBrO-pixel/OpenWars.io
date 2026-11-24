@@ -23,6 +23,7 @@ import {
 import {
   SendDiplomacyIntentEvent,
   SendInfrastructureIntentEvent,
+  SendMobiliseIntentEvent,
   SendResearchIntentEvent,
 } from "../../../../src/client/Transport";
 import type { GameView } from "../../../../src/client/view";
@@ -67,7 +68,7 @@ const NATION: NationView = {
   stability: 720,
   stabilityTarget: 800,
   income: { base: 1000, tax: 900, industry: 120 },
-  expenses: { territory: 200, structures: 30 },
+  expenses: { territory: 200, structures: 30, military: 0 },
   industryRate: 8,
   researchRate: 3,
   development: 4,
@@ -81,6 +82,10 @@ const NATION: NationView = {
   eventHistory: [],
   neighbours: [],
   intelLevels: 0,
+  mobilisation: 1,
+  supply: 700,
+  defence: 50,
+  victory: [],
 };
 
 function game(
@@ -626,6 +631,52 @@ describe("intelligence and events panels", () => {
     expect(phase("natural_disaster")).toBe("active");
     expect(phase("industrial_boom")).toBe("past");
     expect(nav.textContent).toContain("world_events.you");
+    nav.remove();
+  });
+});
+
+describe("military panel and victory progress", () => {
+  it("changes mobilisation through an intent and shows victory progress", async () => {
+    const nation: NationView = {
+      ...NATION,
+      victory: [
+        { kind: "economic", progress: 1000, held: 30, needed: 90 },
+        { kind: "technological", progress: 333, held: 0, needed: 0 },
+      ],
+    };
+    const me = player("me", 100, 0, nation) as FakePlayer &
+      Record<string, unknown>;
+    Object.assign(me, {
+      smallID: () => 1,
+      outgoingAttacks: () => [],
+      incomingAttacks: () => [
+        { attackerID: 9, targetID: 1, troops: 500, id: "x", retreating: false },
+      ],
+    });
+    const nav = document.createElement("command-nav") as CommandNav;
+    document.body.appendChild(nav);
+    nav.game = game(me);
+    const bus = new EventBus();
+    const sent: unknown[] = [];
+    bus.on(SendMobiliseIntentEvent, (e) => sent.push(e));
+    nav.eventBus = bus;
+    nav.init();
+    nav.tick();
+    nav.toggle("military");
+    await nav.updateComplete;
+    (nav.querySelector('[data-mobilise="3"]') as HTMLElement).click();
+    expect(sent).toEqual([expect.objectContaining({ level: 3 })]);
+    expect(nav.querySelector("[data-fronts]")?.textContent).toContain(
+      "military.attacked_by",
+    );
+    nav.toggle("statistics");
+    await nav.updateComplete;
+    expect(
+      nav.querySelector('[data-victory="economic"]')?.textContent,
+    ).toContain("victory.holding");
+    expect(
+      nav.querySelector('[data-victory="technological"]')?.textContent,
+    ).toContain("33%");
     nav.remove();
   });
 });

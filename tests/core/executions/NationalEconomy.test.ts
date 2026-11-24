@@ -186,7 +186,8 @@ describe("national economy in a game", () => {
       v.income.tax +
       v.income.industry -
       v.expenses.territory -
-      v.expenses.structures;
+      v.expenses.structures -
+      v.expenses.military;
     expect(me.gold() - before).toBe(BigInt(expected));
     expect(v.industryRate).toBeGreaterThan(0);
   });

@@ -100,6 +100,11 @@ export class SendInfrastructureIntentEvent implements GameEvent {
   ) {}
 }
 
+/** OpenWars: set the nation's mobilisation level. */
+export class SendMobiliseIntentEvent implements GameEvent {
+  constructor(public readonly level: number) {}
+}
+
 /** OpenWars: propose, accept, reject or break an agreement. */
 export class SendDiplomacyIntentEvent implements GameEvent {
   constructor(
@@ -358,6 +363,9 @@ export class Transport {
     this.subscribe(SendAttackIntentEvent, (e) => this.onSendAttackIntent(e));
     this.subscribe(SendUpgradeStructureIntentEvent, (e) =>
       this.onSendUpgradeStructureIntent(e),
+    );
+    this.subscribe(SendMobiliseIntentEvent, (e) =>
+      this.sendIntent({ type: "mobilise", level: e.level }),
     );
     this.subscribe(SendDiplomacyIntentEvent, (e) =>
       this.sendIntent({

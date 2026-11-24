@@ -24,7 +24,11 @@ export interface NationalSummary {
 /** Expenses per second under the OpenWars economy (0 under classic rules). */
 export function expensesPerSecond(nation: NationView | null): number {
   if (nation === null) return 0;
-  return nation.expenses.territory + nation.expenses.structures;
+  return (
+    nation.expenses.territory +
+    nation.expenses.structures +
+    nation.expenses.military
+  );
 }
 
 const INCOME_WINDOW_S = 10;

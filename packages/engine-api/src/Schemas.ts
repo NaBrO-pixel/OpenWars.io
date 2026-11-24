@@ -52,7 +52,8 @@ export type Intent =
   | ToggleGameStartTimer
   | InfrastructureIntent
   | ResearchIntent
-  | DiplomacyIntent;
+  | DiplomacyIntent
+  | MobiliseIntent;
 
 export type AttackIntent = z.infer<typeof AttackIntentSchema>;
 export type CancelAttackIntent = z.infer<typeof CancelAttackIntentSchema>;
@@ -89,6 +90,7 @@ export type UpdateGameConfigIntent = z.infer<
 export type InfrastructureIntent = z.infer<typeof InfrastructureIntentSchema>;
 export type ResearchIntent = z.infer<typeof ResearchIntentSchema>;
 export type DiplomacyIntent = z.infer<typeof DiplomacyIntentSchema>;
+export type MobiliseIntent = z.infer<typeof MobiliseIntentSchema>;
 export type ToggleGameStartTimer = z.infer<
   typeof ToggleGameStartTimerIntentSchema
 >;
@@ -610,6 +612,13 @@ export const DiplomacyIntentSchema = z.object({
   target: ID,
 });
 
+// OpenWars mobilisation (milestone 6): the nation's military readiness, an
+// index into MilitaryConfig MOBILISATION_LEVELS.
+export const MobiliseIntentSchema = z.object({
+  type: z.literal("mobilise"),
+  level: zb.uint({ max: 3 }),
+});
+
 export const IntentSchema = z.compile(
   z.discriminatedUnion("type", [
     AttackIntentSchema,
@@ -641,6 +650,7 @@ export const IntentSchema = z.compile(
     InfrastructureIntentSchema,
     ResearchIntentSchema,
     DiplomacyIntentSchema,
+    MobiliseIntentSchema,
   ]),
 );
 

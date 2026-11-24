@@ -25,6 +25,7 @@ import { InfrastructureExecutionSnapshot } from "../execution/InfrastructureExec
 import { MarkDisconnectedExecutionSnapshot } from "../execution/MarkDisconnectedExecution";
 import { MirvExecutionSnapshot } from "../execution/MIRVExecution";
 import { MissileSiloExecutionSnapshot } from "../execution/MissileSiloExecution";
+import { MobiliseExecutionSnapshot } from "../execution/MobiliseExecution";
 import { MoveWarshipExecutionSnapshot } from "../execution/MoveWarshipExecution";
 import { NationalEconomyExecutionSnapshot } from "../execution/NationalEconomyExecution";
 import { NationExecutionSnapshot } from "../execution/NationExecution";
@@ -113,4 +114,5 @@ export const EXECUTION_SNAPSHOT_TYPES = [
   InfrastructureExecutionSnapshot,
   ResearchExecutionSnapshot,
   DiplomacyExecutionSnapshot,
+  MobiliseExecutionSnapshot,
 ] as unknown as readonly ExecutionSnapshotType<unknown>[];

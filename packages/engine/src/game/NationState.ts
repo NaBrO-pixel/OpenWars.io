@@ -10,6 +10,7 @@ import type {
   NationExpenses,
   NationIncome,
   NationView,
+  VictoryProgressView,
 } from "@openfront/engine-api/game/GameUpdates";
 import type {
   InfrastructureProjectView,
@@ -22,6 +23,7 @@ import {
   type EventModifiers,
   NO_EVENT,
 } from "@openfront/engine-lib/configuration/EventConfig";
+import { MilitaryConfig } from "@openfront/engine-lib/configuration/MilitaryConfig";
 import {
   NO_TECH,
   type TechModifiers,
@@ -49,6 +51,8 @@ export interface EconomyInput {
   alliances?: number;
   /** Running world events' effects on this nation (milestone 5). */
   events?: EventModifiers;
+  /** Mobilisation level index (milestone 6). */
+  mobilisation?: number;
 }
 
 /** What one economy step decides. */
@@ -143,9 +147,13 @@ export function economyStep(
       100_000,
   );
   const structures = input.structureLevels * cfg.upkeepPerStructureLevel;
+  const mob = input.mobilisation ?? MilitaryConfig.defaultMobilisation;
+  const military = Math.floor(
+    (input.troops * MilitaryConfig.upkeepPerThousandTroops[mob]) / 1000,
+  );
 
   const moneyIn = tax + industryMoney;
-  const moneyOut = territory + structures;
+  const moneyOut = territory + structures + military;
   const net = input.baseIncome + moneyIn - moneyOut;
 
   // Stability target: development raises it; fast growth and deficits
@@ -185,7 +193,8 @@ export function economyStep(
     cfg.stabilityBase +
       devBonus +
       tech.stabilityTarget +
-      ev.stabilityTarget -
+      ev.stabilityTarget +
+      MilitaryConfig.stability[mob] -
       growthPenalty -
       (deficit ? deficitPenalty : 0),
     0,
@@ -194,7 +203,7 @@ export function economyStep(
 
   return {
     income: { base: input.baseIncome, tax, industry: industryMoney },
-    expenses: { territory, structures },
+    expenses: { territory, structures, military },
     moneyIn,
     moneyOut,
     industryRate,
@@ -223,6 +232,10 @@ export const NationStateSchema = z.object({
   tileSamples: z.array(z.number()),
   netHistory: z.array(z.number()),
   techs: z.array(z.string()),
+  mobilisation: z.number(),
+  victoryHolds: z.record(z.string(), z.number()),
+  supply: z.number(),
+  defence: z.number(),
   researching: z
     .object({
       id: z.string(),
@@ -239,7 +252,11 @@ export const NationStateSchema = z.object({
         tax: z.number(),
         industry: z.number(),
       }),
-      expenses: z.object({ territory: z.number(), structures: z.number() }),
+      expenses: z.object({
+        territory: z.number(),
+        structures: z.number(),
+        military: z.number(),
+      }),
       industryRate: z.number(),
       researchRate: z.number(),
       development: z.number(),
@@ -260,6 +277,14 @@ export class NationState {
   netHistory: number[] = [];
   /** Completed technologies, in completion order. */
   techs: string[] = [];
+  /** Mobilisation level (MOBILISATION_LEVELS index). */
+  mobilisation: number = MilitaryConfig.defaultMobilisation;
+  /** Steps each alternative victory has been held. */
+  victoryHolds: Record<string, number> = {};
+  /** Updated each step; combat reads them, so they are snapshotted. */
+  supply = 500;
+  defence = 0;
+  victory: VictoryProgressView[] = [];
   researching: {
     id: string;
     done: number;
@@ -396,7 +421,7 @@ export class NationState {
       stability: this.stability,
       stabilityTarget: last?.stabilityTarget ?? this.stability,
       income: last?.income ?? { base: 0, tax: 0, industry: 0 },
-      expenses: last?.expenses ?? { territory: 0, structures: 0 },
+      expenses: last?.expenses ?? { territory: 0, structures: 0, military: 0 },
       industryRate: last?.industryRate ?? 0,
       researchRate: last?.researchRate ?? 0,
       development: last?.development ?? 0,
@@ -417,6 +442,10 @@ export class NationState {
       eventHistory: this.eventHistory,
       neighbours: this.neighbours,
       intelLevels: this.tech().intelLevels,
+      mobilisation: this.mobilisation,
+      supply: this.supply,
+      defence: this.defence,
+      victory: this.victory,
     };
     return this.cachedView;
   }
@@ -430,6 +459,10 @@ export class NationState {
       tileSamples: [...this.tileSamples],
       netHistory: [...this.netHistory],
       techs: [...this.techs],
+      mobilisation: this.mobilisation,
+      victoryHolds: { ...this.victoryHolds },
+      supply: this.supply,
+      defence: this.defence,
       researching: this.researching === null ? null : { ...this.researching },
       last: copyLast(this.last),
     };
@@ -444,6 +477,10 @@ export class NationState {
     n.tileSamples = [...d.tileSamples];
     n.netHistory = [...d.netHistory];
     n.techs = [...d.techs];
+    n.mobilisation = d.mobilisation;
+    n.victoryHolds = { ...d.victoryHolds };
+    n.supply = d.supply;
+    n.defence = d.defence;
     n.researching = d.researching === null ? null : { ...d.researching };
     n.last = copyLast(d.last);
     return n;

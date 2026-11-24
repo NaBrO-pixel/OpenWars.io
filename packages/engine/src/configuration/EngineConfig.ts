@@ -41,6 +41,10 @@ export interface AttackLogicInput {
   falloutRatio: number | null;
   /** Tiles on the attack front this tick (plus jitter); fixed for the tick. */
   borderSize: number;
+  /** OpenWars (milestone 6): the attacker's supply and the defender's
+   * development bonus, permille. Absent under the classic rules. */
+  attackerSupplyPermille?: number;
+  defenderDefencePermille?: number;
 }
 
 export interface AttackLogicResult {
@@ -646,8 +650,17 @@ export class EngineConfig extends Config {
       attacker.numTiles,
       LARGE_ATTACKER_SPEED_DEPTH,
     );
+    // OpenWars: poor supply and a developed defender cost the attacker more.
+    const supplyMod =
+      input.attackerSupplyPermille === undefined
+        ? 1
+        : (2000 - input.attackerSupplyPermille) / 1000;
+    const defenceMod =
+      input.defenderDefencePermille === undefined
+        ? 1
+        : (1000 + input.defenderDefencePermille) / 1000;
     return {
-      attackerTroopLoss,
+      attackerTroopLoss: attackerTroopLoss * supplyMod * defenceMod,
       defenderTroopLoss,
       tickFraction:
         (speedCost *

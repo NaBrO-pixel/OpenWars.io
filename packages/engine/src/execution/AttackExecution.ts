@@ -359,6 +359,14 @@ export class AttackExecution implements Execution {
     }
   }
 
+  /** OpenWars combat factors: attacker supply, defender development. */
+  private openWarsCombat(defender: Player | null) {
+    return {
+      attackerSupplyPermille: this._owner.nation()?.supply,
+      defenderDefencePermille: defender?.nation()?.defence,
+    };
+  }
+
   private attackLogicInput(
     attackTroops: number,
     tile: TileRef,
@@ -400,6 +408,7 @@ export class AttackExecution implements Execution {
         ? this.mg.numTilesWithFallout() / this.mg.numLandTiles()
         : null,
       borderSize,
+      ...(this.mg.config().isOpenWars() ? this.openWarsCombat(defender) : {}),
     };
   }
 

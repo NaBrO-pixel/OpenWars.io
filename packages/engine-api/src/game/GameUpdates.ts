@@ -335,6 +335,22 @@ export interface NationView {
   neighbours: string[];
   /** Intelligence levels from research. */
   intelLevels: number;
+  /** Mobilisation level (MilitaryConfig MOBILISATION_LEVELS index). */
+  mobilisation: number;
+  /** Supply efficiency and defensive bonus, permille (milestone 6). */
+  supply: number;
+  defence: number;
+  /** Progress toward each alternative victory (milestone 6). */
+  victory: VictoryProgressView[];
+}
+
+export interface VictoryProgressView {
+  kind: string;
+  /** 0..1000+: 1000 means the condition is met. */
+  progress: number;
+  /** Seconds it has been held, and needed. */
+  held: number;
+  needed: number;
 }
 
 export interface NationIncome {
@@ -346,6 +362,8 @@ export interface NationIncome {
 export interface NationExpenses {
   territory: number;
   structures: number;
+  /** Army upkeep (mobilisation, milestone 6). */
+  military: number;
 }
 
 export interface AllianceView {
@@ -424,6 +442,8 @@ export interface WinUpdate {
   type: GameUpdateType.Win;
   allPlayersStats: AllPlayersStats;
   winner: Winner;
+  /** OpenWars: the victory path taken ("economic", ...); absent otherwise. */
+  victory?: string;
 }
 
 export interface HashUpdate {

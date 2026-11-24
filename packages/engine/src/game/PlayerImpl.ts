@@ -2172,7 +2172,7 @@ export class PlayerImpl implements Player {
 
 export const PlayerSnapshot = snapshotType({
   name: "Player",
-  version: 4,
+  version: 5,
   migrations: {
     // v1 had no scenario nations, so none was playable.
     1: (d) => ({ ...d, playable: false }),
@@ -2185,6 +2185,27 @@ export const PlayerSnapshot = snapshotType({
         d.nation === null || d.nation === undefined
           ? null
           : { ...d.nation, techs: [], researching: null },
+    }),
+    // v4 predates mobilisation and victory progress.
+    4: (d) => ({
+      ...d,
+      nation:
+        d.nation === null || d.nation === undefined
+          ? null
+          : {
+              ...d.nation,
+              mobilisation: 1,
+              victoryHolds: {},
+              supply: 500,
+              defence: 0,
+              last:
+                d.nation.last === null
+                  ? null
+                  : {
+                      ...d.nation.last,
+                      expenses: { ...d.nation.last.expenses, military: 0 },
+                    },
+            },
     }),
   },
   schema: z.object({

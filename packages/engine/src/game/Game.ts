@@ -605,6 +605,8 @@ export interface Game extends GameLike {
   setWinner(
     winner: Player | Team | null,
     allPlayersStats: AllPlayersStats,
+    /** OpenWars: the victory path taken (milestone 6). */
+    victory?: string,
   ): void;
   getWinner(): Player | Team | null;
   config(): EngineConfig;

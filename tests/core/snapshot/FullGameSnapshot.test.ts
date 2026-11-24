@@ -129,12 +129,17 @@ const VARIANTS: [string, Partial<GameConfig>][] = [
   ["openwars", { ruleset: "openwars" }],
 ];
 
+// Execution types seen across every variant (they run in order, openwars
+// last): together they must cover every registered type.
+const seenExecTypes = new Set<string>();
+
 describe.each(VARIANTS)("full game snapshots: %s", (_, overrides) => {
   const start = scriptedGameStart(overrides);
   let reference: Reference;
 
   beforeAll(async () => {
     reference = await playReference(start);
+    for (const t of reference.execTypes) seenExecTypes.add(t);
   }, TEST_TIMEOUT);
   test(
     "snapshot -> restore -> snapshot is byte-identical at every checkpoint",
@@ -196,13 +201,13 @@ describe.each(VARIANTS)("full game snapshots: %s", (_, overrides) => {
   test(
     "the game exercised every execution type",
     () => {
-      // Checked once, on the variant that runs every execution type.
+      // Checked once, on the last variant, against all of them.
       if (overrides.ruleset !== "openwars") return;
       // Runs during the spawn phase and finishes inside init, so it is never
       // alive at a tick boundary. BasicExecutions.test.ts covers it directly.
       const neverStored = new Set(["Pause"]);
       const missing = EXECUTION_SNAPSHOT_TYPES.map((t) => t.name).filter(
-        (name) => !reference.execTypes.has(name) && !neverStored.has(name),
+        (name) => !seenExecTypes.has(name) && !neverStored.has(name),
       );
       expect(missing).toEqual([]);
     },

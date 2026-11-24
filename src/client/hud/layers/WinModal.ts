@@ -947,6 +947,12 @@ export class WinModal extends LitElement implements Controller {
         void this.show();
       }
     });
+    // OpenWars: name the victory path (economic, diplomatic...).
+    for (const wu of winUpdates) {
+      if (wu.victory !== undefined && wu.victory !== "territorial") {
+        this._title = `${this._title} · ${translateText(`victory.${wu.victory}_title`)}`;
+      }
+    }
     // After the vote, so a figure from the end has what was voted.
     if (winUpdates.length > 0) {
       void this.updateXp(true);
