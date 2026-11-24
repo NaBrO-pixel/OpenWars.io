@@ -30,6 +30,7 @@
  *   Col 13: Transport Helicopter (13×13)│ layer above structures, with the
  *   Col 14: Fighter (13×13)             │ warship flags (angry when engaging,
  *   Col 15: Bomber (13×13)              ┘ blinking when returning to base)
+ *   Col 16: Tank (11×7, ground layer; angry while it has a target)
  *
  * Data flow:
  *   FrameSnapshot.units → filter by typeToAtlasIdx → instance VBO → GPU
@@ -47,6 +48,7 @@ import {
   UT_ATTACK_HELICOPTER,
   UT_BOMBER,
   UT_FIGHTER,
+  UT_TANK,
   UT_HYDROGEN_BOMB,
   UT_MIRV,
   UT_MIRV_WARHEAD,
@@ -98,6 +100,7 @@ const UNIT_ORDER = [
   UT_TRANSPORT_HELICOPTER,
   UT_FIGHTER,
   UT_BOMBER,
+  UT_TANK,
 ] as const;
 
 const ATLAS_COLS = UNIT_ORDER.length;

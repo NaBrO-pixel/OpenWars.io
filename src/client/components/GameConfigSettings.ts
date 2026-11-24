@@ -125,6 +125,7 @@ const unitOptions: { type: UnitType; translationKey: string }[] = [
   { type: UnitType.AAGun, translationKey: "unit_type.aa_gun" },
   { type: UnitType.Fighter, translationKey: "unit_type.fighter" },
   { type: UnitType.Bomber, translationKey: "unit_type.bomber" },
+  { type: UnitType.Tank, translationKey: "unit_type.tank" },
   {
     type: UnitType.AttackHelicopter,
     translationKey: "unit_type.attack_helicopter",

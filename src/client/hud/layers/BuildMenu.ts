@@ -43,6 +43,7 @@ const radarIcon = assetUrl("images/RadarIconWhite.svg");
 const aaGunIcon = assetUrl("images/AAGunIconWhite.svg");
 const fighterIcon = assetUrl("images/FighterIconWhite.svg");
 const bomberIcon = assetUrl("images/BomberIconWhite.svg");
+const tankIcon = assetUrl("images/TankIconWhite.svg");
 const attackHelicopterIcon = assetUrl("images/AttackHelicopterIconWhite.svg");
 const transportHelicopterIcon = assetUrl(
   "images/TransportHelicopterIconWhite.svg",
@@ -164,6 +165,13 @@ const buildTable: BuildItemDisplay[][] = [
       icon: bomberIcon,
       description: "build_menu.desc.bomber",
       key: "unit_type.bomber",
+      countable: true,
+    },
+    {
+      unitType: UnitType.Tank,
+      icon: tankIcon,
+      description: "build_menu.desc.tank",
+      key: "unit_type.tank",
       countable: true,
     },
     {

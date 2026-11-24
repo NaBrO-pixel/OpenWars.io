@@ -139,6 +139,7 @@ const TUTORIAL_DISABLED_UNITS: UnitType[] = [
   UnitType.Bomber,
   UnitType.AttackHelicopter,
   UnitType.TransportHelicopter,
+  UnitType.Tank,
 ];
 
 const DEFAULT_OPTIONS = {

@@ -230,6 +230,7 @@
       "port": "Sends trade ships to generate gold",
       "radar_station": "Tracks aircraft so SAMs and fighters can engage them",
       "sam_launcher": "Defends against incoming nukes",
+      "tank": "Rolls out of a factory and drives to the tile you pick, capturing hostile land on the way. Duels enemy tanks; defence posts stop it",
       "transport_helicopter": "Lands troops behind enemy lines",
       "warship": "Captures trade ships, destroys ships and boats"
     },
@@ -3640,6 +3641,7 @@
     "port": "Port",
     "radar_station": "Radar Station",
     "sam_launcher": "SAM Launcher",
+    "tank": "Tank",
     "transport_helicopter": "Transport Helicopter",
     "warship": "Warship"
   },

@@ -1046,4 +1046,5 @@ const DESTROYED_UNIT_KEYS: Partial<Record<UnitType, string>> = {
   [UnitType.TransportHelicopter]: "unit_type.transport_helicopter",
   [UnitType.Fighter]: "unit_type.fighter",
   [UnitType.Bomber]: "unit_type.bomber",
+  [UnitType.Tank]: "unit_type.tank",
 };

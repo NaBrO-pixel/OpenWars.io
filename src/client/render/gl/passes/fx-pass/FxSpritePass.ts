@@ -10,6 +10,7 @@ import type { Config } from "@openfront/engine-lib/configuration/Config";
 import type { ConquestFx, DeadUnitFx, RendererConfig } from "../../../types";
 import {
   AIRCRAFT_TYPES,
+  UT_TANK,
   STRUCTURE_TYPES,
   UT_SHELL,
   UT_TRAIN,
@@ -371,7 +372,7 @@ export class FxSpritePass {
 
     // AIR update: an aircraft is only ever removed when shot down or out of
     // fuel, so every removal is an explosion in the air.
-    if (AIRCRAFT_TYPES.has(typeName)) {
+    if (AIRCRAFT_TYPES.has(typeName) || typeName === UT_TANK) {
       this.pushFx(x, y, FX_UNIT_EXPLOSION, now);
       return;
     }

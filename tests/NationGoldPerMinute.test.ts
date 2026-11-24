@@ -23,6 +23,7 @@
  * deterministic.
  */
 import {
+  Aircraft,
   Cell,
   Difficulty,
   Nation,
@@ -134,6 +135,9 @@ interface MinuteRow {
   cities: number;
   tradeShipsAtSea: number;
   trainsRunning: number;
+  aircraft: number;
+  tanks: number;
+  tanksBuilt: number;
 }
 
 async function runNationGame(minutes: number): Promise<{
@@ -198,6 +202,12 @@ async function runNationGame(minutes: number): Promise<{
       cities: game.units(UnitType.City).length,
       tradeShipsAtSea: game.units(UnitType.TradeShip).length,
       trainsRunning: game.units(UnitType.Train).length,
+      // Nations' air and armour (AIR and Armour updates), for the record.
+      aircraft: game.units(Aircraft.types).length,
+      tanks: game.units(UnitType.Tank).length,
+      tanksBuilt: game
+        .players()
+        .reduce((n, p) => n + p.unitsConstructed(UnitType.Tank), 0),
     });
     prev = { ...tally };
   }

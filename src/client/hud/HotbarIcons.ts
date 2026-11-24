@@ -17,6 +17,7 @@ export const radarIcon = assetUrl("images/RadarIconWhite.svg");
 export const aaGunIcon = assetUrl("images/AAGunIconWhite.svg");
 export const fighterIcon = assetUrl("images/FighterIconWhite.svg");
 export const bomberIcon = assetUrl("images/BomberIconWhite.svg");
+export const tankIcon = assetUrl("images/TankIconWhite.svg");
 export const attackHelicopterIcon = assetUrl(
   "images/AttackHelicopterIconWhite.svg",
 );

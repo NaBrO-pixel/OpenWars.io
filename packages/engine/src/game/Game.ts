@@ -130,6 +130,7 @@ export interface UnitParamsMap {
   [UnitType.TransportHelicopter]: { patrolTile: TileRef; troops?: number };
   [UnitType.Fighter]: { patrolTile: TileRef };
   [UnitType.Bomber]: { patrolTile: TileRef };
+  [UnitType.Tank]: { patrolTile: TileRef };
 }
 
 // Type helper to get params type for a specific unit type

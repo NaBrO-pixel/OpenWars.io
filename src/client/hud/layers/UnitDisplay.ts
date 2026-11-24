@@ -31,6 +31,7 @@ import {
   atomBombIcon,
   attackHelicopterIcon,
   bomberIcon,
+  tankIcon,
   cityIcon,
   defensePostIcon,
   factoryIcon,
@@ -73,6 +74,7 @@ export class UnitDisplay extends LitElement implements Controller {
   private _aaGuns = 0;
   private _fighters = 0;
   private _bombers = 0;
+  private _tanks = 0;
   private _attackHelicopters = 0;
   private _transportHelicopters = 0;
   private _factories = 0;
@@ -589,6 +591,12 @@ export class UnitDisplay extends LitElement implements Controller {
           this.cost(item) <= (player?.gold() ?? 0n) &&
           (player?.units(UnitType.Airbase).length ?? 0) > 0
         );
+      // Armour update: tanks roll out of a factory.
+      case UnitType.Tank:
+        return (
+          this.cost(item) <= (player?.gold() ?? 0n) &&
+          (player?.units(UnitType.Factory).length ?? 0) > 0
+        );
       default:
         return this.cost(item) <= (player?.gold() ?? 0n);
     }
@@ -622,6 +630,7 @@ export class UnitDisplay extends LitElement implements Controller {
     this._aaGuns = player.totalUnitLevels(UnitType.AAGun);
     this._fighters = player.totalUnitLevels(UnitType.Fighter);
     this._bombers = player.totalUnitLevels(UnitType.Bomber);
+    this._tanks = player.totalUnitLevels(UnitType.Tank);
     this._attackHelicopters = player.totalUnitLevels(UnitType.AttackHelicopter);
     this._transportHelicopters = player.totalUnitLevels(
       UnitType.TransportHelicopter,
@@ -772,6 +781,13 @@ export class UnitDisplay extends LitElement implements Controller {
               this._bombers,
               UnitType.Bomber,
               "bomber",
+              "",
+            )}
+            ${this.renderUnitItem(
+              tankIcon,
+              this._tanks,
+              UnitType.Tank,
+              "tank",
               "",
             )}
             ${this.renderUnitItem(

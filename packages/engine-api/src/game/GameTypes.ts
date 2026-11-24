@@ -242,6 +242,8 @@ export enum UnitType {
   TransportHelicopter = "Transport Helicopter",
   Fighter = "Fighter",
   Bomber = "Bomber",
+  // Armour update (appended, like AIR).
+  Tank = "Tank",
 }
 
 export enum TrainType {
@@ -283,6 +285,7 @@ export const BuildableAttacks = unitTypeGroup([
   UnitType.MIRV,
   UnitType.Warship,
   ...Aircraft.types,
+  UnitType.Tank,
 ] as const);
 
 /** AIR update: structures of the air war. */

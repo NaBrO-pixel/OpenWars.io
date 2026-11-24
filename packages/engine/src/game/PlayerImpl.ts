@@ -1667,6 +1667,8 @@ export class PlayerImpl implements Player {
       case UnitType.Fighter:
       case UnitType.Bomber:
         return this.aircraftSpawn(targetTile);
+      case UnitType.Tank:
+        return this.tankSpawn(targetTile);
       default:
         assertNever(unitType);
     }
@@ -1768,6 +1770,22 @@ export class PlayerImpl implements Player {
       (base) => base.isActive() && !base.isUnderConstruction(),
     );
     return airbase?.tile() ?? false;
+  }
+
+  /**
+   * Armour update: tanks roll out of the owner's finished factory nearest
+   * to the ordered tile.
+   */
+  tankSpawn(tile: TileRef): TileRef | false {
+    if (!this.mg.isValidRef(tile)) {
+      return false;
+    }
+    const factory = findClosestBy(
+      this.units(UnitType.Factory),
+      (f) => this.mg.manhattanDist(f.tile(), tile),
+      (f) => f.isActive() && !f.isUnderConstruction(),
+    );
+    return factory?.tile() ?? false;
   }
 
   landBasedUnitSpawn(tile: TileRef): TileRef | false {

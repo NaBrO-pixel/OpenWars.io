@@ -26,6 +26,8 @@ export const UT_ATTACK_HELICOPTER = "Attack Helicopter" as const;
 export const UT_TRANSPORT_HELICOPTER = "Transport Helicopter" as const;
 export const UT_FIGHTER = "Fighter" as const;
 export const UT_BOMBER = "Bomber" as const;
+// Armour update
+export const UT_TANK = "Tank" as const;
 
 // Structures
 export const UT_CITY = "City" as const;
@@ -127,4 +129,6 @@ export const ALL_UNIT_TYPES = [
   UT_TRANSPORT_HELICOPTER,
   UT_FIGHTER,
   UT_BOMBER,
+  // Armour update (appended)
+  UT_TANK,
 ] as const;

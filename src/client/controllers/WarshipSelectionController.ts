@@ -24,12 +24,19 @@ export const WARSHIP_SELECTION_RADIUS = 10;
 /** Units a player commands by selecting them: warships and aircraft. */
 const COMMANDABLE_TYPES: readonly UnitType[] = [
   UnitType.Warship,
+  UnitType.Tank,
   ...Aircraft.types,
 ];
 
-/** Aircraft fly anywhere; warships only take orders on water. */
+/** Units that take orders on land: aircraft and (Armour update) tanks. */
+const LAND_ORDERABLE_TYPES: readonly UnitType[] = [
+  ...Aircraft.types,
+  UnitType.Tank,
+];
+
+/** Aircraft and tanks go overland; warships only take orders on water. */
 function isAircraftUnit(unit: UnitView): boolean {
-  return Aircraft.has(unit.type());
+  return LAND_ORDERABLE_TYPES.includes(unit.type());
 }
 
 /**
@@ -163,7 +170,7 @@ export class WarshipSelectionController implements Controller {
     // Over land only aircraft can be under the cursor.
     const types = this.game.isWater(clickRef)
       ? COMMANDABLE_TYPES
-      : Aircraft.types;
+      : LAND_ORDERABLE_TYPES;
     return this.game
       .units(...types)
       .filter(

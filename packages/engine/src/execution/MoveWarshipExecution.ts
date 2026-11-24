@@ -28,7 +28,7 @@ export class MoveWarshipExecution implements Execution {
     // aircraft) and build a lookup map — avoids repeated iteration
     const warshipMap = new Map(
       this.owner
-        .units([UnitType.Warship, ...Aircraft.types])
+        .units([UnitType.Warship, UnitType.Tank, ...Aircraft.types])
         .map((u) => [u.id(), u]),
     );
     // Deduplicate ids so each warship is only moved once
@@ -44,7 +44,8 @@ export class MoveWarshipExecution implements Execution {
       }
       // Aircraft fly anywhere: the new tile is their station, strike target
       // or landing zone (see AircraftExecution).
-      if (Aircraft.has(warship.type())) {
+      // Tanks drive overland (see TankExecution).
+      if (Aircraft.has(warship.type()) || warship.type() === UnitType.Tank) {
         warship.updateWarshipState({ patrolTile: this.position });
         continue;
       }

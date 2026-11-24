@@ -302,6 +302,9 @@ export class Config {
       case UnitType.Bomber:
         info = { maxHealth: 900 };
         break;
+      case UnitType.Tank:
+        info = { maxHealth: 1000 };
+        break;
       case UnitType.TransportShip:
       case UnitType.SAMMissile:
       case UnitType.AtomBomb:

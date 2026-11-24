@@ -395,3 +395,7 @@ continuation), `IntelRules.test.ts`, panel tests.
 2. `npm run typecheck`, `npm run lint`, `npm run build-prod` (run the build after tests: `RenderHtml.test.ts` fails against local build output).
 3. Play one solo game in each mode: World Conquest, Cold War and Sandbox.
 4. Deploy with `deploy/` as described in `docs/SelfHosting.md`.
+
+## Armour update
+
+Tanks are ground units that roll out of factories, break through hostile land, duel other tanks and are stopped by defence posts. Nations use them against the player they are at war with. See `docs/Armour.md`.

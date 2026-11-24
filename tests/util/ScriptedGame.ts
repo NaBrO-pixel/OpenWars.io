@@ -346,6 +346,23 @@ function airIntent(
   return { type: "move_warship", unitIds: [aircraft.id()], tile };
 }
 
+/** Armour update: builds up to two tanks at an enemy, then re-orders them. */
+function tankIntent(
+  p: Player,
+  rand: PseudoRandom,
+  other: Player | null,
+): Intent | null {
+  const target = other === null ? null : randomOwnedTile(rand, other);
+  if (target === null) return null;
+  const tanks = p.units(UnitType.Tank);
+  if (tanks.length < 2 && p.canBuild(UnitType.Tank, target) !== false) {
+    return { type: "build_unit", unit: UnitType.Tank, tile: target };
+  }
+  const tank = pick(rand, tanks);
+  if (tank === null) return null;
+  return { type: "move_warship", unitIds: [tank.id()], tile: target };
+}
+
 function nearbyWater(
   game: Game,
   tile: TileRef,
@@ -558,6 +575,13 @@ function playIntent(game: Game, p: Player, rand: PseudoRandom): Intent | null {
   if (game.ticks() > 300 && rand.chance(4)) {
     const air = airIntent(game, p, rand, other);
     if (air !== null) return air;
+  }
+
+  // Armour: tanks from a factory toward the enemy, then re-ordered. Guarded
+  // on the ruleset first, so the classic variants' random draws are unchanged.
+  if (game.config().isOpenWars() && game.ticks() > 300 && rand.chance(6)) {
+    const tank = tankIntent(p, rand, other);
+    if (tank !== null) return tank;
   }
 
   // OpenWars: develop cities. Guarded on the ruleset first, so the classic

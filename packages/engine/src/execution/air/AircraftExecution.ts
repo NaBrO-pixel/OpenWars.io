@@ -63,6 +63,7 @@ const ATTACK_HELICOPTER_TARGETS: readonly UnitType[] = [
   UnitType.TransportShip,
   UnitType.TransportHelicopter,
   UnitType.Warship,
+  UnitType.Tank,
   UnitType.AttackHelicopter,
 ];
 
