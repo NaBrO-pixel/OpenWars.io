@@ -27,6 +27,7 @@ import {
 } from "../NationalSummary";
 import { renderDiplomacy } from "./DiplomacyPanel";
 import { renderEvents } from "./EventsPanel";
+import { guideSeen, markGuideSeen, renderGuide } from "./GuidePanel";
 import { ToggleInfrastructureOverlayEvent } from "./InfrastructureOverlay";
 import { renderInfrastructure } from "./InfrastructurePanel";
 import { IntelHistory, renderIntelligence } from "./IntelligencePanel";
@@ -404,6 +405,15 @@ export const COMMAND_SECTIONS: readonly CommandSection[] = [
     available: (ctx) => ctx.summary.nation !== null,
   },
   {
+    id: "guide",
+    labelKey: "command_nav.guide",
+    icon: svg(
+      "M12 18h.01M9.1 9a3 3 0 1 1 4.2 2.7c-.8.4-1.3 1.2-1.3 2.1V15M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z",
+    ),
+    render: () => renderGuide(),
+    available: (ctx) => ctx.summary.nation !== null,
+  },
+  {
     id: "statistics",
     labelKey: "command_nav.statistics",
     icon: svg("M4 20V10m6 10V4m6 16v-7m4 7H2"),
@@ -460,6 +470,11 @@ export class CommandNav extends LitElement implements Controller {
       return;
     }
     this.intelHistory.sample(this.game);
+    // First OpenWars game: open the guide once (replayable from its button).
+    if (me.nation() !== null && !guideSeen()) {
+      markGuideSeen();
+      this.open = "guide";
+    }
     this.ctx = {
       game: this.game,
       me,

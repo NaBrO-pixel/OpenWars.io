@@ -979,6 +979,7 @@
     "expense_territory_why": "Administering land beyond your heartland. Grows with every tile you take.",
     "expenses": "Expenses",
     "expenses_total": "Total expenses",
+    "guide": "How OpenWars works",
     "income": "Income",
     "income_base": "Base income",
     "income_base_why": "Every nation's steady revenue.",
@@ -1741,6 +1742,23 @@
     "territory_alpha_label": "Territory opacity",
     "territory_sat_desc": "How vivid the territory fill colors are (lower mutes them)",
     "territory_sat_label": "Territory saturation"
+  },
+  "guide": {
+    "development": "Build cities, then develop them in Infrastructure: roads, railways, industrial and research centres. They cost money and industry and take time.",
+    "development_title": "Development",
+    "diplomacy": "Propose alliances, non-aggression pacts, trade agreements and ceasefires. Breaking deals hurts your reputation, and AI nations remember.",
+    "diplomacy_title": "Diplomacy",
+    "intro": "Seven things to know. Open this guide again any time from the ? button.",
+    "map": "Every colour is a country. Drag to pan, scroll or pinch to zoom, click a country to act on it.",
+    "map_title": "The map",
+    "research": "Spend research points on one technology at a time. Choose a branch: industry, technology or society. Every technology has a real effect.",
+    "research_title": "Research",
+    "resources": "The top bar shows money, income, population, territory, industry, research and stability. Low stability cuts your tax income; fast expansion and debt lower it.",
+    "resources_title": "Resources",
+    "territory": "Attack unclaimed land or neighbours with your troops (the slider sets how many). Bigger countries have more population, but land costs upkeep.",
+    "territory_title": "Territory",
+    "victory": "Win by holding enough territory, by dominating the world economy, through diplomatic influence, or by completing advanced research. See Statistics for your progress.",
+    "victory_title": "Winning"
   },
   "heads_up_message": {
     "choose_spawn": "Choose a starting location",

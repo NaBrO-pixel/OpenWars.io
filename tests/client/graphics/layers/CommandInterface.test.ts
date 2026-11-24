@@ -30,6 +30,11 @@ import {
 } from "../../../../src/client/Transport";
 import type { GameView } from "../../../../src/client/view";
 
+beforeEach(() => {
+  // The guide opens itself once; tests other than its own start past it.
+  localStorage.setItem("openwars.guideSeen", "1");
+});
+
 interface FakePlayer {
   id: () => string;
   isAlive: () => boolean;
@@ -713,5 +718,28 @@ describe("mode picker", () => {
       victoryConditions: ["economic", "diplomatic", "technological"],
     });
     picker.remove();
+  });
+});
+
+describe("guide", () => {
+  it("opens once on the first OpenWars game, then on demand", async () => {
+    localStorage.removeItem("openwars.guideSeen");
+    const nav = document.createElement("command-nav") as CommandNav;
+    document.body.appendChild(nav);
+    nav.game = game(player("me", 100, 0, NATION));
+    nav.init();
+    nav.tick();
+    await nav.updateComplete;
+    expect(nav.querySelectorAll("[data-guide]")).toHaveLength(7);
+    nav.toggle("guide");
+    await nav.updateComplete;
+    nav.init();
+    nav.tick();
+    await nav.updateComplete;
+    expect(nav.querySelector("[data-guide]")).toBeNull();
+    nav.toggle("guide");
+    await nav.updateComplete;
+    expect(nav.querySelectorAll("[data-guide]")).toHaveLength(7);
+    nav.remove();
   });
 });
