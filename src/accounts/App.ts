@@ -19,6 +19,8 @@ import express, {
 import rateLimit from "express-rate-limit";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
+import newsDefaults from "../../resources/news.json";
+import streamsDefaults from "../../resources/streams.json";
 import type { AccountsConfig } from "./Config";
 import type { AccountsDb, UserRow } from "./Database";
 import { authorizeUrl, exchangeCode, type Identity, isProvider } from "./OAuth";
@@ -352,6 +354,19 @@ export function createApp({ config, db, tokens, log }: AppDeps) {
       return;
     }
     res.type("application/json").send(json);
+  });
+
+  // OpenWars has no store, news feed or streams: answer with an empty
+  // catalogue and the client's own bundled defaults, so the client doesn't
+  // log a failed request (and refetch the catalogue) on every page.
+  app.get("/cosmetics.json", (_req, res) => {
+    res.json({ patterns: {}, flags: {} });
+  });
+  app.get("/news.json", (_req, res) => {
+    res.json(newsDefaults);
+  });
+  app.get("/streams.json", (_req, res) => {
+    res.json(streamsDefaults);
   });
 
   app.get("/public/progression/config", (_req, res) => {

@@ -11,6 +11,7 @@ import {
 } from "@openfront/shared/ApiSchemas";
 import { base64urlToUuid } from "@openfront/shared/Base64";
 import { JwksSchema } from "@openfront/shared/configuration/Env";
+import { CosmeticsSchema } from "@openfront/shared/CosmeticSchemas";
 import {
   createPartialGameRecord,
   replacer,
@@ -205,6 +206,18 @@ describe("accounts service", () => {
   it("publishes the signing key the game server expects", async () => {
     const res = await fetch(`${base}/.well-known/jwks.json`);
     expect(JwksSchema.safeParse(await res.json()).success).toBe(true);
+  });
+
+  it("serves an empty store and the bundled news and streams", async () => {
+    const cosmetics = await fetch(`${base}/cosmetics.json`);
+    expect(cosmetics.status).toBe(200);
+    expect(CosmeticsSchema.safeParse(await cosmetics.json()).success).toBe(
+      true,
+    );
+    for (const path of ["/news.json", "/streams.json"]) {
+      const res = await fetch(base + path);
+      expect(res.status).toBe(200);
+    }
   });
 
   it("gives a new visitor a guest session the game accepts", async () => {
