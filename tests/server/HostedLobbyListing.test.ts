@@ -365,6 +365,12 @@ describe("GameManager.listedLobbies", () => {
     vi.useRealTimers();
   });
 
+  it("hosts new lobbies on Medium, so nations use aircraft and tanks", () => {
+    const gm = new GameManager(mockLogger);
+    const game = gm.createGame("g-default", undefined, CREATOR)!;
+    expect(game.gameInfo().gameConfig?.difficulty).toBe(Difficulty.Medium);
+  });
+
   it("returns only listed private lobbies still in the lobby phase", () => {
     const gm = new GameManager(mockLogger);
     const unlisted = gm.createGame("g-unlisted", undefined, CREATOR)!;
