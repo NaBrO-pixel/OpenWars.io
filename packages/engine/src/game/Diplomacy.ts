@@ -46,7 +46,8 @@ export type DiplomacyRefusal =
   | "needs_war"
   | "no_proposal"
   | "no_agreement"
-  | "influence_limit";
+  | "influence_limit"
+  | "at_war";
 
 const KindSchema = z.enum(["nap", "trade", "ceasefire", "intel"]);
 
@@ -164,6 +165,7 @@ export class DiplomacyMap {
     // A ceasefire ends a war: only between nations fighting each other.
     if (kind === "ceasefire" && !this.atWar(from, to)) return "needs_war";
     if (kind === "nap" && from.isAlliedWith(to)) return "already_agreed";
+    if (kind === "trade" && this.atWar(from, to)) return "at_war";
     if (this.overInfluence(game, kind, from, to)) return "influence_limit";
     return null;
   }
@@ -266,6 +268,7 @@ export class DiplomacyMap {
     // Conditions may have changed since it was proposed.
     if (kind === "intel" && !from.isAlliedWith(by)) return "needs_alliance";
     if (this.has(kind, by, from)) return "already_agreed";
+    if (kind === "trade" && this.atWar(from, by)) return "at_war";
     if (this.overInfluence(game, kind, from, by)) return "influence_limit";
     this.agreements.push({
       kind,
@@ -360,6 +363,18 @@ export class DiplomacyMap {
           this.reject(prop.kind, to, from);
         }
       }
+    }
+    // No trading with a nation you invade: attacking a trade partner breaks
+    // the agreement, and the attacker pays the reputation for it.
+    for (const ag of [...this.agreements]) {
+      if (ag.kind !== "trade") continue;
+      const a = alive(ag.a);
+      const b = alive(ag.b);
+      if (a === null || b === null) continue;
+      const attacks = (x: Player, y: Player) =>
+        x.outgoingAttacks().some((atk) => atk.target() === y);
+      if (attacks(a, b)) this.breakAgreement(game, "trade", a, b);
+      else if (attacks(b, a)) this.breakAgreement(game, "trade", b, a);
     }
     for (const ag of [...this.agreements]) {
       const a = alive(ag.a);

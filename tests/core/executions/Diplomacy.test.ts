@@ -279,3 +279,25 @@ describe("AI trade offers", () => {
     expect(game.diplomacy().view(c).incoming).toEqual([]);
   });
 });
+
+describe("trade and war", () => {
+  test("attacking a trade partner breaks the agreement; the attacker pays", () => {
+    act(a, "propose", "trade", b);
+    act(b, "accept", "trade", a);
+    expect(game.diplomacy().has("trade", a, b)).toBe(true);
+    game.addExecution(new AttackExecution(1_000, a, b.id()));
+    ticks(12);
+    expect(game.diplomacy().has("trade", a, b)).toBe(false);
+    expect(game.diplomacy().reputation(a)).toBe(
+      100 - cfg.agreements.trade.breakPenalty,
+    );
+    expect(game.diplomacy().reputation(b)).toBe(100);
+  });
+
+  test("no new trade deal while at war", () => {
+    game.addExecution(new AttackExecution(1_000, b, a.id()));
+    ticks(2);
+    expect(game.diplomacy().canPropose(game, "trade", a, b)).toBe("at_war");
+    expect(game.diplomacy().canPropose(game, "trade", b, a)).toBe("at_war");
+  });
+});
