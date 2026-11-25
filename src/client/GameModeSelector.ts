@@ -55,13 +55,13 @@ import {
 import { isReplayShellHost } from "./VersionedReplay";
 
 const PRIMARY_ACTION =
-  "bg-malibu-blue hover:bg-aquarius active:bg-malibu-blue/80 hover:scale-y-105 hover:scale-x-[1.01]";
+  "font-display tracking-[0.18em] bg-gradient-to-r from-[#1670ff] to-[#38c6ff] border border-[#8fe1ff]/40 shadow-[var(--shadow-ow-glow)] hover:shadow-[var(--shadow-ow-glow-strong)] hover:brightness-110 active:brightness-90 hover:scale-y-105 hover:scale-x-[1.01]";
 const SECONDARY_ACTION =
-  "bg-surface hover:brightness-[1.08] active:brightness-[0.95] hover:scale-105 hover:shadow-[var(--shadow-action-card-hover)]";
+  "font-display tracking-[0.14em] bg-surface/80 border border-ow-edge hover:border-ow-accent hover:brightness-[1.12] active:brightness-[0.95] hover:scale-105 hover:shadow-[var(--shadow-action-card-hover)]";
 const DISABLED = "opacity-50 cursor-not-allowed pointer-events-none";
-/** Tutorial card: the panel's gold, dark text for contrast. */
+/** Tutorial card: an outlined neon button beside Solo. */
 const TUTORIAL_ACTION =
-  "bg-cyber-yellow hover:bg-yellow-300 active:bg-cyber-yellow/80 !text-gray-900 hover:scale-y-105 hover:scale-x-[1.01]";
+  "font-display tracking-[0.18em] bg-ow-accent/10 border-2 border-ow-accent !text-ow-accent shadow-[var(--shadow-ow-glow)] hover:bg-ow-accent/20 hover:shadow-[var(--shadow-ow-glow-strong)] hover:scale-y-105 hover:scale-x-[1.01]";
 
 /** The Tutorial card shows beside Solo until the player has played this many games. */
 const TUTORIAL_CARD_MAX_GAMES = 5;

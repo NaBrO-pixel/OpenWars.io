@@ -523,7 +523,7 @@ export class CommandNav extends LitElement implements Controller {
         aria-label=${translateText("command_nav.label")}
       >
         <div
-          class="flex flex-col gap-1 rounded-r-md border border-l-0 border-ow-border bg-ow-panel/92 backdrop-blur-sm p-1 shadow-lg"
+          class="ow-glass flex flex-col gap-1 rounded-r-md border border-l-0 p-1"
         >
           ${sections.map(
             (s) =>
@@ -547,11 +547,11 @@ export class CommandNav extends LitElement implements Controller {
           section === undefined
             ? nothing
             : html`<section
-                class="ml-2 w-[min(280px,calc(100vw-4rem))] lg:w-[360px] max-h-[70vh] max-lg:max-h-[60vh] overflow-y-auto rounded-md border border-ow-border bg-ow-panel/95 backdrop-blur-sm p-4 shadow-xl"
+                class="ml-2 w-[min(280px,calc(100vw-4rem))] lg:w-[360px] max-h-[70vh] max-lg:max-h-[60vh] overflow-y-auto rounded-md border ow-glass p-4"
                 data-command-panel=${section.id}
               >
                 <header class="mb-2 flex items-center justify-between">
-                  <h2 class="text-base font-semibold text-ow-text">
+                  <h2 class="ow-title text-sm font-semibold">
                     ${translateText(section.labelKey)}
                   </h2>
                   <button

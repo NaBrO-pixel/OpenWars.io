@@ -224,15 +224,12 @@ import "./styles/layout/header.css";
 
 /** Font family of the display font (styles.css --font-display, GameVersion). */
 const DISPLAY_FONT_FAMILY = "OpenWars Display";
-// Bungee's Latin and Latin Extended subsets, with Fontsource's ranges.
+// Orbitron, variable weight 400-900: Latin only. Other scripts fall back to
+// Inter through the font stack (styles.css --font-display).
 const DISPLAY_FONT_SUBSETS: ReadonlyArray<readonly [string, string]> = [
   [
-    "fonts/Bungee-latin.woff2",
+    "fonts/Orbitron-latin.woff2",
     "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD",
-  ],
-  [
-    "fonts/Bungee-latin-ext.woff2",
-    "U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF",
   ],
 ];
 
@@ -669,9 +666,9 @@ class Client {
     await customElements.whenDefined("mobile-nav-bar");
     await customElements.whenDefined("desktop-nav-bar");
 
-    // The display font: Bungee (SIL Open Font License,
-    // resources/fonts/Bungee-OFL.txt), as two subsets so a page only fetches
-    // the one its text needs. Characters outside both fall back to Inter.
+    // The display font: Orbitron (SIL Open Font License,
+    // resources/fonts/Orbitron-OFL.txt), variable weight. Characters outside
+    // its Latin subset fall back to Inter.
     for (const [file, unicodeRange] of UI_FONT_SUBSETS) {
       const face = new FontFace("Inter", `url(${assetUrl(file)})`, {
         unicodeRange,
@@ -684,6 +681,8 @@ class Client {
     for (const [file, unicodeRange] of DISPLAY_FONT_SUBSETS) {
       const face = new FontFace(DISPLAY_FONT_FAMILY, `url(${assetUrl(file)})`, {
         unicodeRange,
+        weight: "400 900",
+        display: "swap",
       });
       document.fonts.add(face);
       face.load().catch(() => {});

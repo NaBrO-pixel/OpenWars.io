@@ -25,7 +25,7 @@ export class OButton extends LitElement {
   }
 
   private readonly BASE =
-    "font-bold tracking-wider rounded-xl border border-transparent " +
+    "font-display font-semibold tracking-[0.12em] rounded-md border border-transparent " +
     "transition-all duration-300 transform hover:-translate-y-px " +
     "outline-none text-center whitespace-normal break-words leading-tight overflow-hidden relative " +
     "disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:opacity-70";
@@ -33,9 +33,9 @@ export class OButton extends LitElement {
   private variantClasses(): string {
     switch (this.variant) {
       case "primary":
-        return "bg-malibu-blue hover:bg-aquarius text-white disabled:bg-gray-600 disabled:text-gray-300";
+        return "bg-gradient-to-r from-[#1670ff] to-[#38c6ff] border-[#8fe1ff]/40 text-white shadow-[var(--shadow-ow-glow)] hover:shadow-[var(--shadow-ow-glow-strong)] hover:brightness-110 disabled:from-gray-600 disabled:to-gray-600 disabled:shadow-none disabled:text-gray-300";
       case "secondary":
-        return "bg-gray-700 hover:bg-gray-600 text-white disabled:bg-gray-800 disabled:text-gray-400";
+        return "bg-ow-raised/70 border-ow-edge hover:border-ow-accent hover:shadow-[var(--shadow-ow-glow)] text-white disabled:bg-gray-800 disabled:text-gray-400";
       case "danger":
         return "bg-red-600 hover:bg-red-500 text-white disabled:bg-red-900 disabled:text-gray-300";
       case "warning":

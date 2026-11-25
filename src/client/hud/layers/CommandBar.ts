@@ -53,10 +53,10 @@ export class CommandBar extends LitElement implements Controller {
       data-command-bar-item
     >
       <span
-        class="text-[11px] uppercase tracking-wide text-ow-text-2 whitespace-nowrap"
+        class="font-display text-[9px] uppercase tracking-[0.14em] text-ow-text-2 whitespace-nowrap"
         >${label}</span
       >
-      <span class="text-sm sm:text-base font-semibold tabular-nums ${tone}"
+      <span class="ow-readout text-sm sm:text-base tabular-nums ${tone}"
         >${value}</span
       >
     </div>`;
@@ -67,7 +67,7 @@ export class CommandBar extends LitElement implements Controller {
     if (s === null) return nothing;
     return html`
       <div
-        class="pointer-events-auto mt-2 flex items-stretch divide-x divide-ow-border rounded-md border border-ow-border bg-ow-panel/92 backdrop-blur-sm py-1 shadow-lg"
+        class="ow-glass pointer-events-auto mt-2 flex items-stretch divide-x divide-ow-border/70 rounded-md border py-1.5"
         role="status"
         aria-label=${translateText("command_bar.label")}
       >

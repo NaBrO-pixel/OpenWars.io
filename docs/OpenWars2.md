@@ -418,3 +418,17 @@ Tanks are ground units that roll out of factories, break through hostile land, d
 - **Diplomatic:** a nation needs agreements or alliances with 40% of the other nations, and never fewer than two (`diplomaticPartnersNeeded`). Before this, a single trade deal won a game of three.
 - **Influence in small games:** the limit also grows by one partner every 8 minutes, so small games can reach two partners from minute 8.
 - **Statistics panel:** victory descriptions show the real numbers for the current game, computed by the same functions the engine uses.
+
+## Futuristic blue look
+
+The UI is restyled as a futuristic blue HUD. It's built on the shared tokens, so most screens change without per-component edits.
+
+- **Palette (`styles.css`):** deep-space navy surfaces, an electric blue-cyan accent (`#38c6ff`), and blue-tinted greys. Tailwind's gray, slate, zinc and neutral scales are remapped onto it.
+- **Display font:** Orbitron (SIL OFL, `resources/fonts/Orbitron-OFL.txt`, variable weight 400-900) replaces Bungee. It's used for titles, buttons and the command bar's figures; other scripts fall back to Inter.
+- **Glass panels:**
+  - `.ow-glass` is a translucent navy gradient with a thin cyan edge, a soft blue glow and corner brackets. The command bar and command nav use it, and in-game HUD panels (`bg-gray-800/92`) and the graphics panel get the same surface.
+  - Modals use `.ow-glass-modal`.
+  - The opacity of all of these follows the HUD opacity setting.
+- **Buttons:** primary buttons are a blue-to-cyan gradient with a glow, secondary buttons are glass with a cyan edge, and the home Tutorial button is outlined neon instead of yellow.
+- **Backdrop:** a faint holographic grid under a blue glow, with slow scanlines (`.ow-backdrop`, `.ow-scanlines`). The scanlines stand still for players who ask for reduced motion.
+- **Not changed:** the map renderer (territory colours, terrain).

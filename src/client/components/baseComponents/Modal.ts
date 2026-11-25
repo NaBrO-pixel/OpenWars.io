@@ -272,7 +272,7 @@ export class OModal extends LitElement {
     // its page is open anyway.
     const sectionClass = this.sidePanel
       ? "graphics-panel-surface relative flex-1 min-h-0 flex flex-col text-white rounded-lg border overflow-hidden"
-      : `relative flex-1 min-h-0 flex flex-col text-white bg-black/70 backdrop-blur-xl lg:rounded-2xl lg:border border-white/10 overflow-hidden ${
+      : `ow-glass-modal relative flex-1 min-h-0 flex flex-col text-white lg:rounded-xl lg:border overflow-hidden ${
           this.inline ? "compact:rounded-none! compact:border-0!" : ""
         } ${this.fitContent ? "rounded-2xl border" : ""} ${
           // On compact screens body.page-open drops its bottom padding so the
@@ -306,7 +306,7 @@ export class OModal extends LitElement {
           ${
             !this.hideHeader && this.title
               ? html`<div
-                  class="px-[1.4rem] py-[1rem] text-2xl font-bold text-white"
+                  class="ow-title px-[1.4rem] py-[1rem] text-xl font-bold"
                 >
                   ${this.title}
                 </div>`

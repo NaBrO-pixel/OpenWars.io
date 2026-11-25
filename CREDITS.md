@@ -7,10 +7,10 @@ See [Contributors](https://github.com/openfrontio/OpenFrontIO/graphs/contributor
 
 ## Fonts
 
-### Bungee
+### Orbitron
 
-Display font. Copyright 2023 The Bungee Project Authors ([github.com/djrrb/Bungee](https://github.com/djrrb/Bungee)).  
-Licensed under the [SIL Open Font License 1.1](resources/fonts/Bungee-OFL.txt).
+Display font. Copyright 2018 The Orbitron Project Authors ([github.com/theleagueof/orbitron](https://github.com/theleagueof/orbitron)).  
+Licensed under the [SIL Open Font License 1.1](resources/fonts/Orbitron-OFL.txt).
 
 ### Inter
 
