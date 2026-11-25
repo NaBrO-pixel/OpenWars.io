@@ -180,3 +180,15 @@ docker compose logs -f
 sign-in locally, set the `DISCORD_*` / `GOOGLE_*` variables and add
 `http://localhost:8787/auth/callback/discord` (or `/google`) as a redirect in
 the provider's settings.
+
+## Tested setup
+
+This guide's `deploy/` stack (game server, accounts service and Caddy) has
+been run end to end from a fresh image build. In that run, two players hosted
+and joined a private OpenWars lobby over HTTPS, played a match against 70 AI
+nations, and the AI built its factories, airbases, aircraft and tanks.
+
+Sign-in needs the accounts service reachable at `api.<DOMAIN>`. Hosting or
+joining a lobby asks it for a guest session first, so if `api.<DOMAIN>`
+doesn't resolve to your server, creating a lobby fails with "Invalid creator
+token".
