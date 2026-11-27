@@ -13,6 +13,7 @@ import type {
   SnapshotReader,
   SnapshotWriter,
 } from "../../snapshot/SnapshotContext";
+import { focusRank } from "../FocusForcesExecution";
 import { ShellExecution } from "../ShellExecution";
 import { isHostileTo, noAircraftInFlight } from "./AirCombat";
 
@@ -50,7 +51,10 @@ export class AAGunExecution implements Execution {
       .nearbyUnits(this.gun.tile(), AA_GUN_RANGE, Aircraft.types)
       .filter(({ unit }) => unit.isActive() && isHostileTo(owner, unit))
       .sort(
-        (a, b) => a.distSquared - b.distSquared || a.unit.id() - b.unit.id(),
+        (a, b) =>
+          focusRank(owner, a.unit) - focusRank(owner, b.unit) ||
+          a.distSquared - b.distSquared ||
+          a.unit.id() - b.unit.id(),
       );
     if (targets.length === 0) return;
 

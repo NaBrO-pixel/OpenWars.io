@@ -342,6 +342,8 @@ export interface NationView {
   defence: number;
   /** Progress toward each alternative victory (milestone 6). */
   victory: VictoryProgressView[];
+  /** The enemy the forces are focused on (the Attack panel), if any. */
+  focus?: string | null;
 }
 
 export interface VictoryProgressView {

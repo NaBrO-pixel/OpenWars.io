@@ -10,6 +10,7 @@ import {
   SendBreakAllianceIntentEvent,
   SendDiplomacyIntentEvent,
   SendInfrastructureIntentEvent,
+  SendFocusForcesIntentEvent,
   SendMobiliseIntentEvent,
   SendResearchIntentEvent,
 } from "../../Transport";
@@ -26,6 +27,7 @@ import {
   type NationalSummary,
   nationalSummary,
 } from "../NationalSummary";
+import { renderAttack } from "./AttackPanel";
 import { OpenCommandSectionEvent } from "./CountryBrief";
 import { renderDiplomacy } from "./DiplomacyPanel";
 import { renderEvents } from "./EventsPanel";
@@ -383,6 +385,18 @@ export const COMMAND_SECTIONS: readonly CommandSection[] = [
     render: (ctx) =>
       renderMilitary(ctx.game, ctx.me, (level) =>
         ctx.nav.eventBus?.emit(new SendMobiliseIntentEvent(level)),
+      ),
+    available: (ctx) => ctx.summary.nation !== null,
+  },
+  {
+    id: "attack",
+    labelKey: "command_nav.attack",
+    icon: svg(
+      "M12 2v4M12 18v4M2 12h4M18 12h4M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2z",
+    ),
+    render: (ctx) =>
+      renderAttack(ctx.game, ctx.me, (target) =>
+        ctx.nav.eventBus?.emit(new SendFocusForcesIntentEvent(target)),
       ),
     available: (ctx) => ctx.summary.nation !== null,
   },

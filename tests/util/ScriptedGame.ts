@@ -237,6 +237,7 @@ function queuedIntent(game: Game, p: Player, tick: number): Intent | null {
     { type: "research", action: "start", tech: "assembly_lines" },
     { type: "diplomacy", action: "propose", kind: "trade", target: other.id() },
     { type: "mobilise", level: 2 },
+    { type: "focus_forces", target: other.id() },
   ];
   return queued[(tick - 20) / 2] ?? null;
 }

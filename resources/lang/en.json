@@ -191,6 +191,19 @@
     "mission_docked": "At airbase",
     "mission_returning": "Returning to base"
   },
+  "attack": {
+    "blocked_cold_war": "Cold War: nations can't attack each other",
+    "blocked_friendly": "Ally: can't attack",
+    "blocked_no_structures": "No structures to target",
+    "blocked_pact": "Pact or ceasefire in force",
+    "focused_on": "Focused on {name}",
+    "intro": "Send every tank, bomber, fighter and attack helicopter at an enemy's structures. Your AA guns, fighters, helicopters and tanks will fire on that enemy first.",
+    "no_focus": "Forces are not focused on anyone.",
+    "no_forces": "You have no tanks or combat aircraft. Build tanks at a factory and aircraft at an airbase.",
+    "recall": "Recall all",
+    "send": "Attack",
+    "structures": "{count} structures"
+  },
   "ban_notice": {
     "appeal_prompt": "Think this is a mistake or want to appeal?",
     "category": {
@@ -969,6 +982,7 @@
   },
   "command_nav": {
     "allies": "Allies",
+    "attack": "Attack",
     "country": "Country",
     "development": "Development",
     "diplomacy": "Diplomacy",

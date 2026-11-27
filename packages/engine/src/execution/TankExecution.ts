@@ -29,6 +29,7 @@ import type {
   SnapshotWriter,
 } from "../snapshot/SnapshotContext";
 import { isHostileTo } from "./air/AirCombat";
+import { focusRank } from "./FocusForcesExecution";
 
 export interface TankOrder {
   owner: Player;
@@ -166,7 +167,10 @@ export class TankExecution implements Execution {
         isHostileTo(owner, unit as Unit),
       )
       .sort(
-        (a, b) => a.distSquared - b.distSquared || a.unit.id() - b.unit.id(),
+        (a, b) =>
+          focusRank(owner, a.unit as Unit) - focusRank(owner, b.unit as Unit) ||
+          a.distSquared - b.distSquared ||
+          a.unit.id() - b.unit.id(),
       );
     if (enemies.length > 0) {
       enemies[0].unit.modifyHealth(-TANK_GUN_DAMAGE, owner);

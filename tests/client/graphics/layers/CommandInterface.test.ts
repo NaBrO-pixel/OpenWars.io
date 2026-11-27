@@ -5,6 +5,10 @@ import { nothing, render, type TemplateResult } from "lit";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import "../../../../src/client/components/OpenWarsModePicker";
 import type { OpenWarsModePicker } from "../../../../src/client/components/OpenWarsModePicker";
+import {
+  attackBlocker,
+  renderAttack,
+} from "../../../../src/client/hud/layers/AttackPanel";
 import type { CommandBar } from "../../../../src/client/hud/layers/CommandBar";
 import {
   COMMAND_SECTIONS,
@@ -879,5 +883,75 @@ describe("country brief", () => {
         () => {},
       ),
     ).toBe(nothing);
+  });
+});
+
+describe("attack panel", () => {
+  const lenientP = (p: object) =>
+    new Proxy(p, {
+      get: (t, k) => (k in t ? t[k as keyof typeof t] : () => false),
+    }) as FakePlayer;
+  const withUnits = (p: FakePlayer, counts: Record<string, number>) =>
+    lenientP({
+      ...p,
+      units: (...types: string[]) =>
+        types.flatMap((t) =>
+          Array.from({ length: counts[t] ?? 0 }, () => ({})),
+        ),
+    });
+
+  function host(t: TemplateResult): HTMLElement {
+    const el = document.createElement("div");
+    render(t, el);
+    return el;
+  }
+
+  it("lists forces and enemies, and sends the order", () => {
+    const me = withUnits(player("me", 100, 0, { ...NATION, focus: null }), {
+      Tank: 2,
+      Bomber: 1,
+    });
+    const red = withUnits(player("red", 300), { City: 2 });
+    const bare = withUnits(player("bare", 50), {});
+    const g = game(me, [red, bare]);
+    (g.config as unknown) = () => ({
+      maxTroops: () => 100_000,
+      gameConfig: () => ({}),
+      isColdWar: () => false,
+    });
+    const sent: (string | null)[] = [];
+    const el = host(renderAttack(g, me as never, (t) => sent.push(t)));
+    expect(el.querySelector("[data-attack-forces]")!.textContent).toContain(
+      "2",
+    );
+    const redBtn = el.querySelector(
+      '[data-attack-target="red"]',
+    ) as HTMLButtonElement;
+    const bareBtn = el.querySelector(
+      '[data-attack-target="bare"]',
+    ) as HTMLButtonElement;
+    expect(redBtn.disabled).toBe(false);
+    expect(bareBtn.disabled).toBe(true);
+    redBtn.click();
+    (el.querySelector("[data-attack-recall]") as HTMLButtonElement).click();
+    expect(sent).toEqual(["red", null]);
+  });
+
+  it("explains why an enemy can't be attacked", () => {
+    const me = withUnits(player("me", 100, 0, NATION), { Tank: 1 });
+    const red = withUnits(player("red", 300), { City: 1 });
+    const g = game(me, [red]);
+    (g.config as unknown) = () => ({
+      maxTroops: () => 100_000,
+      gameConfig: () => ({}),
+      isColdWar: () => true,
+    });
+    expect(attackBlocker(g, me as never, red as never)).toBe(
+      "attack.blocked_cold_war",
+    );
+    const ally = lenientP({ ...me, isFriendly: () => true });
+    expect(attackBlocker(g, ally as never, red as never)).toBe(
+      "attack.blocked_friendly",
+    );
   });
 });

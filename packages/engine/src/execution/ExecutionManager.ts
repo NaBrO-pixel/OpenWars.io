@@ -21,6 +21,7 @@ import { DonateTroopsExecution } from "./DonateTroopExecution";
 import { EmbargoAllExecution } from "./EmbargoAllExecution";
 import { EmbargoExecution } from "./EmbargoExecution";
 import { EmojiExecution } from "./EmojiExecution";
+import { FocusForcesExecution } from "./FocusForcesExecution";
 import { InfrastructureExecution } from "./InfrastructureExecution";
 import { MarkDisconnectedExecution } from "./MarkDisconnectedExecution";
 import { MobiliseExecution } from "./MobiliseExecution";
@@ -139,6 +140,8 @@ export class Executor {
         return new DeleteUnitExecution(player, intent.unitId);
       case "mobilise":
         return new MobiliseExecution(player, intent.level);
+      case "focus_forces":
+        return new FocusForcesExecution(player, intent.target);
       case "diplomacy":
         return new DiplomacyExecution(
           player,

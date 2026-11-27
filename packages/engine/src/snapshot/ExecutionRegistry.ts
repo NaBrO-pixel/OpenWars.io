@@ -21,6 +21,7 @@ import { EmbargoAllExecutionSnapshot } from "../execution/EmbargoAllExecution";
 import { EmbargoExecutionSnapshot } from "../execution/EmbargoExecution";
 import { EmojiExecutionSnapshot } from "../execution/EmojiExecution";
 import { FactoryExecutionSnapshot } from "../execution/FactoryExecution";
+import { FocusForcesExecutionSnapshot } from "../execution/FocusForcesExecution";
 import { InfrastructureExecutionSnapshot } from "../execution/InfrastructureExecution";
 import { MarkDisconnectedExecutionSnapshot } from "../execution/MarkDisconnectedExecution";
 import { MirvExecutionSnapshot } from "../execution/MIRVExecution";
@@ -70,6 +71,7 @@ export const EXECUTION_SNAPSHOT_TYPES = [
   AAGunExecutionSnapshot,
   AircraftExecutionSnapshot,
   TankExecutionSnapshot,
+  FocusForcesExecutionSnapshot,
   AirStructureExecutionSnapshot,
   GuidedMissileExecutionSnapshot,
   BoatRetreatExecutionSnapshot,

@@ -432,3 +432,14 @@ The UI is restyled as a futuristic blue HUD. It's built on the shared tokens, so
 - **Buttons:** primary buttons are a blue-to-cyan gradient with a glow, secondary buttons are glass with a cyan edge, and the home Tutorial button is outlined neon instead of yellow.
 - **Backdrop:** a faint holographic grid under a blue glow, with slow scanlines (`.ow-backdrop`, `.ow-scanlines`). The scanlines stand still for players who ask for reduced motion.
 - **Not changed:** the map renderer (territory colours, terrain).
+
+## Attack panel, smoother money, bomber stand-down
+
+- **Attack panel:** a command-nav section and the `focus_forces` intent (`FocusForcesExecution`).
+  - **Attack:** pick an enemy you can attack. Every tank drives at its structures, every bomber strikes one, and every fighter and attack helicopter takes station over one. Units are spread across the structures. Transport helicopters are left alone.
+  - **Focus:** the chosen enemy is kept on the nation, so AA guns, fighters, attack helicopters and tanks engage its units first (`focusRank`).
+  - **Recall all:** tanks drive to the nearest factory and aircraft stand down at the nearest airbase.
+  - **Refused:** against allies, nations under a pact or ceasefire, in Cold War, and against enemies with no structures. The panel shows each reason.
+- **Money flow:** each economy step's net change (tax and industry money less upkeep) is now paid out evenly over the next 10 ticks instead of in one lump. On Total War, upkeep used to make the treasury rise every tick and then drop once a second, so a structure that looked affordable couldn't be paid for. The amount still to pay out is part of the nation's snapshot and desync hash.
+- **Bombers:** a bomber whose aim point has no hostile structure in reach (none there, or destroyed or taken meanwhile) now flies home and stays docked instead of circling.
+- **HUD fix:** the command nav and infrastructure overlay elements had been placed inside the top HUD grid. They took grid cells and pushed the speed/pause/settings/leave bar onto a second row, which moved whenever the hovered-country card grew. They now sit outside the grid.

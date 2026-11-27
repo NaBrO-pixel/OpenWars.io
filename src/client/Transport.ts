@@ -105,6 +105,11 @@ export class SendMobiliseIntentEvent implements GameEvent {
   constructor(public readonly level: number) {}
 }
 
+/** OpenWars Attack panel: focus all forces on an enemy, or recall (null). */
+export class SendFocusForcesIntentEvent implements GameEvent {
+  constructor(public readonly target: string | null) {}
+}
+
 /** OpenWars: propose, accept, reject or break an agreement. */
 export class SendDiplomacyIntentEvent implements GameEvent {
   constructor(
@@ -363,6 +368,9 @@ export class Transport {
     this.subscribe(SendAttackIntentEvent, (e) => this.onSendAttackIntent(e));
     this.subscribe(SendUpgradeStructureIntentEvent, (e) =>
       this.onSendUpgradeStructureIntent(e),
+    );
+    this.subscribe(SendFocusForcesIntentEvent, (e) =>
+      this.sendIntent({ type: "focus_forces", target: e.target }),
     );
     this.subscribe(SendMobiliseIntentEvent, (e) =>
       this.sendIntent({ type: "mobilise", level: e.level }),

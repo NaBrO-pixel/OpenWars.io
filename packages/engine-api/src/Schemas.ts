@@ -53,7 +53,8 @@ export type Intent =
   | InfrastructureIntent
   | ResearchIntent
   | DiplomacyIntent
-  | MobiliseIntent;
+  | MobiliseIntent
+  | FocusForcesIntent;
 
 export type AttackIntent = z.infer<typeof AttackIntentSchema>;
 export type CancelAttackIntent = z.infer<typeof CancelAttackIntentSchema>;
@@ -91,6 +92,7 @@ export type InfrastructureIntent = z.infer<typeof InfrastructureIntentSchema>;
 export type ResearchIntent = z.infer<typeof ResearchIntentSchema>;
 export type DiplomacyIntent = z.infer<typeof DiplomacyIntentSchema>;
 export type MobiliseIntent = z.infer<typeof MobiliseIntentSchema>;
+export type FocusForcesIntent = z.infer<typeof FocusForcesIntentSchema>;
 export type ToggleGameStartTimer = z.infer<
   typeof ToggleGameStartTimerIntentSchema
 >;
@@ -627,6 +629,14 @@ export const MobiliseIntentSchema = z.object({
   level: zb.uint({ max: 3 }),
 });
 
+// OpenWars Attack panel: send every tank and combat aircraft at an enemy's
+// structures and have the air defences fire on its aircraft first; with no
+// target, recall them all home.
+export const FocusForcesIntentSchema = z.object({
+  type: z.literal("focus_forces"),
+  target: ID.nullable(),
+});
+
 export const IntentSchema = z.compile(
   z.discriminatedUnion("type", [
     AttackIntentSchema,
@@ -659,6 +669,7 @@ export const IntentSchema = z.compile(
     ResearchIntentSchema,
     DiplomacyIntentSchema,
     MobiliseIntentSchema,
+    FocusForcesIntentSchema,
   ]),
 );
 
