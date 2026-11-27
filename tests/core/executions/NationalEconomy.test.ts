@@ -177,10 +177,12 @@ describe("national economy in a game", () => {
     expect(tribe.nation()).toBeNull();
   });
 
-  test("pays its net into the treasury", () => {
+  test("pays its net into the treasury, spread over the second", () => {
     me.buildUnit(UnitType.Factory, game.ref(10, 10), {});
     untilStep();
-    const before = untilStep();
+    untilStep();
+    // The step just ran and paid its first tenth; take the gold from before
+    // that tick by undoing it, then watch the other nine.
     const v = me.nation()!.view();
     const expected =
       v.income.tax +
@@ -188,8 +190,42 @@ describe("national economy in a game", () => {
       v.expenses.territory -
       v.expenses.structures -
       v.expenses.military;
-    expect(me.gold() - before).toBe(BigInt(expected));
+    const first = Math.trunc(expected / 10);
+    const start = me.gold() - BigInt(first);
+    const steps: bigint[] = [];
+    let last = me.gold();
+    for (let i = 0; i < 9; i++) {
+      game.executeNextTick();
+      steps.push(me.gold() - last);
+      last = me.gold();
+    }
+    expect(me.gold() - start).toBe(BigInt(expected));
+    // No lump: every tick's share is within one coin of a tenth.
+    for (const d of steps) {
+      expect(Math.abs(Number(d) - expected / 10)).toBeLessThanOrEqual(1);
+    }
     expect(v.industryRate).toBeGreaterThan(0);
+  });
+
+  test("total war upkeep drains smoothly, not in a lump", () => {
+    me.addTroops(400_000);
+    me.addGold(1_000_000n);
+    me.ensureNation().mobilisation = 3; // total war
+    untilStep();
+    const changes: bigint[] = [];
+    let last = me.gold();
+    for (let i = 0; i < 20; i++) {
+      game.executeNextTick();
+      changes.push(me.gold() - last);
+      last = me.gold();
+    }
+    // Losing money every tick by about the same amount.
+    const max = changes.reduce((m, d) => (d < m ? d : m), 0n);
+    const min = changes.reduce((m, d) => (d > m ? d : m), max);
+    expect(max).toBeLessThan(0n);
+    expect(Number(min - max)).toBeLessThanOrEqual(
+      Math.ceil(Math.abs(Number(max)) / 10) + 1,
+    );
   });
 
   test("the client gets the economy, and only when it changes", () => {

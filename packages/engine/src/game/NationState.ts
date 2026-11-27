@@ -263,6 +263,11 @@ export const NationStateSchema = z.object({
       stabilityTarget: z.number(),
     })
     .nullable(),
+  // Money still to pay out (+) or take (-) over the next ticks, and how many
+  // ticks are left. Optional: snapshots from before the flow have none.
+  flowPending: z.number().optional(),
+  focus: z.string().nullable().optional(),
+  flowTicks: z.number().optional(),
 });
 export type NationStateData = z.infer<typeof NationStateSchema>;
 
@@ -294,6 +299,16 @@ export class NationState {
     money: number;
   } | null = null;
   last: Omit<EconomyResult, "moneyIn" | "moneyOut"> | null = null;
+  /**
+   * Each economy step's net (tax and industry money less upkeep) is paid out
+   * evenly over the ticks until the next step, not in one lump: with heavy
+   * upkeep (total war) the treasury would otherwise jump every second, and a
+   * structure that looked affordable when clicked couldn't be paid for.
+   */
+  flowPending = 0;
+  flowTicks = 0;
+  /** The enemy the forces are focused on (FocusForcesExecution). */
+  focus: string | null = null;
   private modifiers: TechModifiers | null = null;
 
   /** The summed effects of the completed technologies. */
@@ -446,6 +461,7 @@ export class NationState {
       supply: this.supply,
       defence: this.defence,
       victory: this.victory,
+      focus: this.focus,
     };
     return this.cachedView;
   }
@@ -455,9 +471,25 @@ export class NationState {
    * (PlayerImpl.hash): every field that the economy, research and military
    * steps change. Integer arithmetic only, so every client agrees.
    */
+  /** Queues a step's net change, spread over `ticks` ticks. */
+  startFlow(net: number, ticks: number): void {
+    this.flowPending += net;
+    this.flowTicks = ticks;
+  }
+
+  /** This tick's share of the queued change (signed). */
+  drainFlow(): number {
+    if (this.flowTicks <= 0) return 0;
+    const amount = Math.trunc(this.flowPending / this.flowTicks);
+    this.flowPending -= amount;
+    this.flowTicks--;
+    return amount;
+  }
+
   hash(): number {
     return Math.trunc(
-      this.industry * 3 +
+      this.flowPending +
+        this.industry * 3 +
         this.research * 7 +
         this.stability * 11 +
         this.steps * 13 +
@@ -484,6 +516,9 @@ export class NationState {
       defence: this.defence,
       researching: this.researching === null ? null : { ...this.researching },
       last: copyLast(this.last),
+      flowPending: this.flowPending,
+      flowTicks: this.flowTicks,
+      focus: this.focus,
     };
   }
 
@@ -502,6 +537,9 @@ export class NationState {
     n.defence = d.defence;
     n.researching = d.researching === null ? null : { ...d.researching };
     n.last = copyLast(d.last);
+    n.flowPending = d.flowPending ?? 0;
+    n.flowTicks = d.flowTicks ?? 0;
+    n.focus = d.focus ?? null;
     return n;
   }
 }

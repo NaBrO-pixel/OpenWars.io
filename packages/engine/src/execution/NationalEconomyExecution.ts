@@ -48,7 +48,19 @@ export class NationalEconomyExecution implements Execution {
   }
 
   tick(ticks: number): void {
-    if (this.mg === null || ticks % ECONOMY_STEP_TICKS !== 0) return;
+    if (this.mg === null) return;
+    if (ticks % ECONOMY_STEP_TICKS === 0) this.step();
+    // Every tick: pay out this tick's share of each nation's last step.
+    for (const player of this.mg.players()) {
+      const amount = player.nation()?.drainFlow() ?? 0;
+      if (amount > 0) player.addGold(BigInt(amount));
+      else if (amount < 0) player.removeGold(BigInt(-amount));
+    }
+  }
+
+  /** Once a second: every nation's economy step (and the world's). */
+  private step(): void {
+    if (this.mg === null) return;
     this.steps++;
     this.mg.diplomacy().advance(this.mg, this.steps);
     this.mg
@@ -87,8 +99,7 @@ export class NationalEconomyExecution implements Execution {
         researchForNation(this.mg, player);
       }
       const { moneyIn, moneyOut } = nation.step(economyInput(this.mg, player));
-      if (moneyIn > 0) player.addGold(BigInt(moneyIn));
-      if (moneyOut > 0) player.removeGold(BigInt(moneyOut));
+      nation.startFlow(moneyIn - moneyOut, ECONOMY_STEP_TICKS);
       if (
         player.type() === PlayerType.Nation &&
         nation.steps % NATION_DEVELOP_EVERY === 0
