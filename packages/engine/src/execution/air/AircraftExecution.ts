@@ -40,6 +40,7 @@ import type {
   SnapshotWriter,
 } from "../../snapshot/SnapshotContext";
 import { AttackExecution } from "../AttackExecution";
+import { focusRank } from "../FocusForcesExecution";
 import { ShellExecution } from "../ShellExecution";
 import {
   airbaseAt,
@@ -298,6 +299,30 @@ export class AircraftExecution implements Execution {
     return state.fuel <= ticksHome + BINGO_FUEL_MARGIN;
   }
 
+  /**
+   * Ends the mission: the order becomes the nearest airbase, so the aircraft
+   * flies home and stays docked until ordered out again.
+   */
+  private standDown(): void {
+    const base = nearestAirbase(this.mg, this.owner(), this.aircraft.tile());
+    if (base === undefined) {
+      this.holdStation();
+      return;
+    }
+    this.aircraft.updateWarshipState({ patrolTile: base.tile() });
+    this.lastObservedPatrolTile = base.tile();
+    this.startReturn();
+  }
+
+  private hasHostileStructureNear(tile: TileRef): boolean {
+    return this.mg.anyUnitNearby(
+      tile,
+      BOMB_STRUCTURE_RADIUS,
+      Structures.types,
+      (u) => u.isActive() && isHostileTo(this.owner(), u),
+    );
+  }
+
   private startReturn(): void {
     const base = nearestAirbase(this.mg, this.owner(), this.aircraft.tile());
     this.target = undefined;
@@ -443,8 +468,13 @@ export class AircraftExecution implements Execution {
 
   private bomberMission(): void {
     const aimPoint = this.aircraft.warshipState().patrolTile!;
-    if (!this.isHostileGround(aimPoint)) {
-      this.holdStation();
+    // Nothing to bomb there (no hostile structure in reach of the aim point,
+    // or it was destroyed or taken meanwhile): back to base, and stay there.
+    if (
+      !this.isHostileGround(aimPoint) ||
+      !this.hasHostileStructureNear(aimPoint)
+    ) {
+      this.standDown();
       return;
     }
     this.moveToward(aimPoint);
@@ -528,7 +558,9 @@ export class AircraftExecution implements Execution {
     let bestPriority = Infinity;
     let bestDistSq = Infinity;
     for (const { unit } of this.mg.nearbyUnits(center, searchRange, types)) {
-      const priority = types.indexOf(unit.type());
+      // The focused enemy's units first, then by type.
+      const priority =
+        focusRank(owner, unit) * types.length + types.indexOf(unit.type());
       const distSq = this.mg.euclideanDistSquared(
         this.aircraft.tile(),
         unit.tile(),

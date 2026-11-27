@@ -386,6 +386,19 @@ describe("AIR update", () => {
       expect(bomber.warshipState().state).toBe("retreating");
     });
 
+    test("bombers with nothing to hit fly home and stay there", () => {
+      const base = blue.buildUnit(UnitType.Airbase, game.ref(80, 100), {});
+      // Enemy land, but no structure within reach of the aim point.
+      const troops = red.troops();
+      const bomber = launch(blue, UnitType.Bomber, 150, 150);
+      executeTicks(game, 400);
+      expect(bomber.aircraftState().ammo).toBe(1);
+      expect(red.troops()).toBe(troops);
+      expect(bomber.warshipState().patrolTile).toBe(base.tile());
+      expect(bomber.tile()).toBe(base.tile());
+      expect(bomber.warshipState().state).toBe("docked");
+    });
+
     test("bombers do not strike their own or neutral ground", () => {
       blue.buildUnit(UnitType.Airbase, game.ref(10, 100), {});
       const city = blue.buildUnit(UnitType.City, game.ref(50, 100), {});
