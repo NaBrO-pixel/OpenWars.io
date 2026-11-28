@@ -613,7 +613,11 @@ export class AircraftExecution implements Execution {
       true,
     )) {
       if (!unit.isActive() || !isHostileTo(attacker, unit)) continue;
-      unit.decreaseLevel(attacker);
+      // Precision bombing (military research) knocks down more levels.
+      const levels = 1 + (attacker.nation()?.tech().bombExtraLevels ?? 0);
+      for (let i = 0; i < levels && unit.isActive(); i++) {
+        unit.decreaseLevel(attacker);
+      }
     }
     const victim = this.mg.owner(aimPoint);
     if (victim.isPlayer()) {

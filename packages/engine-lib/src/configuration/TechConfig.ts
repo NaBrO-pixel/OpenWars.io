@@ -1,8 +1,14 @@
-// OpenWars research (docs/OpenWars2.md, milestone 4): three branches of five
-// technologies. Data only: the engine applies the effects (techModifiers),
+// OpenWars research (docs/OpenWars2.md, milestone 4): four branches of five
+// technologies (the military branch does not count toward the
+// technological victory). Data only: the engine applies the effects (techModifiers),
 // the client shows them. Integers: permille multipliers, flat bonuses.
 
-export const TECH_BRANCHES = ["industry", "technology", "society"] as const;
+export const TECH_BRANCHES = [
+  "industry",
+  "technology",
+  "society",
+  "military",
+] as const;
 export type TechBranch = (typeof TECH_BRANCHES)[number];
 
 /** What completed technologies change, summed over every completed one. */
@@ -30,6 +36,18 @@ export interface TechEffects {
   deficitPenaltyCutPermille?: number;
   /** Intelligence confidence levels gained on every country (milestone 5). */
   intelLevels?: number;
+  /** Tank gun damage, permille added. */
+  tankDamagePermille?: number;
+  /** Damage tanks take, permille cut. */
+  tankArmourPermille?: number;
+  /** More shells in each AA gun volley. */
+  aaExtraVolley?: number;
+  /** More structure levels each bomber strike knocks down. */
+  bombExtraLevels?: number;
+  /** Army upkeep cut, permille. */
+  militaryUpkeepCutPermille?: number;
+  /** Mobilisation's stability penalty cut, permille. */
+  mobilisationUnrestCutPermille?: number;
 }
 
 export interface TechDefinition {
@@ -177,6 +195,58 @@ export const TECHS: readonly TechDefinition[] = [
     requires: ["economic_resilience"],
     effects: { stabilityTarget: 120 },
   },
+
+  // --- Military: armour, air defence and the war economy -------------------
+  {
+    id: "combined_arms",
+    branch: "military",
+    tier: 1,
+    ...tier(1),
+    requires: [],
+    effects: { tankDamagePermille: 250 },
+  },
+  {
+    id: "composite_armour",
+    branch: "military",
+    tier: 2,
+    ...tier(2),
+    requires: ["combined_arms"],
+    effects: { tankArmourPermille: 300 },
+  },
+  {
+    id: "flak_directors",
+    branch: "military",
+    tier: 3,
+    ...tier(3),
+    requires: ["composite_armour"],
+    effects: { aaExtraVolley: 1 },
+  },
+  {
+    id: "precision_bombing",
+    branch: "military",
+    tier: 4,
+    ...tier(4),
+    requires: ["flak_directors"],
+    effects: { bombExtraLevels: 1 },
+  },
+  {
+    id: "war_economy",
+    branch: "military",
+    tier: 5,
+    ...tier(5),
+    requires: ["precision_bombing"],
+    effects: {
+      militaryUpkeepCutPermille: 350,
+      mobilisationUnrestCutPermille: 500,
+    },
+  },
+];
+
+/** Branches whose advanced technologies make the technological victory. */
+export const VICTORY_BRANCHES: readonly TechBranch[] = [
+  "industry",
+  "technology",
+  "society",
 ];
 
 export const TECH_BY_ID: ReadonlyMap<string, TechDefinition> = new Map(
@@ -198,6 +268,12 @@ export const NO_TECH: TechModifiers = {
   growthPenaltyCutPermille: 0,
   deficitPenaltyCutPermille: 0,
   intelLevels: 0,
+  tankDamagePermille: 0,
+  tankArmourPermille: 0,
+  aaExtraVolley: 0,
+  bombExtraLevels: 0,
+  militaryUpkeepCutPermille: 0,
+  mobilisationUnrestCutPermille: 0,
 };
 
 /** The summed effects of the given completed technologies. */

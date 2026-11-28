@@ -1,5 +1,8 @@
 import { influenceCap } from "@openfront/engine-lib/configuration/DiplomacyConfig";
-import { TECHS } from "@openfront/engine-lib/configuration/TechConfig";
+import {
+  TECHS,
+  VICTORY_BRANCHES,
+} from "@openfront/engine-lib/configuration/TechConfig";
 import {
   diplomaticPartnersNeeded,
   economicShareNeeded,
@@ -11,12 +14,14 @@ import {
 // makes a path trivially fast or unreachable fails here.
 describe("victory pacing", () => {
   test("technological victory: 10–30 minutes of research", () => {
-    const seconds = TECHS.reduce((s, t) => s + t.steps, 0);
+    // The military branch doesn't count toward the technological victory.
+    const needed = TECHS.filter((t) => VICTORY_BRANCHES.includes(t.branch));
+    const seconds = needed.reduce((s, t) => s + t.steps, 0);
     expect(seconds).toBeGreaterThanOrEqual(10 * 60);
     expect(seconds).toBeLessThanOrEqual(30 * 60);
     // The points it needs, spread over that time, are a developed
     // nation's rate (a few cities and research centres), not a fantasy.
-    const points = TECHS.reduce((s, t) => s + t.research, 0);
+    const points = needed.reduce((s, t) => s + t.research, 0);
     const perSecond = points / seconds;
     expect(perSecond).toBeGreaterThan(1);
     expect(perSecond).toBeLessThan(10);

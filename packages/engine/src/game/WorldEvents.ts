@@ -81,6 +81,26 @@ const MESSAGE: Record<string, Record<Phase, string>> = {
     start: "events_display.world_event_natural_disaster_start",
     end: "events_display.world_event_natural_disaster_end",
   },
+  arms_race: {
+    warning: "events_display.world_event_arms_race_warning",
+    start: "events_display.world_event_arms_race_start",
+    end: "events_display.world_event_arms_race_end",
+  },
+  scientific_summit: {
+    warning: "events_display.world_event_scientific_summit_warning",
+    start: "events_display.world_event_scientific_summit_start",
+    end: "events_display.world_event_scientific_summit_end",
+  },
+  bumper_harvest: {
+    warning: "events_display.world_event_bumper_harvest_warning",
+    start: "events_display.world_event_bumper_harvest_start",
+    end: "events_display.world_event_bumper_harvest_end",
+  },
+  cyber_attack: {
+    warning: "events_display.world_event_cyber_attack_warning",
+    start: "events_display.world_event_cyber_attack_start",
+    end: "events_display.world_event_cyber_attack_end",
+  },
 };
 
 /** A number in [0, n) from the tick and a salt: the same on every client. */

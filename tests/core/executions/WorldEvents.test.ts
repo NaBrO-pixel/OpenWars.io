@@ -32,17 +32,22 @@ function run(game: Game, ticks: number) {
 }
 
 describe("the event catalogue", () => {
-  test("has the six required events, each with a real effect", () => {
-    expect(EVENTS.map((e) => e.id).sort()).toEqual(
-      [
+  test("has the required events and the later ones, each with a real effect", () => {
+    expect(EVENTS.map((e) => e.id)).toEqual(
+      expect.arrayContaining([
         "global_recession",
         "industrial_boom",
         "natural_disaster",
         "political_instability",
         "technological_breakthrough",
         "trade_disruption",
-      ].sort(),
+        "arms_race",
+        "scientific_summit",
+        "bumper_harvest",
+        "cyber_attack",
+      ]),
     );
+    expect(new Set(EVENTS.map((e) => e.id)).size).toBe(EVENTS.length);
     for (const e of EVENTS) {
       expect(eventModifiers([e.effects])).not.toEqual(NO_EVENT);
       expect(e.durationTicks).toBeGreaterThan(0);

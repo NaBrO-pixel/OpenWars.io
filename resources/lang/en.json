@@ -1418,17 +1418,22 @@
     "research_completed_assembly_lines": "Research complete: Assembly Lines.",
     "research_completed_automation": "Research complete: Automation.",
     "research_completed_civil_administration": "Research complete: Civil Administration.",
+    "research_completed_combined_arms": "Research complete: Combined Arms.",
+    "research_completed_composite_armour": "Research complete: Composite Armour.",
     "research_completed_economic_resilience": "Research complete: Economic Resilience.",
+    "research_completed_flak_directors": "Research complete: Flak Directors.",
     "research_completed_heavy_industry": "Research complete: Heavy Industry.",
     "research_completed_information_systems": "Research complete: Information Systems.",
     "research_completed_logistics_networks": "Research complete: Logistics Networks.",
     "research_completed_national_unity": "Research complete: National Unity.",
+    "research_completed_precision_bombing": "Research complete: Precision Bombing.",
     "research_completed_project_management": "Research complete: Project Management.",
     "research_completed_public_services": "Research complete: Public Services.",
     "research_completed_research_labs": "Research complete: Research Laboratories.",
     "research_completed_scientific_revolution": "Research complete: Scientific Revolution.",
     "research_completed_social_cohesion": "Research complete: Social Cohesion.",
     "research_completed_standardised_parts": "Research complete: Standardised Parts.",
+    "research_completed_war_economy": "Research complete: War Economy.",
     "retreating": "retreating",
     "sent_emoji": "Sent {name}: {emoji}",
     "sent_emoji_all": "Sent everyone: {emoji}",
@@ -1438,6 +1443,15 @@
     "unit_destroyed": "Your {unit} was destroyed",
     "unit_voluntarily_deleted": "Unit voluntarily deleted",
     "wants_to_renew_alliance": "{name} wants to renew your alliance",
+    "world_event_arms_race_end": "The arms race has cooled.",
+    "world_event_arms_race_start": "An arms race has begun. Factories run day and night.",
+    "world_event_arms_race_warning": "Tensions are rising: an arms race begins in 20 seconds.",
+    "world_event_bumper_harvest_end": "{name}'s harvest season is over.",
+    "world_event_bumper_harvest_start": "{name} brings in a bumper harvest.",
+    "world_event_bumper_harvest_warning": "A bumper harvest is expected in {name}.",
+    "world_event_cyber_attack_end": "{name} has restored its networks.",
+    "world_event_cyber_attack_start": "A cyber attack hits {name}.",
+    "world_event_cyber_attack_warning": "Analysts detect hackers probing {name}'s networks.",
     "world_event_global_recession_end": "The global recession is over.",
     "world_event_global_recession_start": "A global recession has begun.",
     "world_event_global_recession_warning": "Economists warn of a global recession within 30 seconds.",
@@ -1450,6 +1464,9 @@
     "world_event_political_instability_end": "Calm returns to {name}.",
     "world_event_political_instability_start": "Political instability grips {name}.",
     "world_event_political_instability_warning": "Unrest is growing in {name}.",
+    "world_event_scientific_summit_end": "The scientific summit has ended.",
+    "world_event_scientific_summit_start": "A world scientific summit has begun.",
+    "world_event_scientific_summit_warning": "Scientists are gathering for a world summit in 20 seconds.",
     "world_event_technological_breakthrough_end": "{name}'s breakthrough has been absorbed.",
     "world_event_technological_breakthrough_start": "{name} makes a technological breakthrough.",
     "world_event_technological_breakthrough_warning": "A nation's scientists make a major discovery.",
@@ -3060,19 +3077,26 @@
   },
   "research": {
     "branch_industry": "Industry",
+    "branch_military": "Military",
     "branch_society": "Society",
     "branch_technology": "Technology",
     "cancel": "Cancel",
+    "effect_aa_volley": "+{value} shell per AA gun volley",
+    "effect_bomb_levels": "Bomber strikes knock structures down {value} more level",
     "effect_deficit_penalty": "−{value}% stability loss from debts",
     "effect_growth_penalty": "−{value}% stability loss from expansion",
     "effect_industry": "+{value}% industry output",
     "effect_industry_money": "+{value}% money from industry",
     "effect_infrastructure_cost": "−{value}% industry cost of infrastructure",
     "effect_intel": "+{value} intelligence level on every country",
+    "effect_military_upkeep": "−{value}% army upkeep",
+    "effect_mobilisation_unrest": "−{value}% unrest from mobilisation",
     "effect_projects": "+{value} infrastructure project at once",
     "effect_research": "+{value}% research",
     "effect_research_centres": "+{value}% research from research centres",
     "effect_stability": "+{value}% stability",
+    "effect_tank_armour": "−{value}% damage to tanks",
+    "effect_tank_damage": "+{value}% tank gun damage",
     "effect_tax": "+{value}% tax income",
     "effect_upkeep": "−{value}% territory upkeep",
     "intro": "Research one technology at a time. Each costs research points and money, takes time, and has a lasting effect. Choose which branch to prioritise.",
@@ -3507,9 +3531,21 @@
       "desc": "A professional civil service keeps order.",
       "name": "Civil Administration"
     },
+    "combined_arms": {
+      "desc": "Armour, artillery and infantry trained to fight as one.",
+      "name": "Combined Arms"
+    },
+    "composite_armour": {
+      "desc": "Layered ceramic and steel plating for every tank.",
+      "name": "Composite Armour"
+    },
     "economic_resilience": {
       "desc": "Safety nets soften the blow of hard times.",
       "name": "Economic Resilience"
+    },
+    "flak_directors": {
+      "desc": "Fire-control computers aim every anti-aircraft gun.",
+      "name": "Flak Directors"
     },
     "heavy_industry": {
       "desc": "Steel, machinery and power at national scale.",
@@ -3526,6 +3562,10 @@
     "national_unity": {
       "desc": "A shared national identity: lasting stability.",
       "name": "National Unity"
+    },
+    "precision_bombing": {
+      "desc": "Guided munitions find the heart of a structure.",
+      "name": "Precision Bombing"
     },
     "project_management": {
       "desc": "Run more national projects at the same time.",
@@ -3550,6 +3590,10 @@
     "standardised_parts": {
       "desc": "Common parts make every project cheaper to build.",
       "name": "Standardised Parts"
+    },
+    "war_economy": {
+      "desc": "Rationing and state factories keep a nation at war fed and paid.",
+      "name": "War Economy"
     }
   },
   "territory_patterns": {
@@ -3943,6 +3987,21 @@
     "your_team": "Your team won!"
   },
   "world_event": {
+    "arms_race": {
+      "desc": "Every nation races to out-build the others.",
+      "effect": "+20% industry and −4% stability target, for everyone.",
+      "name": "Arms race"
+    },
+    "bumper_harvest": {
+      "desc": "An exceptional harvest in one nation.",
+      "effect": "+25% tax and +6% stability target while it lasts.",
+      "name": "Bumper harvest"
+    },
+    "cyber_attack": {
+      "desc": "Hackers cripple one nation's networks.",
+      "effect": "−50% research and −15% money from industry while it lasts.",
+      "name": "Cyber attack"
+    },
     "global_recession": {
       "desc": "A worldwide downturn hits every economy.",
       "effect": "−25% tax, −20% money from industry, for everyone.",
@@ -3962,6 +4021,11 @@
       "desc": "Unrest spreads through one nation.",
       "effect": "−15% stability target for the affected nation.",
       "name": "Political instability"
+    },
+    "scientific_summit": {
+      "desc": "The world's scientists share what they know.",
+      "effect": "+40% research, for everyone.",
+      "name": "Scientific summit"
     },
     "technological_breakthrough": {
       "desc": "A nation's scientists make a major discovery.",

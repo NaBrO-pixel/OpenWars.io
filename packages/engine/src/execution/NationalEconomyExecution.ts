@@ -14,6 +14,7 @@ import {
 import {
   TECH_BRANCHES,
   TECHS,
+  VICTORY_BRANCHES,
 } from "@openfront/engine-lib/configuration/TechConfig";
 import { z } from "zod";
 import { Execution, Game, Player } from "../game/Game";
@@ -185,6 +186,11 @@ const RESEARCH_MESSAGE: Readonly<Record<string, string>> = {
   social_cohesion: "events_display.research_completed_social_cohesion",
   economic_resilience: "events_display.research_completed_economic_resilience",
   national_unity: "events_display.research_completed_national_unity",
+  combined_arms: "events_display.research_completed_combined_arms",
+  composite_armour: "events_display.research_completed_composite_armour",
+  flak_directors: "events_display.research_completed_flak_directors",
+  precision_bombing: "events_display.research_completed_precision_bombing",
+  war_economy: "events_display.research_completed_war_economy",
 };
 
 /** Economy steps between an AI nation's development decisions. */
@@ -221,9 +227,16 @@ export function developForNation(mg: Game, player: Player): void {
  */
 export function researchForNation(mg: Game, player: Player): void {
   const nation = player.ensureNation();
-  const start = player.smallID() % TECH_BRANCHES.length;
-  for (let i = 0; i < TECH_BRANCHES.length; i++) {
-    const branch = TECH_BRANCHES[(start + i) % TECH_BRANCHES.length];
+  // The victory branches in turn (from one that depends on the nation, so
+  // nations specialise differently), the military branch after them.
+  const start = player.smallID() % VICTORY_BRANCHES.length;
+  const order = [
+    ...VICTORY_BRANCHES.map(
+      (_, i) => VICTORY_BRANCHES[(start + i) % VICTORY_BRANCHES.length],
+    ),
+    ...TECH_BRANCHES.filter((b) => !VICTORY_BRANCHES.includes(b)),
+  ];
+  for (const branch of order) {
     const next = TECHS.find(
       (t) => t.branch === branch && !nation.hasTech(t.id),
     );

@@ -149,7 +149,10 @@ export function economyStep(
   const structures = input.structureLevels * cfg.upkeepPerStructureLevel;
   const mob = input.mobilisation ?? MilitaryConfig.defaultMobilisation;
   const military = Math.floor(
-    (input.troops * MilitaryConfig.upkeepPerThousandTroops[mob]) / 1000,
+    (input.troops *
+      MilitaryConfig.upkeepPerThousandTroops[mob] *
+      (1000 - tech.militaryUpkeepCutPermille)) /
+      1_000_000,
   );
 
   const moneyIn = tax + industryMoney;
@@ -194,7 +197,11 @@ export function economyStep(
       devBonus +
       tech.stabilityTarget +
       ev.stabilityTarget +
-      MilitaryConfig.stability[mob] -
+      Math.trunc(
+        (MilitaryConfig.stability[mob] *
+          (1000 - tech.mobilisationUnrestCutPermille)) /
+          1000,
+      ) -
       growthPenalty -
       (deficit ? deficitPenalty : 0),
     0,

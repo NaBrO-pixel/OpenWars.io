@@ -1,6 +1,10 @@
 import { TileRef } from "@openfront/engine-api/game/GameMap";
 import { UnitType } from "@openfront/engine-api/game/GameTypes";
 import {
+  NO_TECH,
+  type TechModifiers,
+} from "@openfront/engine-lib/configuration/TechConfig";
+import {
   DEFENCE_POST_ANTI_TANK_DAMAGE,
   DEFENCE_POST_ANTI_TANK_RANGE,
   TANK_ASSAULT_TICKS,
@@ -30,6 +34,17 @@ import type {
 } from "../snapshot/SnapshotContext";
 import { isHostileTo } from "./air/AirCombat";
 import { focusRank } from "./FocusForcesExecution";
+
+/** A player's research effects (none for classic games or tribes). */
+function techOf(p: Player): TechModifiers {
+  return p.nation()?.tech() ?? NO_TECH;
+}
+
+/** Damage to `tank` after its owner's armour research (at least 1). */
+function armoured(tank: Unit, damage: number): number {
+  const cut = techOf(tank.owner()).tankArmourPermille;
+  return Math.max(1, Math.floor((damage * (1000 - cut)) / 1000));
+}
 
 export interface TankOrder {
   owner: Player;
@@ -105,7 +120,7 @@ export class TankExecution implements Execution {
         holder.removeTroops(Math.min(holder.troops(), TANK_CAPTURE_TROOP_LOSS));
       }
       owner.conquer(next);
-      tank.modifyHealth(-TANK_CAPTURE_WEAR);
+      tank.modifyHealth(-armoured(tank, TANK_CAPTURE_WEAR));
       if (!tank.isActive()) {
         this.active = false;
         return;
@@ -173,7 +188,17 @@ export class TankExecution implements Execution {
           a.unit.id() - b.unit.id(),
       );
     if (enemies.length > 0) {
-      enemies[0].unit.modifyHealth(-TANK_GUN_DAMAGE, owner);
+      const victim = enemies[0].unit as Unit;
+      victim.modifyHealth(
+        -armoured(
+          victim,
+          Math.floor(
+            (TANK_GUN_DAMAGE * (1000 + techOf(owner).tankDamagePermille)) /
+              1000,
+          ),
+        ),
+        owner,
+      );
       this.lastCombat = ticks;
     }
     for (const { unit: post } of mg.nearbyUnits(
@@ -184,7 +209,7 @@ export class TankExecution implements Execution {
         isHostileTo(owner, unit as Unit) && !unit.isUnderConstruction(),
     )) {
       tank.modifyHealth(
-        -DEFENCE_POST_ANTI_TANK_DAMAGE * post.level(),
+        -armoured(tank, DEFENCE_POST_ANTI_TANK_DAMAGE * post.level()),
         post.owner(),
       );
       this.lastCombat = ticks;

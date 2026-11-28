@@ -59,7 +59,10 @@ export class AAGunExecution implements Execution {
     if (targets.length === 0) return;
 
     this.lastVolley = ticks;
-    const volley = Math.min(this.gun.level(), AA_GUN_MAX_VOLLEY);
+    // Flak directors (military research) add a shell to every volley.
+    const volley =
+      Math.min(this.gun.level(), AA_GUN_MAX_VOLLEY) +
+      (owner.nation()?.tech().aaExtraVolley ?? 0);
     for (let i = 0; i < volley; i++) {
       const target = targets[i % targets.length].unit;
       this.mg.addExecution(

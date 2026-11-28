@@ -443,3 +443,21 @@ The UI is restyled as a futuristic blue HUD. It's built on the shared tokens, so
 - **Money flow:** each economy step's net change (tax and industry money less upkeep) is now paid out evenly over the next 10 ticks instead of in one lump. On Total War, upkeep used to make the treasury rise every tick and then drop once a second, so a structure that looked affordable couldn't be paid for. The amount still to pay out is part of the nation's snapshot and desync hash.
 - **Bombers:** a bomber whose aim point has no hostile structure in reach (none there, or destroyed or taken meanwhile) now flies home and stays docked instead of circling.
 - **HUD fix:** the command nav and infrastructure overlay elements had been placed inside the top HUD grid. They took grid cells and pushed the speed/pause/settings/leave bar onto a second row, which moved whenever the hovered-country card grew. They now sit outside the grid.
+
+## Military research branch and new world events
+
+- **Military research branch:** a fourth branch, with each technology requiring the one before it. It doesn't count toward the technological victory (`VICTORY_BRANCHES`), so that victory's pacing is unchanged. AI nations research it only after the other branches.
+  1. Combined Arms: +25% tank gun damage.
+  2. Composite Armour: −30% damage to tanks.
+  3. Flak Directors: +1 shell per AA gun volley.
+  4. Precision Bombing: bomber strikes knock structures down one more level.
+  5. War Economy: −35% army upkeep and −50% unrest from mobilisation.
+- **New world events:**
+  - Arms race (global, from minute 8): +20% industry, −4% stability target.
+  - Scientific summit (global, from minute 6): +40% research.
+  - Bumper harvest (one nation): +25% tax, +6% stability target.
+  - Cyber attack (one nation, from minute 7): −50% research, −15% money from industry.
+
+## Phones held sideways
+
+On screens no taller than 520px (the `short:` variant), the command nav sits below the resource bar and scrolls instead of running off the screen. The resource bar is compact: one line per figure, small labels, so it clears the leaderboard buttons and the speed/pause bar.

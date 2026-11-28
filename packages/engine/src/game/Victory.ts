@@ -6,7 +6,10 @@
 // listed here for its progress only.
 import { PlayerType } from "@openfront/engine-api/game/GameTypes";
 import type { VictoryProgressView } from "@openfront/engine-api/game/GameUpdates";
-import { TECHS } from "@openfront/engine-lib/configuration/TechConfig";
+import {
+  TECHS,
+  VICTORY_BRANCHES,
+} from "@openfront/engine-lib/configuration/TechConfig";
 import {
   diplomaticPartnersNeeded,
   economicShareNeeded,
@@ -40,7 +43,9 @@ function netIncome(p: Player): number {
 }
 
 const ADVANCED = TECHS.filter(
-  (t) => t.tier === VictoryConfig.technological.tier,
+  (t) =>
+    t.tier === VictoryConfig.technological.tier &&
+    VICTORY_BRANCHES.includes(t.branch),
 ).map((t) => t.id);
 
 export const VICTORY_CONDITIONS: readonly VictoryCondition[] = [

@@ -397,7 +397,7 @@ describe("research panel", () => {
     expect(state("research_labs")).toBe("researching");
     expect(state("standardised_parts")).toBe("available");
     expect(state("heavy_industry")).toBe("locked");
-    expect(nav.querySelectorAll("[data-branch]")).toHaveLength(3);
+    expect(nav.querySelectorAll("[data-branch]")).toHaveLength(4);
     // Busy: nothing else can start.
     const btn = nav.querySelector(
       '[data-research-start="standardised_parts"]',

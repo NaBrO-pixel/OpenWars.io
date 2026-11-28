@@ -31,6 +31,12 @@ const EFFECT_KEYS: Record<keyof TechEffects, string> = {
   growthPenaltyCutPermille: "research.effect_growth_penalty",
   deficitPenaltyCutPermille: "research.effect_deficit_penalty",
   intelLevels: "research.effect_intel",
+  tankDamagePermille: "research.effect_tank_damage",
+  tankArmourPermille: "research.effect_tank_armour",
+  aaExtraVolley: "research.effect_aa_volley",
+  bombExtraLevels: "research.effect_bomb_levels",
+  militaryUpkeepCutPermille: "research.effect_military_upkeep",
+  mobilisationUnrestCutPermille: "research.effect_mobilisation_unrest",
 };
 
 /** The effect lines of a technology, e.g. "+15% industry output". */
@@ -39,7 +45,12 @@ export function effectLines(effects: TechEffects): string[] {
     ([k, v]) =>
       translateText(EFFECT_KEYS[k], {
         value:
-          k === "extraProjects" || k === "intelLevels" ? v : Math.round(v / 10),
+          k === "extraProjects" ||
+          k === "intelLevels" ||
+          k === "aaExtraVolley" ||
+          k === "bombExtraLevels"
+            ? v
+            : Math.round(v / 10),
       }),
   );
 }
