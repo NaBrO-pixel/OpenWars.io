@@ -533,11 +533,11 @@ export class CommandNav extends LitElement implements Controller {
     const section = sections.find((s) => s.id === this.open);
     return html`
       <nav
-        class="pointer-events-auto fixed left-0 z-[950] flex max-lg:top-1/2 max-lg:-translate-y-1/2 max-lg:items-start lg:bottom-4 lg:items-end"
+        class="pointer-events-auto fixed left-0 z-[950] flex max-lg:top-1/2 max-lg:-translate-y-1/2 max-lg:items-start lg:bottom-4 lg:items-end short:top-[5.25rem]! short:translate-y-0! short:bottom-auto! short:items-start!"
         aria-label=${translateText("command_nav.label")}
       >
         <div
-          class="ow-glass flex flex-col gap-1 rounded-r-md border border-l-0 p-1"
+          class="ow-glass flex flex-col gap-1 rounded-r-md border border-l-0 p-1 short:max-h-[calc(100dvh-6rem)] short:overflow-y-auto"
         >
           ${sections.map(
             (s) =>
@@ -561,7 +561,7 @@ export class CommandNav extends LitElement implements Controller {
           section === undefined
             ? nothing
             : html`<section
-                class="ml-2 w-[min(280px,calc(100vw-4rem))] lg:w-[360px] max-h-[70vh] max-lg:max-h-[60vh] overflow-y-auto rounded-md border ow-glass p-4"
+                class="ml-2 w-[min(280px,calc(100vw-4rem))] lg:w-[360px] max-h-[70vh] max-lg:max-h-[60vh] short:max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-md border ow-glass p-4"
                 data-command-panel=${section.id}
               >
                 <header class="mb-2 flex items-center justify-between">

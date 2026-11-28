@@ -18,6 +18,10 @@
 
 /* Phones and small tablets held upright, where the unit bar is a column on the
    right edge. UnitDisplay.isSideBar() asks the same query. */
+/* Short screens (phones held sideways): the command nav sits below the
+   resource bar and scrolls instead of overflowing the screen. */
+@custom-variant short (@media (max-height: 520px));
+
 @custom-variant side-bar (@media (width < 64rem) and (orientation: portrait));
 
 @theme {
